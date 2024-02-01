@@ -2,11 +2,16 @@ import { createRoot } from 'react-dom/client';
 import App from '@pages/content/ui/app';
 import refreshOnUpdate from 'virtual:reload-on-update-in-view';
 import injectedStyle from './injected.css?inline';
+import { attachTwindStyle } from '@root/src/shared/style/twind';
 
 refreshOnUpdate('pages/content');
 
 const root = document.createElement('div');
 root.id = 'askman-chrome-extension-content-view-root';
+root.style.zIndex = '999';
+root.style.position = 'absolute';
+root.style.left = '0';
+root.style.top = '0';
 
 document.body.append(root);
 
@@ -20,6 +25,8 @@ shadowRoot.appendChild(rootIntoShadow);
 const styleElement = document.createElement('style');
 styleElement.innerHTML = injectedStyle;
 shadowRoot.appendChild(styleElement);
+
+attachTwindStyle(rootIntoShadow, shadowRoot);
 
 /**
  * https://github.com/askman-dev/askman-chrome-extension/pull/174

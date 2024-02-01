@@ -8,3 +8,4 @@
  *
  */
 import('@pages/content/ui/root');
+import('highlight.js/styles/monokai.min.css')
