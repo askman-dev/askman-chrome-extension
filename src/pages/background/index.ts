@@ -23,6 +23,31 @@ function onContextMenuClicked(info: chrome.contextMenus.OnClickData, tab: chrome
       break;
   }
 }
+function onMessageListener(command) {
+  console.log('background received message', command);
+  switch (command) {
+    case 'ChatPopupDisplay':
+      chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
+        if (chrome.runtime.lastError) console.error(chrome.runtime.lastError);
+        // `tab` will either be a `tabs.Tab` instance or `undefined`.
+        if (tab) {
+          chrome.tabs
+            .sendMessage<TabMessage>(tab.id, { cmd: CommandType.ChatPopupDisplay, pageUrl: tab.url })
+            .catch(error => {
+              console.error(error);
+              // TODO fix 弹不出来
+              // chrome.notifications.create(
+              //     'basic', {
+              //         iconUrl: '/icon-128.png', type: 'basic',
+              //         message: '请刷新页面后重试', title: error.message
+              //     }
+              // )
+            });
+        }
+      });
+      break;
+  }
+}
 function initExtension() {
   chrome.contextMenus.create({
     title: 'Ask That Man',
@@ -30,6 +55,7 @@ function initExtension() {
     id: 'id-context-menu',
   });
   chrome.contextMenus.onClicked.addListener(onContextMenuClicked);
+  chrome.commands.onCommand.addListener(onMessageListener);
 }
 chrome.runtime.onInstalled.addListener(function () {});
 initExtension();

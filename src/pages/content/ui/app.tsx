@@ -35,7 +35,7 @@ export default function App() {
   const { run: handleSelectionChange } = useDebounceFn(
     () => {
       const selection = document.getSelection();
-      if (selection && selection.anchorNode) {
+      if (targetDom.current && selection && selection.anchorNode) {
         targetDom.current = selection.anchorNode.parentElement as HTMLElement;
         // calculate position
         const rect = targetDom.current.getBoundingClientRect();
@@ -62,6 +62,11 @@ export default function App() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onBackgroundMessage = function (message: TabMessage, sender, sendResponse) {
     if (message.cmd === CommandType.ChatPopupDisplay) {
+      if (currentCodeSnippnet == '...') {
+        setCurrentCodeSnippnet('');
+        setAskPanelVisible(false);
+        return;
+      }
       setCurrentCodeSnippnet('...');
       setAskPanelVisible(true);
     }
@@ -92,8 +97,6 @@ export default function App() {
     }
   };
 
-  if (!targetDom.current) return null;
-
   return (
     <>
       <AskPanel
@@ -106,14 +109,16 @@ export default function App() {
           top: 10,
         }}
       />
-      <AskButton
-        visible={askButtonVisible}
-        style={{
-          left: parentRect.left + parentRect.width + ASK_BUTTON_OFFSET_X,
-          top: parentRect.top,
-        }}
-        onClick={handleAsk}
-      />
+      {parentRect && (
+        <AskButton
+          visible={askButtonVisible}
+          style={{
+            left: parentRect.left + parentRect.width + ASK_BUTTON_OFFSET_X,
+            top: parentRect.top,
+          }}
+          onClick={handleAsk}
+        />
+      )}
     </>
   );
 }

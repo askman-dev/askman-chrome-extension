@@ -15,7 +15,7 @@ const manifest = {
   name: '__MSG_extensionName__',
   version: packageJson.version,
   description: '__MSG_extensionDescription__',
-  permissions: ['storage', 'sidePanel', 'contextMenus'],
+  permissions: ['tabs', 'notifications', 'storage', 'sidePanel', 'contextMenus'],
   side_panel: {
     default_path: 'src/pages/sidepanel/index.html',
   },
@@ -53,6 +53,15 @@ const manifest = {
       matches: ['*://*/*'],
     },
   ],
+  commands: {
+    ChatPopupDisplay: {
+      suggested_key: {
+        default: 'Ctrl+I',
+        mac: 'Command+I',
+      },
+      description: '__MSG_extensionCommandChatPopupDisplay__',
+    },
+  },
 };
 
 export default manifest;

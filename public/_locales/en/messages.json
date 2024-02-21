@@ -6,5 +6,9 @@
   "extensionName": {
     "description": "Extension name",
     "message": "【EN】问那个人"
+  },
+  "extensionCommandChatPopupDisplay": {
+    "description": "Command to display the popup",
+    "message": "显示聊天弹窗"
   }
 }
