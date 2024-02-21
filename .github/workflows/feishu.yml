@@ -21,7 +21,8 @@ jobs:
 
             const response = await fetch('https://open.feishu.cn/open-apis/bot/v2/hook/6aaf763f-2251-4eca-ba22-384d6e641491', {
                   method: 'POST', // Adjust the method as needed
-                  body: JSON.stringify({"msg_type": "text","content": {"text": `event: ${{ github.event_name }},\nref_name: ${{ github.ref_name }},\nmessage: ${commit.data.commit.message}`}}), // Customize the payload
+                  body: JSON.stringify({"msg_type": "text",
+                      "content": {"text": `event: ${{ github.event_name }},\nref_name: ${{ github.ref_name }},\nmessage: ${commit.data.commit.message}\nauthor: ${commit.data.commit.author.name}`}}), // Customize the payload
                   headers: {
                     'Content-Type': 'application/json',
                   },
