@@ -84,7 +84,7 @@ export default function App() {
       document.body.removeEventListener('selectionchange', handleSelectionChange);
       window.removeEventListener('scroll', hideAskButton);
     };
-  }, []);
+  });
 
   const handleAsk = () => {
     console.log('🚀 ~ handleAsk ~ targetDom.current:', targetDom.current);
