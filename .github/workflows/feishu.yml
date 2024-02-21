@@ -10,7 +10,14 @@ jobs:
 
     steps:
       - name: Push to Feishu Webhook
-        uses: actions/github-script@v3
+        uses: actions/github-script@v7.0.1
         with:
           script: |
-            curl -X POST -H "Content-Type: application/json" -d '{"msg_type": "text","content": {"text": "Code has been pushed to Feishu"}}' https://open.feishu.cn/open-apis/bot/v2/hook/6aaf763f-2251-4eca-ba22-384d6e641491
+            const response = await fetch('https://open.feishu.cn/open-apis/bot/v2/hook/6aaf763f-2251-4eca-ba22-384d6e641491', {
+                  method: 'POST', // Adjust the method as needed
+                  body: JSON.stringify({"msg_type": "text","content": {"text": "Code has been pushed to Feishu"}}), // Customize the payload
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                });
+                console.log('Message sent:', response.status, response.statusText); 
