@@ -3,7 +3,7 @@ name: Push to Feishu Webhook
 on:
   push:
     branches:
-      - main
+      - [main, dev]
 
 jobs:
   build:
