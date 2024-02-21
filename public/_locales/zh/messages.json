@@ -1,10 +1,10 @@
 {
   "extensionDescription": {
     "description": "Extension description",
-    "message": "【EN】纯国产扩展，可以在任何页面中向 ChatGLM 提问"
+    "message": "纯国产扩展，可以在任何页面中向 ChatGLM 提问"
   },
   "extensionName": {
     "description": "Extension name",
-    "message": "【EN】问那个人"
+    "message": "问那个人"
   }
 }

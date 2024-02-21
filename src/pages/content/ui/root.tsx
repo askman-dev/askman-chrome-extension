@@ -8,9 +8,9 @@ refreshOnUpdate('pages/content');
 
 const root = document.createElement('div');
 root.id = 'askman-chrome-extension-content-view-root';
-root.style.zIndex = '999';
+root.style.zIndex = '2147483646';
 root.style.position = 'absolute';
-root.style.left = '0';
+root.style.right = '0';
 root.style.top = '0';
 
 document.body.append(root);

@@ -1,0 +1,17 @@
+name: Push to Feishu Webhook
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Push to Feishu Webhook
+        uses: actions/github-script@v3
+        with:
+          script: |
+            curl -X POST -H "Content-Type: application/json" -d '{"msg_type": "text","content": {"text": "Code has been pushed to Feishu"}}' https://open.feishu.cn/open-apis/bot/v2/hook/6aaf763f-2251-4eca-ba22-384d6e641491
