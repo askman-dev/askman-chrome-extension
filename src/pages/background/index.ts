@@ -11,7 +11,11 @@ reloadOnUpdate('pages/background');
 reloadOnUpdate('pages/content/style.scss');
 
 console.log('background loaded');
-
+/**
+ * This function is called when the context menu is clicked on a web page.
+ * @param {chrome.contextMenus.OnClickData} info - The data associated with the context menu click event.
+ * @param {chrome.tabs.Tab} tab - The active tab associated with the context menu click event.
+ */
 function onContextMenuClicked(info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) {
   const selectionText = info.selectionText;
   const pageUrl = info.pageUrl;
