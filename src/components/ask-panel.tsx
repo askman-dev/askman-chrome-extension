@@ -24,10 +24,10 @@ export const Send = ({ className, divClassName, text = '解释 ↵' }: DomProps)
     </div>
   );
 };
-const DivWrapper = ({ className, iconChevronBottom, iconChevronBottomClassName }: DomProps) => {
+const ToolBtn = ({ className, iconChevronBottom, iconChevronBottomClassName }: DomProps) => {
   console.log(className, iconChevronBottom, iconChevronBottomClassName);
   return (
-    <div>
+    <div className={`${className}`}>
       <div>工具</div>
     </div>
   );
@@ -51,32 +51,34 @@ function AskPanel(props: IAskPanelProps) {
   return (
     <div
       className={classNames(
-        'bg-white fixed  overflow-hidden shadow-lg rounded-md w-[473px] h-[155px] min-w-80 max-w-lg min-h-40',
+        'bg-white fixed  overflow-hidden border-2 border-solid rounded-md w-[473px] h-[155px] min-w-80 max-w-lg min-h-40',
         `${visible ? 'visible' : 'invisible'}`,
       )}
       {...rest}>
       <div className="font-semibold bg-white px-3 py-2">
         Ask That Man <Cancel className="!absolute !left-[433px] !top-[11px]" />
       </div>
-      <div className="relative w-[481px] h-[163px] left-[-4px] bg-[url(/layout.png)] bg-cover bg-[50%_50%]">
-        <Send
-          className="!border-[unset] !border-[unset] !absolute !left-[388px] !bg-[#00000059] !top-[117px]"
-          divClassName="!left-[11px] !top-[3px]"
-          text="发送 ↵"
-        />
-        <DivWrapper
-          className="!absolute !left-[313px] !top-[117px]"
-          iconChevronBottom="image.png"
-          iconChevronBottomClassName="!left-[40px] !top-[9px]"
-        />
-        <div className="w-[437px] h-[68px] top-[40px] left-[23px] overflow-hidden border-b [border-bottom-style:solid] border-[#0000004c] absolute rounded-[5px]">
-          <div className="w-[351px] top-[41px] left-[2px] text-[#00000059] text-[14px] absolute [font-family:'Inter-Regular',Helvetica] font-normal tracking-[0] leading-[normal]">
-            请输入问题或要求
-          </div>
-        </div>
-      </div>
       <div className="px-3 py-2">
         <Highlight>{code}</Highlight>
+      </div>
+      <div className="relative w-[481px] left-[-4px] bg-[url(/layout.png)] bg-cover bg-[50%_50%]">
+        <div className="w-full h-[68px] rounded border-solid border overflow-hidden border-b [border-bottom-style:solid] border-[#0000004c] rounded-[5px]">
+          <textarea
+            className=" text-[#00000095] text-[14px] w-full h-full [font-family:'Inter-Regular',Helvetica] font-normal tracking-[0] leading-[normal]"
+            placeholder="请输入问题或要求"></textarea>
+        </div>
+        <div className="w-full">
+          <Send
+            className="float-right !border-[unset] !border-[unset] !bg-[#00000059]"
+            divClassName="!left-[11px] !top-[3px]"
+            text="发送 ↵"
+          />
+          <ToolBtn
+            className="float-right"
+            iconChevronBottom="image.png"
+            iconChevronBottomClassName="!left-[40px] !top-[9px]"
+          />
+        </div>
       </div>
     </div>
   );
