@@ -3,14 +3,26 @@ import { useDebounceFn } from 'ahooks';
 import AskButton from '@src/components/ask-button';
 import AskPanel from '@root/src/components/ask-panel';
 import { CommandType, TabMessage } from '@root/src/types';
+import { QuoteAgent, QuoteContext } from '@root/src/agents/quote';
 
 const ASK_BUTTON_OFFSET_X = 6; // 按钮距离左侧的偏移量
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function getQuotes(): Promise<void> {
+  return new Promise(resolve => {
+    chrome.runtime.sendMessage({ cmd: CommandType.ChatPopupDisplay }, () => {
+      resolve();
+    });
+  });
+}
 
 export default function App() {
   const [askButtonVisible, setAskButtonVisible] = useState<boolean>(false);
   const [askPanelVisible, setAskPanelVisible] = useState<boolean>(false);
   const targetDom = useRef<HTMLElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentCodeSnippnet, setCurrentCodeSnippnet] = useState<string>('');
+  const [askPanelQuotes, setAskPanelQuotes] = useState<Promise<QuoteContext>[]>([]);
   const [parentRect, setParentRect] = useState<DOMRect>();
   const { run: handleMouseOver } = useDebounceFn(
     (e: MouseEvent) => {
@@ -62,13 +74,13 @@ export default function App() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onBackgroundMessage = function (message: TabMessage, sender, sendResponse) {
     if (message.cmd === CommandType.ChatPopupDisplay) {
-      if (currentCodeSnippnet == '...') {
-        setCurrentCodeSnippnet('');
+      if (askPanelVisible) {
         setAskPanelVisible(false);
         return;
       }
-      setCurrentCodeSnippnet('...');
+      setAskPanelQuotes([QuoteAgent.getQuoteByDocument(window.location.href, document)]);
       setAskPanelVisible(true);
+      return;
     }
   };
 
@@ -92,7 +104,9 @@ export default function App() {
     if (targetDom.current) {
       // get text
       const text = targetDom.current.textContent;
-      setCurrentCodeSnippnet(text);
+      // setCurrentCodeSnippnet(text);
+      // setAskPanelVisible(true);
+      setAskPanelQuotes([QuoteAgent.getQuoteBySelection(window.location.href, text)]);
       setAskPanelVisible(true);
     }
   };
@@ -101,7 +115,8 @@ export default function App() {
     <>
       <AskPanel
         visible={askPanelVisible}
-        code={currentCodeSnippnet}
+        code={''}
+        quotes={askPanelQuotes}
         style={{
           // left: parentRect.left + parentRect.width + ASK_BUTTON_OFFSET_X,
           // top: parentRect.top,

@@ -1,10 +1,13 @@
 import classNames from 'classnames';
 
 import Highlight from 'react-highlight';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { QuoteAgent, QuoteContext } from '../agents/quote';
 
 interface IAskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
   visible?: boolean;
+  quotes?: Array<Promise<QuoteContext>>;
 }
 interface DomProps {
   className?: string;
@@ -46,12 +49,13 @@ const Cancel = ({ className }: CancelProps): JSX.Element => {
   );
 };
 function AskPanel(props: IAskPanelProps) {
-  const { code, visible, ...rest } = props;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { code, visible, quotes, ...rest } = props;
 
   return (
     <div
       className={classNames(
-        'bg-white fixed  overflow-hidden border-2 border-solid rounded-md w-[473px] h-[155px] min-w-80 max-w-lg min-h-40',
+        'bg-white fixed  overflow-hidden border-2 border-solid rounded-md w-[473px] min-w-80 max-w-lg min-h-[155px]',
         `${visible ? 'visible' : 'invisible'}`,
       )}
       {...rest}>
@@ -61,13 +65,26 @@ function AskPanel(props: IAskPanelProps) {
       <div className="px-3 py-2">
         <Highlight>{code}</Highlight>
       </div>
+
       <div className="relative w-[481px] left-[-4px] bg-[url(/layout.png)] bg-cover bg-[50%_50%]">
-        <div className="w-full h-[68px] rounded border-solid border overflow-hidden border-b [border-bottom-style:solid] border-[#0000004c] rounded-[5px]">
+        <div className="w-full relative flex-col justify-start items-start inline-flex text-left px-2">
+          <div className="my-2 border-l border-black">
+            <div className="text-black text-xs font-normal px-2">
+              {'const { OpenAI } = require("@langchain/openai");'}
+            </div>
+          </div>
+          <div className="border-l border-black">
+            <div className="text-black text-xs font-normal px-2">
+              {'const { OpenAI } = require("@langchain/openai");'}
+            </div>
+          </div>
+        </div>
+        <div className="w-full h-[68px] overflow-hidden p-3">
           <textarea
-            className=" text-[#00000095] text-[14px] w-full h-full [font-family:'Inter-Regular',Helvetica] font-normal tracking-[0] leading-[normal]"
+            className="rounded border-solid border border-b [border-bottom-style:solid] border-[#0000004c] rounded-[5px] text-[#00000095] text-[14px] w-full h-full [font-family:'Inter-Regular',Helvetica] font-normal tracking-[0] leading-[normal]"
             placeholder="请输入问题或要求"></textarea>
         </div>
-        <div className="w-full">
+        <div className="w-full h-25">
           <Send
             className="float-right !border-[unset] !border-[unset] !bg-[#00000059]"
             divClassName="!left-[11px] !top-[3px]"

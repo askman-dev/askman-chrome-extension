@@ -1,3 +1,10 @@
+export interface AgentContext {
+  selection?: string;
+  pageUrl?: string;
+  linkText?: string;
+  linkUrl?: string;
+}
+
 export enum CommandType {
   ChatPopupDisplay,
   ChatToolbarDisplay,
