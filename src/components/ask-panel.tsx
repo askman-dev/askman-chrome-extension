@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import Highlight from 'react-highlight';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { QuoteAgent, QuoteContext } from '../agents/quote';
+import { myObject } from '../agents/llm';
 
 interface IAskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -51,6 +52,8 @@ const Cancel = ({ className }: CancelProps): JSX.Element => {
 function AskPanel(props: IAskPanelProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { code, visible, quotes, ...rest } = props;
+
+  myObject.test('你是谁');
 
   return (
     <div

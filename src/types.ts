@@ -5,6 +5,14 @@ export interface AgentContext {
   linkUrl?: string;
 }
 
+export interface ChatMessageContext {
+  userInput: string;
+  toolPrompt: string;
+  quoteText: string;
+  pageUrl: string;
+  pageTitle: string;
+}
+
 export enum CommandType {
   ChatPopupDisplay,
   ChatToolbarDisplay,
