@@ -4,6 +4,7 @@ import Highlight from 'react-highlight';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { QuoteAgent, QuoteContext } from '../agents/quote';
 import { myObject } from '../agents/llm';
+import React from 'react';
 
 interface IAskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -49,11 +50,66 @@ const Cancel = ({ className }: CancelProps): JSX.Element => {
     </div>
   );
 };
+
+interface QuoteComponentProps {
+  quotePromise: Promise<QuoteContext>;
+}
+/**
+ * Represents a component that displays a quote.
+ */
+class QuoteComponent extends React.Component<QuoteComponentProps> {
+  state = {
+    isLoading: true,
+    data: null as null | QuoteContext,
+  };
+
+  constructor(props: QuoteComponentProps) {
+    super(props);
+    props.quotePromise.then(value => {
+      this.setState({
+        isLoading: false,
+        data: value,
+      });
+    });
+  }
+
+  componentDidMount() {
+    this.setState({ isLoading: true });
+  }
+
+  render() {
+    if (this.state.isLoading) {
+      return (
+        <div className="border-l border-black">
+          <div className="text-black text-xs font-normal px-2">
+            {'const { OpenAI } = require("@langchain/openai");'}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="border-l border-black">
+        <div className="text-black text-xs font-normal px-2">{this.state.data?.selection}</div>
+      </div>
+    );
+  }
+}
+
 function AskPanel(props: IAskPanelProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { code, visible, quotes, ...rest } = props;
+  React.useEffect(() => {
+    if (quotes && quotes.length) {
+      Promise.all(quotes).then(quoteContexts => {
+        // 所有的 quotes 都准备好了，可以执行相应的操作
+        console.log(quoteContexts);
+        myObject.askWithQuotes(quoteContexts, '解释');
+      });
+    }
+  }, [quotes]);
 
-  myObject.test('你是谁');
+  // myObject.test('你是谁');
 
   return (
     <div
@@ -71,16 +127,7 @@ function AskPanel(props: IAskPanelProps) {
 
       <div className="relative w-[481px] left-[-4px] bg-[url(/layout.png)] bg-cover bg-[50%_50%]">
         <div className="w-full relative flex-col justify-start items-start inline-flex text-left px-2">
-          <div className="my-2 border-l border-black">
-            <div className="text-black text-xs font-normal px-2">
-              {'const { OpenAI } = require("@langchain/openai");'}
-            </div>
-          </div>
-          <div className="border-l border-black">
-            <div className="text-black text-xs font-normal px-2">
-              {'const { OpenAI } = require("@langchain/openai");'}
-            </div>
-          </div>
+          {quotes && quotes.map((quote, index) => <QuoteComponent key={index} quotePromise={quote} />)}
         </div>
         <div className="w-full h-[68px] overflow-hidden p-3">
           <textarea

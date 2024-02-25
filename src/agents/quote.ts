@@ -4,6 +4,7 @@ import { BaseAgent } from './base';
 export class QuoteContext implements AgentContext {
   public selection?: string;
   public pageUrl?: string;
+  public pageTitle?: string;
   public linkText?: string;
   public linkUrl?: string;
 }
@@ -16,7 +17,9 @@ export class QuoteAgent implements BaseAgent {
   public static getQuoteByDocument(pageUrl: string, document: Document): Promise<QuoteContext> {
     const quote = new QuoteContext();
     quote.pageUrl = pageUrl;
+    quote.pageTitle = document.title;
     quote.selection = document.getSelection()?.toString();
+    console.log('getQuoteByDocument:', quote);
     return Promise.resolve(quote);
   }
   public static getQuoteBySelection(pageUrl: string, selection: string): Promise<QuoteContext> {
