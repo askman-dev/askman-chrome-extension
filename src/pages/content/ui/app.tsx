@@ -4,6 +4,7 @@ import AskButton from '@src/components/ask-button';
 import AskPanel from '@root/src/components/ask-panel';
 import { CommandType, TabMessage } from '@root/src/types';
 import { QuoteAgent, QuoteContext } from '@root/src/agents/quote';
+import { ChatCore } from '@root/src/chat/chat';
 
 const ASK_BUTTON_OFFSET_X = 6; // 按钮距离左侧的偏移量
 
@@ -15,6 +16,8 @@ function getQuotes(): Promise<void> {
     });
   });
 }
+
+const chat = new ChatCore();
 
 export default function App() {
   const [askButtonVisible, setAskButtonVisible] = useState<boolean>(false);
@@ -71,6 +74,20 @@ export default function App() {
     },
   );
 
+  function showChat(quoteText?: string) {
+    setAskPanelVisible(true);
+    chat.init();
+    let quote = null;
+    if (quoteText) {
+      quote = QuoteAgent.getQuoteBySelection(window.location.href, quoteText);
+    } else {
+      quote = QuoteAgent.getQuoteByDocument(window.location.href, document);
+    }
+    if (quote) {
+      setAskPanelQuotes([quote]);
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onBackgroundMessage = function (message: TabMessage, sender, sendResponse) {
     if (message.cmd === CommandType.ChatPopupDisplay) {
@@ -78,23 +95,23 @@ export default function App() {
         setAskPanelVisible(false);
         return;
       }
-      setAskPanelQuotes([QuoteAgent.getQuoteByDocument(window.location.href, document)]);
-      setAskPanelVisible(true);
+      console.log('收到后台消息 ', message);
+      showChat();
       return;
     }
   };
-
-  chrome.runtime.onMessage.addListener(onBackgroundMessage);
 
   useEffect(() => {
     document.body.addEventListener('mouseover', handleMouseOver);
     document.body.addEventListener('selectionchange', handleSelectionChange);
     window.addEventListener('scroll', hideAskButton);
+    chrome.runtime.onMessage.addListener(onBackgroundMessage);
 
     return () => {
       document.body.removeEventListener('mouseover', handleMouseOver);
       document.body.removeEventListener('selectionchange', handleSelectionChange);
       window.removeEventListener('scroll', hideAskButton);
+      chrome.runtime.onMessage.removeListener(onBackgroundMessage);
     };
   });
 
@@ -106,8 +123,9 @@ export default function App() {
       const text = targetDom.current.textContent;
       // setCurrentCodeSnippnet(text);
       // setAskPanelVisible(true);
-      setAskPanelQuotes([QuoteAgent.getQuoteBySelection(window.location.href, text)]);
-      setAskPanelVisible(true);
+      // setAskPanelQuotes([QuoteAgent.getQuoteBySelection(window.location.href, text)]);
+      // setAskPanelVisible(true);
+      showChat(text);
     }
   };
 
