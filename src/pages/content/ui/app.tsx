@@ -4,7 +4,7 @@ import AskButton from '@src/components/ask-button';
 import AskPanel from '@root/src/components/ask-panel';
 import { CommandType, TabMessage } from '@root/src/types';
 import { QuoteAgent, QuoteContext } from '@root/src/agents/quote';
-import { ChatCore } from '@root/src/chat/chat';
+import { ChatCoreContext, ChatPopupContext } from '@root/src/chat/chat';
 
 const ASK_BUTTON_OFFSET_X = 6; // 按钮距离左侧的偏移量
 
@@ -16,8 +16,6 @@ function getQuotes(): Promise<void> {
     });
   });
 }
-
-const chat = new ChatCore();
 
 export default function App() {
   const [askButtonVisible, setAskButtonVisible] = useState<boolean>(false);
@@ -76,7 +74,6 @@ export default function App() {
 
   function showChat(quoteText?: string) {
     setAskPanelVisible(true);
-    chat.init();
     let quote = null;
     if (quoteText) {
       quote = QuoteAgent.getQuoteBySelection(window.location.href, quoteText);
@@ -131,17 +128,22 @@ export default function App() {
 
   return (
     <>
-      <AskPanel
-        visible={askPanelVisible}
-        code={''}
-        quotes={askPanelQuotes}
-        style={{
-          // left: parentRect.left + parentRect.width + ASK_BUTTON_OFFSET_X,
-          // top: parentRect.top,
-          right: 10,
-          top: 10,
-        }}
-      />
+      {askPanelVisible ? (
+        <ChatPopupContext.Provider value={new ChatCoreContext()}>
+          <AskPanel
+            visible={askPanelVisible}
+            code={''}
+            quotes={askPanelQuotes}
+            style={{
+              // left: parentRect.left + parentRect.width + ASK_BUTTON_OFFSET_X,
+              // top: parentRect.top,
+              right: 10,
+              top: 10,
+            }}
+          />
+        </ChatPopupContext.Provider>
+      ) : null}
+
       {parentRect && (
         <AskButton
           visible={askButtonVisible}
