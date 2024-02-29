@@ -16,6 +16,7 @@ function getQuotes(): Promise<void> {
     });
   });
 }
+const tabChatContext = new ChatCoreContext();
 
 export default function App() {
   const [askButtonVisible, setAskButtonVisible] = useState<boolean>(false);
@@ -128,12 +129,13 @@ export default function App() {
       // setAskPanelQuotes([QuoteAgent.getQuoteBySelection(window.location.href, text)]);
       // setAskPanelVisible(true);
       showChat(text);
+      setAskButtonVisible(false);
     }
   };
 
   return (
     <>
-      <ChatPopupContext.Provider value={new ChatCoreContext()}>
+      <ChatPopupContext.Provider value={tabChatContext}>
         {askPanelVisible ? (
           <AskPanel
             visible={askPanelVisible}
