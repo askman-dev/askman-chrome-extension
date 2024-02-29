@@ -6,7 +6,7 @@ import { CommandType, TabMessage } from '@root/src/types';
 import { QuoteAgent, QuoteContext } from '@root/src/agents/quote';
 import { ChatCoreContext, ChatPopupContext } from '@root/src/chat/chat';
 
-const ASK_BUTTON_OFFSET_X = 6; // 按钮距离左侧的偏移量
+const ASK_BUTTON_OFFSET_X = 5; // 按钮距离左侧的偏移量
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getQuotes(): Promise<void> {
@@ -28,7 +28,8 @@ export default function App() {
   const { run: handleMouseOver } = useDebounceFn(
     (e: MouseEvent) => {
       const domEl: HTMLElement = (e.target as HTMLElement).closest('pre');
-
+      const btnEl: HTMLElement = (e.target as HTMLElement).closest('#askman-chrome-extension-content-view-root');
+      // console.log(domEl, btnEl, e.target)
       if (domEl?.tagName === 'PRE' || domEl?.contentEditable === 'true') {
         targetDom.current = domEl;
 
@@ -36,6 +37,8 @@ export default function App() {
         const rect = domEl.getBoundingClientRect();
         setParentRect(rect);
         setAskButtonVisible(true);
+      } else if (btnEl == null) {
+        setAskButtonVisible(false);
       }
 
       return false;
@@ -148,7 +151,7 @@ export default function App() {
         <AskButton
           visible={askButtonVisible}
           style={{
-            left: parentRect.left + parentRect.width + ASK_BUTTON_OFFSET_X,
+            left: parentRect.left + parentRect.width - ASK_BUTTON_OFFSET_X,
             top: parentRect.top,
           }}
           onClick={handleAsk}
