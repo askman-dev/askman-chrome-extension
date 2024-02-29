@@ -31,4 +31,30 @@ export class QuoteAgent implements BaseAgent {
     quote.selection = selection;
     return Promise.resolve(quote);
   }
+
+  public static formatQuote(quote: QuoteContext): string {
+    /**
+      > [!INFO]
+      > 这里是callout模块
+      > 支持**markdown** 和 [[Internal link|wikilinks]].
+     */
+    if (quote.type == 'selection') {
+      const lines = ['[!QUOTE]', '选中文本: ' + quote.selection, `来自: [${quote.pageUrl}](${quote.pageUrl})`];
+
+      lines.map(line => {
+        return '> ' + line;
+      });
+      return lines.join('\n');
+    }
+    if (quote.type == 'page') {
+      const lines = ['[!QUOTE]', `浏览网页: [${quote.pageUrl}](${quote.pageUrl})`];
+
+      lines.map(line => {
+        return '> ' + line;
+      });
+      return lines.join('\n');
+    }
+    console.warn('未知的引用类型', quote);
+    return '';
+  }
 }

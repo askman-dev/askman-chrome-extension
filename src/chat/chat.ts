@@ -1,7 +1,7 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { QuoteContext } from '../agents/quote';
+import { QuoteAgent, QuoteContext } from '../agents/quote';
 import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
 import { createContext } from 'react';
 import { ToolsPromptInterface } from '../components/ask-tooldropdown';
@@ -12,7 +12,7 @@ export interface ChatCoreInterface {
   init();
   test(userPrompt: string);
   askWithQuotes(quotes: QuoteContext[], userPrompt: null | string);
-  askWithTool(tool: ToolsPromptInterface, userPrompt: null | string);
+  askWithTool(tool: ToolsPromptInterface, quotes: QuoteContext[], userPrompt: null | string);
   testAskWithQuotes(quotes: QuoteContext[], userPrompt: null | string);
   setOnDataListener(callback: (data: BaseMessage[]) => void);
   removeOnDataListener();
@@ -62,15 +62,7 @@ export class ChatCoreContext implements ChatCoreInterface {
     let prompt = '';
     const quotesPrompts = quotes
       .map(quote => {
-        if (quote.pageTitle && quote.pageUrl && quote.selection) {
-          return `* \`${quote.selection}\` from [${quote.pageTitle}](${quote.pageUrl})\n`;
-        } else if (quote.pageTitle && quote.pageUrl) {
-          return `* \`browsing [${quote.pageTitle}](${quote.pageUrl})\n`;
-        } else if (quote.selection) {
-          return `* ${quote.selection}\n`;
-        } else {
-          return null;
-        }
+        return QuoteAgent.formatQuote(quote);
       })
       .filter(p => p);
     if (quotesPrompts.length) {
@@ -98,15 +90,7 @@ export class ChatCoreContext implements ChatCoreInterface {
     let prompt = '';
     const quotesPrompts = quotes
       .map(quote => {
-        if (quote.pageTitle && quote.pageUrl && quote.selection) {
-          return `\`${quote.selection}\` from [${quote.pageTitle}](${quote.pageUrl})\n`;
-        } else if (quote.pageTitle && quote.pageUrl) {
-          return `\`browsing [${quote.pageTitle}](${quote.pageUrl})\n`;
-        } else if (quote.selection) {
-          return `${quote.selection}\n`;
-        } else {
-          return null;
-        }
+        return QuoteAgent.formatQuote(quote);
       })
       .filter(p => p);
     if (quotesPrompts.length) {
