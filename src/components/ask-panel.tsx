@@ -5,6 +5,7 @@ import Highlight from 'react-highlight';
 import { QuoteContext } from '../agents/quote';
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ChatPopupContext } from '../chat/chat';
+import ToolDropdown from './ask-tooldropdown';
 
 interface IAskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -21,11 +22,11 @@ interface DomProps {
   onClick?: () => void;
 }
 
-export const Send = ({ status, className, divClassName, text = '解释 ↵', onClick }: DomProps): JSX.Element => {
+export const Send = ({ status, className, text = '解释', onClick }: DomProps): JSX.Element => {
   return (
     <button
       className={classNames(
-        `relative w-[69px] h-[25px]  rounded-[5px] border-solid border-black ${className}`,
+        `relative w-[69px] rounded-md border-solid border-black border-1 px-2 py-1 text-white text-xs ${className}`,
         `${status == 'disabled' ? 'cursor-not-allowed' : 'cursor-pointer'}`,
         `${status == 'disabled' ? 'bg-[#CFCFCF] border-[#CFCFCF]' : 'bg-black border'}`,
       )}
@@ -36,20 +37,13 @@ export const Send = ({ status, className, divClassName, text = '解释 ↵', onC
           onClick();
         }
       }}>
-      <span
-        className={`absolute top-[2px] left-[10px] text-white text-[14px] text-right tracking-[0] leading-[normal] ${divClassName}`}>
-        {text}
-      </span>
+      {text} ↵
     </button>
   );
 };
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ToolBtn = ({ className, iconChevronBottom, iconChevronBottomClassName }: DomProps) => {
-  return (
-    <div className={`${className}`}>
-      <div>工具</div>
-    </div>
-  );
+  return <ToolDropdown className={`${className} `} />;
 };
 
 interface CancelProps {
@@ -145,7 +139,7 @@ function AskPanel(props: IAskPanelProps) {
   return (
     <div
       className={classNames(
-        'bg-white fixed overflow-hidden border-2 border-solid rounded-md w-[473px] min-w-80 max-w-lg min-h-[155px]',
+        'bg-white fixed overflow-hidden border-2 border-solid text-sm rounded-md w-[473px] min-w-80 max-w-lg min-h-[155px]',
         `${visible ? 'visible' : 'invisible'}`,
       )}
       {...rest}>
@@ -195,19 +189,20 @@ function AskPanel(props: IAskPanelProps) {
             value={userInput}
             placeholder="请输入问题或要求"></textarea>
         </div>
-        <div className="w-full h-25">
+        <div className="w-full h-34 flex">
+          <div className="grow"></div>
           <Send
             status={userInput || initQuotes.length ? 'ready' : 'disabled'}
-            className="float-right !border-[unset] cursor-pointer"
-            divClassName="!left-[11px] !top-[3px]"
-            text="发送 ↵"
+            className="!border-[unset] cursor-pointer"
+            text="发送"
             onClick={onSend}
           />
           <ToolBtn
-            className="float-right"
-            iconChevronBottom="image.png"
-            iconChevronBottomClassName="!left-[40px] !top-[9px]"
+            className="float-right fixed right-[100px] mt-[1px] text-right"
+            // iconChevronBottom="image.png"
+            // iconChevronBottomClassName="!left-[40px] !top-[9px]"
           />
+          <div className="w-2"></div>
         </div>
       </div>
     </div>
