@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import Highlight from 'react-highlight';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { QuoteContext } from '../agents/quote';
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ChatPopupContext } from '../chat/chat';
 
 interface IAskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -73,7 +73,7 @@ function AskPanel(props: IAskPanelProps) {
   //TODO 需要定义一个可渲染、可序列号的类型，疑似是 StoredMessage
   const [history, setHistory] = useState<{ name: string; type: 'text' | 'image'; text: string }[]>([]);
   const [initQuotes, setInitQuotes] = useState<Array<QuoteContext>>([]);
-
+  const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     quotes.forEach(quote => {
       quote
@@ -84,7 +84,6 @@ function AskPanel(props: IAskPanelProps) {
           console.error(error);
         });
     });
-    //TODO fixbug 这里希望清空数组，实际上没有作用
     return () => {
       setInitQuotes([]);
     };
@@ -123,6 +122,12 @@ function AskPanel(props: IAskPanelProps) {
       rerenderHistory();
     });
     rerenderHistory();
+
+    setTimeout(() => {
+      console.log('获取焦点');
+      inputRef.current.focus();
+    }, 1000);
+
     return () => {
       console.log('移除消息回调');
       chatContext.removeOnDataListener();
@@ -175,6 +180,7 @@ function AskPanel(props: IAskPanelProps) {
         </div>
         <div className="w-full h-[68px] overflow-hidden p-3">
           <textarea
+            ref={inputRef}
             className="rounded border-solid border border-b border-[#0000004c] rounded-[5px] text-[#00000095] text-[14px] w-full h-full font-normal tracking-[0] leading-[normal] p-1 min-h-1.25"
             onKeyDown={e => {
               console.log('onKeyDown', e.key);
