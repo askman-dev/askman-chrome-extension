@@ -6,6 +6,7 @@ import { QuoteContext } from '../agents/quote';
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ChatPopupContext } from '../chat/chat';
 import ToolDropdown, { ToolsPromptInterface } from './ask-tooldropdown';
+import TextareaAutosize from 'react-textarea-autosize';
 
 interface IAskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -151,11 +152,11 @@ function AskPanel(props: IAskPanelProps) {
   return (
     <div
       className={classNames(
-        'bg-white fixed border-2 border-solid text-sm rounded-md w-[473px] min-w-80 max-w-lg min-h-[155px]',
+        'bg-white fixed border-1 border-solid border-gray-100 drop-shadow-lg text-sm rounded-lg w-[473px] min-w-80 max-w-lg min-h-[155px]',
         `${askPanelVisible ? 'visible' : 'invisible'}`,
       )}
       {...rest}>
-      <div className="font-semibold absolute bg-transparent bg-gradient-to-r from-white via-white to-white/60 w-full text-sm px-3 py-2">
+      <div className="font-semibold absolute rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 w-full text-sm px-3 py-2">
         Ask That Man{' '}
         <Cancel
           className="!absolute !left-[433px] !top-[11px]"
@@ -165,7 +166,7 @@ function AskPanel(props: IAskPanelProps) {
           }}
         />
       </div>
-      <div className="px-3 py-10 max-h-80 overflow-auto">
+      <div className="px-3 py-10 max-h-80 overflow-x-hidden overflow-y-auto mb-2">
         {history.map((message, index) => (
           <div
             key={index}
@@ -180,9 +181,9 @@ function AskPanel(props: IAskPanelProps) {
         <Highlight>{code}</Highlight>
       </div>
 
-      <div className="relative w-full bg-cover pb-2 bg-[50%_50%]">
+      <div className="user-tools relative w-full bg-cover pb-2 bg-[50%_50%]">
         {userTools && (
-          <div className="w-full relative flex-col justify-start items-start inline-flex text-left px-2">
+          <div className="w-full relative flex-col justify-start items-start inline-flex text-left px-2 pb-2">
             <button
               className="bg-black text-white rounded-md py-0.5 px-2 border-solid border-1 text-xs"
               title="点击删除"
@@ -194,22 +195,26 @@ function AskPanel(props: IAskPanelProps) {
           </div>
         )}
 
-        <div className="w-full relative flex-col justify-start items-start inline-flex text-left px-2">
-          {initQuotes &&
-            initQuotes.map((quote, index) => (
+        {initQuotes.length > 0 && (
+          <div className="quotes w-full relative flex-col justify-start items-start inline-flex text-left px-2 pb-3">
+            {initQuotes.map((quote, index) => (
               <div className="border-l border-black w-full" key={index + '-' + quote}>
                 <div className="text-black text-xs font-normal px-2 overflow-hidden whitespace-nowrap text-ellipsis max-h-[2.25rem] leading-[1.125rem] line-clamp-2">
-                  {quote?.selection}
+                  引用 {quote.type == 'page' ? quote.pageTitle : quote?.selection}
                 </div>
               </div>
             ))}
-        </div>
-        <div className="w-full h-[68px] overflow-hidden p-3">
-          <textarea
+          </div>
+        )}
+
+        <div className="w-full overflow-hidden pl-2 pr-2 mb-2">
+          <TextareaAutosize
             ref={inputRef}
-            className="rounded border-solid border border-b border-[#0000004c] rounded-[5px] text-[#00000095] focus:border-gray-400 text-[14px] w-full h-full font-normal tracking-[0] leading-[normal] p-1 min-h-1.25"
+            maxRows={5}
+            minRows={1}
+            className="rounded border-solid border-1 border-gray outline-none rounded-md text-gray-800 text-sm w-full font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none"
             onKeyDown={e => {
-              console.log('onKeyDown', e.key);
+              // console.log('onKeyDown', e.key);
               if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
                 onSend();
               }
@@ -221,12 +226,12 @@ function AskPanel(props: IAskPanelProps) {
               e.preventDefault();
             }}
             value={userInput}
-            placeholder="请输入问题或要求"></textarea>
+            placeholder="请输入问题或要求"></TextareaAutosize>
         </div>
         <div className="w-full h-34 flex">
           <div className="grow"></div>
           <ToolDropdown
-            className="float-right fixed right-[100px] mt-[1px] text-right"
+            className="right-[100px] mt-[1px] text-right"
             onItemClick={item => {
               setUserTools(item);
             }}
@@ -236,11 +241,6 @@ function AskPanel(props: IAskPanelProps) {
             className="cursor-pointer"
             text="发送"
             onClick={onSend}
-          />
-          <ToolBtn
-            className="float-right fixed right-[100px] mt-[1px] text-right"
-            // iconChevronBottom="image.png"
-            // iconChevronBottomClassName="!left-[40px] !top-[9px]"
           />
           <div className="w-2"></div>
         </div>

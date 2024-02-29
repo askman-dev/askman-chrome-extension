@@ -65,7 +65,7 @@ export class ChatCoreContext implements ChatCoreInterface {
         if (quote.pageTitle && quote.pageUrl && quote.selection) {
           return `* \`${quote.selection}\` from [${quote.pageTitle}](${quote.pageUrl})\n`;
         } else if (quote.pageTitle && quote.pageUrl) {
-          return `* \`at [${quote.pageTitle}](${quote.pageUrl})\n`;
+          return `* \`browsing [${quote.pageTitle}](${quote.pageUrl})\n`;
         } else if (quote.selection) {
           return `* ${quote.selection}\n`;
         } else {
@@ -101,7 +101,7 @@ export class ChatCoreContext implements ChatCoreInterface {
         if (quote.pageTitle && quote.pageUrl && quote.selection) {
           return `\`${quote.selection}\` from [${quote.pageTitle}](${quote.pageUrl})\n`;
         } else if (quote.pageTitle && quote.pageUrl) {
-          return `\`at [${quote.pageTitle}](${quote.pageUrl})\n`;
+          return `\`browsing [${quote.pageTitle}](${quote.pageUrl})\n`;
         } else if (quote.selection) {
           return `${quote.selection}\n`;
         } else {

@@ -2,6 +2,7 @@ import { AgentContext } from '../types';
 import { BaseAgent } from './base';
 
 export class QuoteContext implements AgentContext {
+  public type: 'selection' | 'page' | 'link';
   public selection?: string;
   public pageUrl?: string;
   public pageTitle?: string;
@@ -16,6 +17,7 @@ export class QuoteAgent implements BaseAgent {
   }
   public static getQuoteByDocument(pageUrl: string, document: Document): Promise<QuoteContext> {
     const quote = new QuoteContext();
+    quote.type = 'page';
     quote.pageUrl = pageUrl;
     quote.pageTitle = document.title;
     quote.selection = document.getSelection()?.toString();
@@ -24,6 +26,7 @@ export class QuoteAgent implements BaseAgent {
   }
   public static getQuoteBySelection(pageUrl: string, selection: string): Promise<QuoteContext> {
     const quote = new QuoteContext();
+    quote.type = 'selection';
     quote.pageUrl = pageUrl;
     quote.selection = selection;
     return Promise.resolve(quote);

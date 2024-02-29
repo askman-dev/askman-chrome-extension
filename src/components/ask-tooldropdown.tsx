@@ -1,6 +1,7 @@
 import { Menu, Transition } from '@headlessui/react';
 import { useEffect, useState, Fragment, forwardRef } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
+import classNames from 'classnames';
 interface ToolDropdownProps {
   className: string;
   onItemClick: (tool: ToolsPromptInterface) => void;
@@ -67,7 +68,7 @@ export default function ToolDropdown({ className, onItemClick }: ToolDropdownPro
     };
   }, []);
   return (
-    <div className="mr-1">
+    <div className={classNames(`mr-1 ${className}`)}>
       <Menu as="div" className="relative" onMouseOver={() => setOpen(true)}>
         <div>
           <Menu.Button
