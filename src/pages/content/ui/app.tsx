@@ -135,6 +135,7 @@ export default function App() {
         <ChatPopupContext.Provider value={new ChatCoreContext()}>
           <AskPanel
             visible={askPanelVisible}
+            onHide={() => setAskPanelVisible(false)}
             code={''}
             quotes={askPanelQuotes}
             style={{

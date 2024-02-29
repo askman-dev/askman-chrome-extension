@@ -11,6 +11,7 @@ interface IAskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
   visible?: boolean;
   quotes?: Array<Promise<QuoteContext>>;
+  onHide?: () => void;
 }
 interface DomProps {
   status?: 'ready' | 'disabled' | 'loading';
@@ -48,22 +49,26 @@ const ToolBtn = ({ className, iconChevronBottom, iconChevronBottomClassName }: D
 
 interface CancelProps {
   className: string;
+  onClick: () => void;
 }
-const Cancel = ({ className }: CancelProps): JSX.Element => {
+const Cancel = ({ className, onClick }: CancelProps): JSX.Element => {
   return (
     <div className={classNames(`relative w-[24px] h-[15px] ${className}`)}>
-      <div className="absolute -top-px left-0 [text-shadow:0px_4px_4px_#00000040] [font-family:'Inter-Regular',Helvetica] font-normal text-[#0000008c] text-[12px] text-right tracking-[0] leading-[normal]">
+      <button
+        className="absolute -top-px left-0 [text-shadow:0px_4px_4px_#00000040] [font-family:'Inter-Regular',Helvetica] font-normal text-[#0000008c] text-[12px] text-right tracking-[0] leading-[normal]"
+        onClick={onClick}>
         隐藏
-      </div>
+      </button>
     </div>
   );
 };
 
 function AskPanel(props: IAskPanelProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { code, visible, quotes, ...rest } = props;
+  const { code, visible, quotes, onHide, ...rest } = props;
   const chatContext = useContext(ChatPopupContext);
   const [userInput, setUserInput] = useState<string>('');
+  const [askPanelVisible, setAskPanelVisible] = useState<boolean>(visible);
   //TODO 需要定义一个可渲染、可序列号的类型，疑似是 StoredMessage
   const [history, setHistory] = useState<{ name: string; type: 'text' | 'image'; text: string }[]>([]);
   const [initQuotes, setInitQuotes] = useState<Array<QuoteContext>>([]);
@@ -117,10 +122,11 @@ function AskPanel(props: IAskPanelProps) {
     });
     rerenderHistory();
 
-    setTimeout(() => {
-      console.log('获取焦点');
-      inputRef.current.focus();
-    }, 1000);
+    askPanelVisible &&
+      setTimeout(() => {
+        console.log('获取焦点');
+        inputRef.current.focus();
+      }, 200);
 
     return () => {
       console.log('移除消息回调');
@@ -140,11 +146,18 @@ function AskPanel(props: IAskPanelProps) {
     <div
       className={classNames(
         'bg-white fixed border-2 border-solid text-sm rounded-md w-[473px] min-w-80 max-w-lg min-h-[155px]',
-        `${visible ? 'visible' : 'invisible'}`,
+        `${askPanelVisible ? 'visible' : 'invisible'}`,
       )}
       {...rest}>
       <div className="font-semibold absolute w-full bg-white opacity-60 text-sm bg-white px-3 py-2">
-        Ask That Man <Cancel className="!absolute !left-[433px] !top-[11px]" />
+        Ask That Man{' '}
+        <Cancel
+          className="!absolute !left-[433px] !top-[11px]"
+          onClick={() => {
+            setAskPanelVisible(false);
+            onHide();
+          }}
+        />
       </div>
       <div className="px-3 py-10 max-h-80 overflow-auto">
         {history.map((message, index) => (
@@ -161,7 +174,7 @@ function AskPanel(props: IAskPanelProps) {
         <Highlight>{code}</Highlight>
       </div>
 
-      <div className="relative w-full bg-[url(/layout.png)] bg-cover bg-[50%_50%]">
+      <div className="relative w-full bg-cover bg-[50%_50%]">
         <div className="w-full relative flex-col justify-start items-start inline-flex text-left px-2">
           {initQuotes &&
             initQuotes.map((quote, index) => (

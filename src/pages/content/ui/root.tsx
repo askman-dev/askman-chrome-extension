@@ -12,6 +12,8 @@ root.style.zIndex = '2147483646';
 root.style.position = 'absolute';
 root.style.right = '0';
 root.style.top = '0';
+root.style.backgroundColor = 'transparent';
+root.style.border = 'none';
 
 document.body.append(root);
 

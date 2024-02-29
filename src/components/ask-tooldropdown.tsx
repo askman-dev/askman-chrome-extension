@@ -1,9 +1,21 @@
-import { Menu } from '@headlessui/react';
-import { useEffect, useState } from 'react';
+import { Menu, Transition } from '@headlessui/react';
+import { useEffect, useState, Fragment, forwardRef } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 interface ToolDropdownProps {
   className: string;
 }
+
+const CustomToolButton = forwardRef(function (props: { onClick: () => void }, ref) {
+  return (
+    <button
+      className="inline-flex w-full justify-center rounded-md border-black border-1 border-solid bg-white px-2 py-1 text-xs font-medium text-black hover:bg-black/5 focus:outline-none"
+      ref={ref}
+      {...props}
+    />
+  );
+});
+CustomToolButton.displayName = 'CustomToolButton';
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function ToolDropdown(props: ToolDropdownProps) {
   const [open, setOpen] = useState(false);
@@ -22,28 +34,24 @@ export default function ToolDropdown(props: ToolDropdownProps) {
       <Menu as="div" className="relative" onMouseOver={() => setOpen(true)}>
         <div>
           <Menu.Button
-            className="rounded-md border-black border-1 border-solid bg-white px-2 py-1 text-xs font-medium text-black hover:bg-black/30 focus:outline-none"
+            className="inline-flex w-full justify-center rounded-md border-black border-1 border-solid bg-white px-2 py-1 text-xs font-medium text-black hover:bg-black/30 focus:outline-none"
             onClick={e => {
               setOpen(!open);
               e.stopPropagation();
             }}>
             工具
-            <ChevronDownIcon
-              className="-mt-1 inline h-5 w-5 text-violet-200 hover:text-violet-100"
-              aria-hidden="true"
-            />
+            <ChevronDownIcon className="-mr-1 ml-2 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
           </Menu.Button>
         </div>
-        {/* <Transition
+        <Transition
+          show={open}
           as={Fragment}
           enter="transition ease-out duration-100"
           enterFrom="transform opacity-0 scale-95"
           enterTo="transform opacity-100 scale-100"
           leave="transition ease-in duration-75"
           leaveFrom="transform opacity-100 scale-100"
-          leaveTo="transform opacity-0 scale-95"
-        > */}
-        {open && (
+          leaveTo="transform opacity-0 scale-95">
           <Menu.Items
             className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
             static>
@@ -129,8 +137,7 @@ export default function ToolDropdown(props: ToolDropdownProps) {
               </Menu.Item>
             </div>
           </Menu.Items>
-        )}
-        {/* </Transition> */}
+        </Transition>
       </Menu>
     </div>
   );
