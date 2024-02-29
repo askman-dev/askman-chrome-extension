@@ -4,8 +4,8 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid';
 interface ToolDropdownProps {
   className: string;
 }
-export default function ToolDropdown({ className }: ToolDropdownProps) {
-  // className = "fixed top-36 w-56 text-right"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function ToolDropdown(props: ToolDropdownProps) {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     function handleClickOutside() {
@@ -18,17 +18,20 @@ export default function ToolDropdown({ className }: ToolDropdownProps) {
     };
   }, []);
   return (
-    <div className={className}>
-      <Menu as="div" className="relative inline-block text-left" onMouseOver={() => setOpen(true)}>
+    <div className="mr-1">
+      <Menu as="div" className="relative" onMouseOver={() => setOpen(true)}>
         <div>
           <Menu.Button
-            className="inline-flex w-full justify-center rounded-md border-black border-1 border-solid bg-white px-2 py-1 text-xs font-medium text-black hover:bg-black/30 focus:outline-none"
+            className="rounded-md border-black border-1 border-solid bg-white px-2 py-1 text-xs font-medium text-black hover:bg-black/30 focus:outline-none"
             onClick={e => {
               setOpen(!open);
               e.stopPropagation();
             }}>
             工具
-            <ChevronDownIcon className="-mr-1 ml-2 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
+            <ChevronDownIcon
+              className="-mt-1 inline h-5 w-5 text-violet-200 hover:text-violet-100"
+              aria-hidden="true"
+            />
           </Menu.Button>
         </div>
         {/* <Transition

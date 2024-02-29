@@ -26,7 +26,7 @@ export const Send = ({ status, className, text = '解释', onClick }: DomProps):
   return (
     <button
       className={classNames(
-        `relative w-[69px] rounded-md border-solid border-black border-1 px-2 py-1 text-white text-xs ${className}`,
+        `relative w-[69px] rounded-md font-medium border-solid border-black border-1 px-2 py-1 text-white text-xs ${className}`,
         `${status == 'disabled' ? 'cursor-not-allowed' : 'cursor-pointer'}`,
         `${status == 'disabled' ? 'bg-[#CFCFCF] border-[#CFCFCF]' : 'bg-black border'}`,
       )}
@@ -139,7 +139,7 @@ function AskPanel(props: IAskPanelProps) {
   return (
     <div
       className={classNames(
-        'bg-white fixed overflow-hidden border-2 border-solid text-sm rounded-md w-[473px] min-w-80 max-w-lg min-h-[155px]',
+        'bg-white fixed border-2 border-solid text-sm rounded-md w-[473px] min-w-80 max-w-lg min-h-[155px]',
         `${visible ? 'visible' : 'invisible'}`,
       )}
       {...rest}>
@@ -189,20 +189,17 @@ function AskPanel(props: IAskPanelProps) {
             value={userInput}
             placeholder="请输入问题或要求"></textarea>
         </div>
-        <div className="w-full h-34 flex">
-          <div className="grow"></div>
+        <div className="flex justify-end px-3 pb-3">
+          <ToolBtn
+          // iconChevronBottom="image.png"
+          // iconChevronBottomClassName="!left-[40px] !top-[9px]"
+          />
           <Send
             status={userInput || initQuotes.length ? 'ready' : 'disabled'}
-            className="!border-[unset] cursor-pointer"
+            className="cursor-pointer"
             text="发送"
             onClick={onSend}
           />
-          <ToolBtn
-            className="float-right fixed right-[100px] mt-[1px] text-right"
-            // iconChevronBottom="image.png"
-            // iconChevronBottomClassName="!left-[40px] !top-[9px]"
-          />
-          <div className="w-2"></div>
         </div>
       </div>
     </div>
