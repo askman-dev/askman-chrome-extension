@@ -217,6 +217,7 @@ function AskPanel(props: IAskPanelProps) {
               // console.log('onKeyDown', e.key);
               if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
                 onSend();
+                e.preventDefault();
               }
               // github 上面按 s 会触发页面搜索
               if (e.key === 's') e.preventDefault();

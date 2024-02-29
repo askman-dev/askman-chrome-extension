@@ -133,8 +133,8 @@ export default function App() {
 
   return (
     <>
-      {askPanelVisible ? (
-        <ChatPopupContext.Provider value={new ChatCoreContext()}>
+      <ChatPopupContext.Provider value={new ChatCoreContext()}>
+        {askPanelVisible ? (
           <AskPanel
             visible={askPanelVisible}
             onHide={() => setAskPanelVisible(false)}
@@ -152,19 +152,19 @@ export default function App() {
               top: 10,
             }}
           />
-        </ChatPopupContext.Provider>
-      ) : null}
+        ) : null}
 
-      {parentRect && (
-        <AskButton
-          visible={askButtonVisible}
-          style={{
-            left: parentRect.left + parentRect.width - ASK_BUTTON_OFFSET_X,
-            top: parentRect.top,
-          }}
-          onClick={handleAsk}
-        />
-      )}
+        {parentRect && (
+          <AskButton
+            visible={askButtonVisible}
+            style={{
+              left: parentRect.left + parentRect.width - ASK_BUTTON_OFFSET_X,
+              top: parentRect.top,
+            }}
+            onClick={handleAsk}
+          />
+        )}
+      </ChatPopupContext.Provider>
     </>
   );
 }
