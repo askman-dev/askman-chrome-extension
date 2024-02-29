@@ -220,7 +220,7 @@ function AskPanel(props: IAskPanelProps) {
                 e.preventDefault();
               }
               // github 上面按 s 会触发页面搜索
-              if (e.key === 's') e.preventDefault();
+              if (e.key.match(/^[a-z/\\]$/) && !e.shiftKey && !e.ctrlKey && !e.altKey) e.stopPropagation();
             }}
             onChange={e => {
               setUserInput(e.currentTarget.value);
