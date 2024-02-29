@@ -4,6 +4,7 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { QuoteContext } from '../agents/quote';
 import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
 import { createContext } from 'react';
+import { ToolsPromptInterface } from '../components/ask-tooldropdown';
 
 export interface ChatCoreInterface {
   model: ChatOpenAI;
@@ -11,6 +12,7 @@ export interface ChatCoreInterface {
   init();
   test(userPrompt: string);
   askWithQuotes(quotes: QuoteContext[], userPrompt: null | string);
+  askWithTool(tool: ToolsPromptInterface, userPrompt: null | string);
   testAskWithQuotes(quotes: QuoteContext[], userPrompt: null | string);
   setOnDataListener(callback: (data: BaseMessage[]) => void);
   removeOnDataListener();
@@ -79,26 +81,69 @@ export class ChatCoreContext implements ChatCoreInterface {
     }
 
     this.history.push(new HumanMessage({ content: prompt, name: 'human' }));
-    setTimeout(() => this._onDataListener(this.history));
+    this._onDataListener && setTimeout(() => this._onDataListener(this.history));
+    return this.stream(this.history);
+  }
+
+  /**
+   * Asynchronously prompts the user with a specific tool, a list of quotes, and an optional user prompt.
+   *
+   * @param {ToolsPromptInterface} tool - the specific tool to prompt the user with
+   * @param {QuoteContext[]} quotes - a list of quotes to prompt the user with
+   * @param {null | string} userPrompt - an optional prompt for the user
+   * @return {Promise<void>} a Promise that resolves when the user has responded
+   */
+  async askWithTool(tool: ToolsPromptInterface, quotes: QuoteContext[], userPrompt: null | string) {
+    // 先把 quotes 与 user prompt 合并，然后再用 tool 包装
+    let prompt = '';
+    const quotesPrompts = quotes
+      .map(quote => {
+        if (quote.pageTitle && quote.pageUrl && quote.selection) {
+          return `\`${quote.selection}\` from [${quote.pageTitle}](${quote.pageUrl})\n`;
+        } else if (quote.pageTitle && quote.pageUrl) {
+          return `\`at [${quote.pageTitle}](${quote.pageUrl})\n`;
+        } else if (quote.selection) {
+          return `${quote.selection}\n`;
+        } else {
+          return null;
+        }
+      })
+      .filter(p => p);
+    if (quotesPrompts.length) {
+      prompt = quotesPrompts.join('\n') + '\n';
+    }
+    if (userPrompt) {
+      prompt += userPrompt;
+    }
+
+    if (tool.template.indexOf('${INPUT}') > -1) {
+      prompt = tool.template.replace('${INPUT}', prompt);
+    }
+
+    this.history.push(new HumanMessage({ content: prompt, name: 'human' }));
+    this._onDataListener && setTimeout(() => this._onDataListener(this.history));
     return this.stream(this.history);
   }
   async stream(history) {
     console.log('start stream ', new Date());
+    if (this._onDataListener == null) {
+      console.warn('no this._onDataListener');
+    }
     const pendingResponse = new AIMessage({ content: '正在思考...', name: 'ai' });
     setTimeout(() => this.history.push(pendingResponse));
-    setTimeout(() => this._onDataListener(this.history));
+    this._onDataListener && setTimeout(() => this._onDataListener(this.history));
     const stream = await this.model.stream(history);
     // 这里会等一小会
     console.log('start stream 2 ', new Date());
     const chunks = [];
     for await (const chunk of stream) {
       chunks.push(chunk);
-      console.log(`${chunk.content}|`, new Date());
+      // console.log(`${chunk.content}|`, new Date());
       pendingResponse.content = chunks.reduce((acc, cur) => {
         return acc + cur.content;
       }, '');
 
-      setTimeout(() => this._onDataListener(this.history));
+      this._onDataListener && setTimeout(() => this._onDataListener(this.history));
     }
   }
   async test(userPrompt: string) {

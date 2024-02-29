@@ -28,13 +28,15 @@ export default function App() {
   const { run: handleMouseOver } = useDebounceFn(
     (e: MouseEvent) => {
       const domEl: HTMLElement = (e.target as HTMLElement).closest('pre');
+      const highlightEl: HTMLElement = (e.target as HTMLElement).closest('div.highlight');
       const btnEl: HTMLElement = (e.target as HTMLElement).closest('#askman-chrome-extension-content-view-root');
       // console.log(domEl, btnEl, e.target)
-      if (domEl?.tagName === 'PRE' || domEl?.contentEditable === 'true') {
-        targetDom.current = domEl;
+      if (domEl?.tagName === 'PRE' || domEl?.contentEditable === 'true' || highlightEl) {
+        if (domEl) targetDom.current = domEl;
+        else if (highlightEl) targetDom.current = highlightEl;
 
         // calculate position
-        const rect = domEl.getBoundingClientRect();
+        const rect = domEl ? domEl.getBoundingClientRect() : highlightEl.getBoundingClientRect();
         setParentRect(rect);
         setAskButtonVisible(true);
       } else if (btnEl == null) {
@@ -137,6 +139,11 @@ export default function App() {
             visible={askPanelVisible}
             onHide={() => setAskPanelVisible(false)}
             code={''}
+            onKeyDown={e => {
+              if (e.key === 'Escape') {
+                setAskPanelVisible(false);
+              }
+            }}
             quotes={askPanelQuotes}
             style={{
               // left: parentRect.left + parentRect.width + ASK_BUTTON_OFFSET_X,

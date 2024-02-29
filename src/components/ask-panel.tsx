@@ -5,7 +5,7 @@ import Highlight from 'react-highlight';
 import { QuoteContext } from '../agents/quote';
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ChatPopupContext } from '../chat/chat';
-import ToolDropdown from './ask-tooldropdown';
+import ToolDropdown, { ToolsPromptInterface } from './ask-tooldropdown';
 
 interface IAskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -43,8 +43,8 @@ export const Send = ({ status, className, text = '解释', onClick }: DomProps):
   );
 };
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const ToolBtn = ({ className, iconChevronBottom, iconChevronBottomClassName }: DomProps) => {
-  return <ToolDropdown className={`${className} `} />;
+const ToolBtn = (props: DomProps) => {
+  return;
 };
 
 interface CancelProps {
@@ -73,6 +73,7 @@ function AskPanel(props: IAskPanelProps) {
   const [history, setHistory] = useState<{ name: string; type: 'text' | 'image'; text: string }[]>([]);
   const [initQuotes, setInitQuotes] = useState<Array<QuoteContext>>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [userTools, setUserTools] = useState<ToolsPromptInterface>();
   useEffect(() => {
     quotes.forEach(quote => {
       quote
@@ -89,7 +90,7 @@ function AskPanel(props: IAskPanelProps) {
   }, [quotes]);
 
   useEffect(() => {
-    console.log('chatContext.history = ' + JSON.stringify(chatContext.history));
+    // console.log('chatContext.history = ' + JSON.stringify(chatContext.history));
     function rerenderHistory() {
       setHistory(
         chatContext.history.map(message => {
@@ -116,8 +117,8 @@ function AskPanel(props: IAskPanelProps) {
     }
 
     console.log('注册消息回调');
-    chatContext.setOnDataListener(data => {
-      console.log(data);
+    chatContext.setOnDataListener(() => {
+      // console.log(data);
       rerenderHistory();
     });
     rerenderHistory();
@@ -135,13 +136,18 @@ function AskPanel(props: IAskPanelProps) {
   }, []);
 
   function onSend() {
-    chatContext.askWithQuotes(initQuotes!, userInput);
+    if (userTools) {
+      chatContext.askWithTool(userTools, initQuotes, userInput);
+    } else {
+      chatContext.askWithQuotes(initQuotes!, userInput);
+    }
+    setUserTools(null);
     setUserInput('');
     setInitQuotes([]);
   }
 
   // myObject.test('你是谁');
-  console.log('history = ' + JSON.stringify(history));
+  // console.log('history = ' + JSON.stringify(history));
   return (
     <div
       className={classNames(
@@ -149,7 +155,7 @@ function AskPanel(props: IAskPanelProps) {
         `${askPanelVisible ? 'visible' : 'invisible'}`,
       )}
       {...rest}>
-      <div className="font-semibold absolute w-full bg-white opacity-60 text-sm bg-white px-3 py-2">
+      <div className="font-semibold absolute bg-transparent bg-gradient-to-r from-white via-white to-white/60 w-full text-sm px-3 py-2">
         Ask That Man{' '}
         <Cancel
           className="!absolute !left-[433px] !top-[11px]"
@@ -174,7 +180,20 @@ function AskPanel(props: IAskPanelProps) {
         <Highlight>{code}</Highlight>
       </div>
 
-      <div className="relative w-full bg-cover bg-[50%_50%]">
+      <div className="relative w-full bg-cover pb-2 bg-[50%_50%]">
+        {userTools && (
+          <div className="w-full relative flex-col justify-start items-start inline-flex text-left px-2">
+            <button
+              className="bg-black text-white rounded-md py-0.5 px-2 border-solid border-1 text-xs"
+              title="点击删除"
+              onClick={() => {
+                setUserTools(null);
+              }}>
+              {userTools.name}
+            </button>
+          </div>
+        )}
+
         <div className="w-full relative flex-col justify-start items-start inline-flex text-left px-2">
           {initQuotes &&
             initQuotes.map((quote, index) => (
@@ -188,24 +207,29 @@ function AskPanel(props: IAskPanelProps) {
         <div className="w-full h-[68px] overflow-hidden p-3">
           <textarea
             ref={inputRef}
-            className="rounded border-solid border border-b border-[#0000004c] rounded-[5px] text-[#00000095] text-[14px] w-full h-full font-normal tracking-[0] leading-[normal] p-1 min-h-1.25"
+            className="rounded border-solid border border-b border-[#0000004c] rounded-[5px] text-[#00000095] focus:border-gray-400 text-[14px] w-full h-full font-normal tracking-[0] leading-[normal] p-1 min-h-1.25"
             onKeyDown={e => {
               console.log('onKeyDown', e.key);
               if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
-                e.preventDefault();
                 onSend();
               }
+              // github 上面按 s 会触发页面搜索
+              if (e.key === 's') e.preventDefault();
             }}
             onChange={e => {
               setUserInput(e.currentTarget.value);
+              e.preventDefault();
             }}
             value={userInput}
             placeholder="请输入问题或要求"></textarea>
         </div>
-        <div className="flex justify-end px-3 pb-3">
-          <ToolBtn
-          // iconChevronBottom="image.png"
-          // iconChevronBottomClassName="!left-[40px] !top-[9px]"
+        <div className="w-full h-34 flex">
+          <div className="grow"></div>
+          <ToolDropdown
+            className="float-right fixed right-[100px] mt-[1px] text-right"
+            onItemClick={item => {
+              setUserTools(item);
+            }}
           />
           <Send
             status={userInput || initQuotes.length ? 'ready' : 'disabled'}
@@ -213,6 +237,12 @@ function AskPanel(props: IAskPanelProps) {
             text="发送"
             onClick={onSend}
           />
+          <ToolBtn
+            className="float-right fixed right-[100px] mt-[1px] text-right"
+            // iconChevronBottom="image.png"
+            // iconChevronBottomClassName="!left-[40px] !top-[9px]"
+          />
+          <div className="w-2"></div>
         </div>
       </div>
     </div>
