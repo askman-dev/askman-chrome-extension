@@ -158,13 +158,16 @@ export default function App() {
 
         {parentRect && (
           <AskButton
-            visible={askButtonVisible}
+            visible={true || askButtonVisible}
+            className="fixed"
             style={{
               left: parentRect.left + parentRect.width - ASK_BUTTON_OFFSET_X,
               top: parentRect.top,
             }}
-            onClick={handleAsk}
-          />
+            primary
+            onClick={handleAsk}>
+            Ask
+          </AskButton>
         )}
       </ChatPopupContext.Provider>
     </>

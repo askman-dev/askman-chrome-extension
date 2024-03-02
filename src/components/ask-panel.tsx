@@ -1,14 +1,15 @@
 import classNames from 'classnames';
-
-import Highlight from 'react-highlight';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import 'highlight.js/styles/default.min.css';
 import { QuoteContext } from '../agents/quote';
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ChatPopupContext } from '../chat/chat';
 import ToolDropdown, { ToolsPromptInterface } from './ask-tooldropdown';
 import TextareaAutosize from 'react-textarea-autosize';
+import { XMarkIcon } from '@heroicons/react/20/solid';
+import AskMessage from './ask-message';
+import AskButton from './ask-button';
 
-interface IAskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
+interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
   visible?: boolean;
   quotes?: Array<Promise<QuoteContext>>;
@@ -24,57 +25,26 @@ interface DomProps {
   onClick?: () => void;
 }
 
-export const Send = ({ status, className, text = '解释', onClick }: DomProps): JSX.Element => {
-  return (
-    <button
-      className={classNames(
-        `relative w-[69px] rounded-md font-medium border-solid border-black border-1 px-2 py-1 text-white text-xs ${className}`,
-        `${status == 'disabled' ? 'cursor-not-allowed' : 'cursor-pointer'}`,
-        `${status == 'disabled' ? 'bg-[#CFCFCF] border-[#CFCFCF]' : 'bg-black border'}`,
-      )}
-      onClick={() => onClick()}
-      onKeyDown={e => {
-        if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
-          e.preventDefault();
-          onClick();
-        }
-      }}>
-      {text} ↵
-    </button>
-  );
-};
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ToolBtn = (props: DomProps) => {
   return;
 };
 
-interface CancelProps {
-  className: string;
-  onClick: () => void;
-}
-const Cancel = ({ className, onClick }: CancelProps): JSX.Element => {
-  return (
-    <div className={classNames(`relative w-[24px] h-[15px] ${className}`)}>
-      <button
-        className="absolute -top-px left-0 [text-shadow:0px_4px_4px_#00000040] [font-family:'Inter-Regular',Helvetica] font-normal text-[#0000008c] text-[12px] text-right tracking-[0] leading-[normal]"
-        onClick={onClick}>
-        隐藏
-      </button>
-    </div>
-  );
-};
-
-function AskPanel(props: IAskPanelProps) {
+function AskPanel(props: AskPanelProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { code, visible, quotes, onHide, ...rest } = props;
   const chatContext = useContext(ChatPopupContext);
   const [userInput, setUserInput] = useState<string>('');
   const [askPanelVisible, setAskPanelVisible] = useState<boolean>(visible);
   //TODO 需要定义一个可渲染、可序列号的类型，疑似是 StoredMessage
-  const [history, setHistory] = useState<{ name: string; type: 'text' | 'image'; text: string }[]>([]);
+  const [history, setHistory] = useState<{ name: string; type: string; text: string }[]>([]);
   const [initQuotes, setInitQuotes] = useState<Array<QuoteContext>>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const [userTools, setUserTools] = useState<ToolsPromptInterface>();
+
+  // chat list ref
+  // const chatListRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     quotes.forEach(quote => {
       quote
@@ -156,10 +126,10 @@ function AskPanel(props: IAskPanelProps) {
         `${askPanelVisible ? 'visible' : 'invisible'}`,
       )}
       {...rest}>
-      <div className="font-semibold absolute rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 w-full text-sm px-3 py-2">
-        Ask That Man{' '}
-        <Cancel
-          className="!absolute !left-[433px] !top-[11px]"
+      <div className="font-semibold absolute rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 w-full text-sm px-3 py-2 flex justify-between">
+        <span>Ask That Man</span>
+        <XMarkIcon
+          className="w-4 h-4 "
           onClick={() => {
             setAskPanelVisible(false);
             onHide();
@@ -168,17 +138,12 @@ function AskPanel(props: IAskPanelProps) {
       </div>
       <div className="px-3 py-10 max-h-80 overflow-x-hidden overflow-y-auto mb-2">
         {history.map((message, index) => (
-          <div
+          <AskMessage
             key={index}
-            className={classNames(
-              'text-sm font-normal px-2 leading-[1.125rem]',
-              message.name == 'human' ? 'text-sky-700 text-opacity-90' : 'text-black',
-              message.name == 'human' ? 'mb-2' : 'mb-4',
-            )}>
-            {message.text}
-          </div>
+            // key={message.id}
+            {...message}
+          />
         ))}
-        <Highlight>{code}</Highlight>
       </div>
 
       <div className="user-tools relative w-full bg-cover pb-2 bg-[50%_50%]">
@@ -229,7 +194,7 @@ function AskPanel(props: IAskPanelProps) {
             value={userInput}
             placeholder="请输入问题或要求"></TextareaAutosize>
         </div>
-        <div className="w-full h-34 flex">
+        <div className="w-full h-34 px-2 flex">
           <div className="grow"></div>
           <ToolDropdown
             className="right-[100px] mt-[1px] text-right"
@@ -237,13 +202,18 @@ function AskPanel(props: IAskPanelProps) {
               setUserTools(item);
             }}
           />
-          <Send
-            status={userInput || initQuotes.length ? 'ready' : 'disabled'}
-            className="cursor-pointer"
-            text="发送"
+          <AskButton
+            primary
+            disabled={!(userInput || initQuotes.length)}
             onClick={onSend}
-          />
-          <div className="w-2"></div>
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+                e.preventDefault();
+                onSend();
+              }
+            }}>
+            发送
+          </AskButton>
         </div>
       </div>
     </div>
