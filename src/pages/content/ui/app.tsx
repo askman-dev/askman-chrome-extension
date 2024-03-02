@@ -5,23 +5,19 @@ import AskPanel from '@root/src/components/ask-panel';
 import { CommandType, TabMessage } from '@root/src/types';
 import { QuoteAgent, QuoteContext } from '@root/src/agents/quote';
 import { ChatCoreContext, ChatPopupContext } from '@root/src/chat/chat';
+import { PageGithubAgent } from '@root/src/agents/page.github';
+import PageGithubReadmeToolDropdown from '@src/components/page-github-readme';
+import { createPortal } from 'react-dom';
 
 const ASK_BUTTON_OFFSET_X = 5; // 按钮距离左侧的偏移量
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getQuotes(): Promise<void> {
-  return new Promise(resolve => {
-    chrome.runtime.sendMessage({ cmd: CommandType.ChatPopupDisplay }, () => {
-      resolve();
-    });
-  });
-}
 const tabChatContext = new ChatCoreContext();
 
 export default function App() {
   const [askButtonVisible, setAskButtonVisible] = useState<boolean>(false);
   const [askPanelVisible, setAskPanelVisible] = useState<boolean>(false);
   const targetDom = useRef<HTMLElement>(null);
+  const [pageActionButton, setPageActionButton] = useState<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentCodeSnippnet, setCurrentCodeSnippnet] = useState<string>('');
   const [askPanelQuotes, setAskPanelQuotes] = useState<Promise<QuoteContext>[]>([]);
@@ -110,6 +106,13 @@ export default function App() {
     window.addEventListener('scroll', hideAskButton);
     chrome.runtime.onMessage.addListener(onBackgroundMessage);
 
+    // 为每个站点选择合适的 agent
+    if (PageGithubAgent.isSupport(window.location.href)) {
+      console.log('github 支持', pageActionButton);
+      const e = PageGithubAgent.findActionButtonContainer(document);
+      setPageActionButton(e);
+    }
+
     return () => {
       document.body.removeEventListener('mouseover', handleMouseOver);
       document.body.removeEventListener('selectionchange', handleSelectionChange);
@@ -135,6 +138,17 @@ export default function App() {
 
   return (
     <>
+      {PageGithubAgent.isSupport(window.location.href) &&
+        pageActionButton &&
+        createPortal(
+          <PageGithubReadmeToolDropdown
+            className={''}
+            onItemClick={e => {
+              showChat(e.text);
+            }}
+          />,
+          pageActionButton,
+        )}
       <ChatPopupContext.Provider value={tabChatContext}>
         {askPanelVisible ? (
           <AskPanel
