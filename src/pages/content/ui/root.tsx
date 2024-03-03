@@ -30,6 +30,9 @@ shadowRoot.appendChild(styleElement);
 
 attachTwindStyle(rootIntoShadow, shadowRoot);
 
+// 三方网站会插入一些按钮，对按钮启用 twind 支持
+attachTwindStyle(document.getElementsByTagName('askman-chrome-extension-content-action-button-wrap')[0], document);
+
 /**
  * https://github.com/askman-dev/askman-chrome-extension/pull/174
  *

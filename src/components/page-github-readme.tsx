@@ -12,15 +12,16 @@ export interface PageActionButtonInterface {
 export default function PageGithubReadmeToolDropdown({ className, onItemClick }: ToolDropdownProps) {
   // className = "fixed top-36 w-56 text-right"
   return (
-    <div className={classNames(`mr-1 ${className}`)}>
+    <div className={classNames(`askman-chrome-extension-content-action-button-wrap mr-1 ${className}`)}>
       <button
+        className="text-sm p-1.5 rounded-sm hover:bg-gray-100"
         onClick={() => {
           onItemClick({
             name: '总结',
             text: document.getElementsByTagName('article')[0].innerText,
           });
         }}>
-        总结
+        问那个人
       </button>
     </div>
   );
