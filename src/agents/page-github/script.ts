@@ -1,5 +1,5 @@
-import { BaseAgent } from './base';
-import { QuoteContext } from './quote';
+import { BaseAgent } from '../base';
+import { QuoteContext } from '../quote';
 
 export class PageGithubAgent implements BaseAgent {
   public name = 'PageGithubAgent';

@@ -5,9 +5,11 @@ import AskPanel from '@root/src/components/ask-panel';
 import { CommandType, TabMessage } from '@root/src/types';
 import { QuoteAgent, QuoteContext } from '@root/src/agents/quote';
 import { ChatCoreContext, ChatPopupContext } from '@root/src/chat/chat';
-import { PageGithubAgent } from '@root/src/agents/page.github';
-import PageGithubReadmeToolDropdown from '@src/components/page-github-readme';
+import { PageGithubAgent } from '@root/src/agents/page-github/script';
+import PageGithubReadmeToolDropdown from '@root/src/agents/page-github/component';
 import { createPortal } from 'react-dom';
+import { PageStackoverflowAgent } from '@root/src/agents/page-stackoverflow/script';
+import PageStackoverflowToolDropdown from '@root/src/agents/page-stackoverflow/component';
 
 const ASK_BUTTON_OFFSET_X = 5; // 按钮距离左侧的偏移量
 
@@ -112,6 +114,11 @@ export default function App() {
       const e = PageGithubAgent.findActionButtonContainer(document);
       setPageActionButton(e);
     }
+    if (PageStackoverflowAgent.isSupport(window.location.href)) {
+      console.log('stackoverflow 支持', pageActionButton);
+      const e = PageStackoverflowAgent.findActionButtonContainer(document);
+      setPageActionButton(e);
+    }
 
     return () => {
       document.body.removeEventListener('mouseover', handleMouseOver);
@@ -138,6 +145,17 @@ export default function App() {
 
   return (
     <>
+      {PageStackoverflowAgent.isSupport(window.location.href) &&
+        pageActionButton &&
+        createPortal(
+          <PageStackoverflowToolDropdown
+            className={''}
+            onItemClick={e => {
+              showChat(e.text);
+            }}
+          />,
+          pageActionButton,
+        )}
       {PageGithubAgent.isSupport(window.location.href) &&
         pageActionButton &&
         createPortal(
