@@ -14,7 +14,7 @@ export default function PageStackoverflowToolDropdown({ className, onItemClick }
   return (
     <div
       className={classNames(
-        `flex justify-between items-center  pl-[15px] rounded-md w-full bg-[hsl(43,50%,28%)] border-[hsl(43,50%,39%)] text-left font-medium text-[13px] text-[hsl(210,11%,98%)] border-1 mb-5 ${className}`,
+        `flex justify-between items-center  pl-[15px] rounded-md w-full bg-[hsl(43,50%,28%)] border-solid border-[hsl(43,50%,39%)] text-left font-medium text-[13px] text-[hsl(210,11%,98%)] border-1 mb-5 ${className}`,
       )}>
       <span>问那个人</span>
       <button
