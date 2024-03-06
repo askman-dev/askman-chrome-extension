@@ -15,6 +15,8 @@ export default function inlineVitePreloadScript() {
         const modules = meta.chunks?.[chunkName]?.modules;
         __vitePreload = modules?.[Object.keys(modules)?.[0]]?.code;
         __vitePreload = __vitePreload?.replaceAll('const ', 'var ');
+        __vitePreload = __vitePreload?.replaceAll('assetsURL(dep)', 'chrome.runtime.getURL(assetsURL(dep))');
+
         if (!__vitePreload) {
           return null;
         }
