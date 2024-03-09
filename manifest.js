@@ -16,9 +16,9 @@ const manifest = {
   version: packageJson.version,
   description: '__MSG_extensionDescription__',
   permissions: ['tabs', 'notifications', 'storage', 'sidePanel', 'contextMenus'],
-  side_panel: {
-    default_path: 'src/pages/sidepanel/index.html',
-  },
+  // side_panel: {
+  //   default_path: 'src/pages/sidepanel/index.html',
+  // },
   options_page: 'src/pages/options/index.html',
   background: {
     service_worker: 'src/pages/background/index.js',
@@ -46,7 +46,7 @@ const manifest = {
       js: ['src/pages/contentUI/index.js'],
     },
   ],
-  devtools_page: 'src/pages/devtools/index.html',
+  // devtools_page: 'src/pages/devtools/index.html',
   web_accessible_resources: [
     {
       resources: ['assets/js/*.js', 'assets/css/*.css', 'icon-128.png', 'icon-34.png'],

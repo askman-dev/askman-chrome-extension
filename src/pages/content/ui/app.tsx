@@ -168,6 +168,19 @@ export default function App() {
           pageActionButton,
         )}
       <ChatPopupContext.Provider value={tabChatContext}>
+        {parentRect && (
+          <AskButton
+            visible={true || askButtonVisible}
+            className="fixed"
+            style={{
+              left: parentRect.left + parentRect.width - ASK_BUTTON_OFFSET_X,
+              top: parentRect.top,
+            }}
+            primary
+            onClick={handleAsk}>
+            Ask
+          </AskButton>
+        )}
         {askPanelVisible ? (
           <AskPanel
             visible={askPanelVisible}
@@ -187,20 +200,6 @@ export default function App() {
             }}
           />
         ) : null}
-
-        {parentRect && (
-          <AskButton
-            visible={true || askButtonVisible}
-            className="fixed"
-            style={{
-              left: parentRect.left + parentRect.width - ASK_BUTTON_OFFSET_X,
-              top: parentRect.top,
-            }}
-            primary
-            onClick={handleAsk}>
-            Ask
-          </AskButton>
-        )}
       </ChatPopupContext.Provider>
     </>
   );

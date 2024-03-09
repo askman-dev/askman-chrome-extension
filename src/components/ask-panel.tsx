@@ -127,7 +127,12 @@ function AskPanel(props: AskPanelProps) {
       )}
       {...rest}>
       <div className="font-semibold absolute rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 w-full text-sm px-3 py-2 flex justify-between">
-        <span>Ask That Man</span>
+        <span>
+          Ask That Man{' '}
+          <b className="border-1 border-solid border-slate-300 rounded-md p-0.5 pl-1 pr-1 text-sm">
+            快捷键 Command + I
+          </b>
+        </span>
         <XMarkIcon
           className="w-4 h-4 "
           onClick={() => {
