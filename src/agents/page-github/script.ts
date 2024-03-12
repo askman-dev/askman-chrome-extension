@@ -1,4 +1,4 @@
-import { BaseAgent } from '../base';
+import { ActionButtonHelper, BaseAgent } from '../base';
 import { QuoteContext } from '../quote';
 
 export class PageGithubAgent implements BaseAgent {
@@ -24,9 +24,15 @@ export class PageGithubAgent implements BaseAgent {
       console.log('找不到 readme 按钮');
       return;
     }
+    let wrap;
+    if (editBtn[0].parentElement.getElementsByTagName('askman-chrome-extension-content-action-button-wrap').length) {
+      wrap = editBtn[0].parentElement.getElementsByTagName('askman-chrome-extension-content-action-button-wrap')[0];
+    } else {
+      wrap = ActionButtonHelper.createShadowRoot()
+      editBtn[0].parentElement.insertBefore(wrap, editBtn[0]);
+    }
     console.log('找到 readme 按钮:', editBtn);
 
-    // editBtn[0].parentNode.insertBefore(button, editBtn[0]);
-    return editBtn[0].parentElement;
+    return wrap.shadowRoot.getElementById("shadow-root");;
   }
 }

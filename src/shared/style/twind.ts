@@ -8,6 +8,7 @@ export function attachTwindStyle<T extends { adoptedStyleSheets: unknown }>(
 ) {
   const sheet = cssom(new CSSStyleSheet());
   const tw = twind(config, sheet);
+  // console.info(observedElement, documentOrShadowRoot);
   observe(tw, observedElement);
   documentOrShadowRoot.adoptedStyleSheets = [sheet.target];
 }

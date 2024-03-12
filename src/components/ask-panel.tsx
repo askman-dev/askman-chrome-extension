@@ -122,7 +122,7 @@ function AskPanel(props: AskPanelProps) {
   return (
     <div
       className={classNames(
-        'bg-white fixed border-1 border-solid border-gray-100 drop-shadow-lg text-sm rounded-lg w-[473px] min-w-80 max-w-lg min-h-[155px]',
+        'bg-white text-black fixed border-1 border-solid border-gray-100 drop-shadow-lg text-sm rounded-lg w-[473px] min-w-80 max-w-lg min-h-[155px]',
         `${askPanelVisible ? 'visible' : 'invisible'}`,
       )}
       {...rest}>

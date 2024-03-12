@@ -18,7 +18,7 @@ export default function PageStackoverflowToolDropdown({ className, onItemClick }
       )}>
       <span>问那个人</span>
       <button
-        className="m-2 mr-[15px] ws-nowrap s-btn s-btn__filled"
+        className="m-2 mr-[15px] rounded-lg ws-nowrap p-2 pl-4 pr-4 bg-[#90C4F9] text-black"
         onClick={() => {
           onItemClick({
             name: '总结',

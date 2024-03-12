@@ -1,4 +1,4 @@
-import { BaseAgent } from '../base';
+import { ActionButtonHelper, BaseAgent } from '../base';
 
 export class PageStackoverflowAgent implements BaseAgent {
   public name = 'PageStackoverflowAgent';
@@ -9,11 +9,10 @@ export class PageStackoverflowAgent implements BaseAgent {
   public static findActionButtonContainer(doc): HTMLDivElement | null {
     const side = doc.getElementById('sidebar');
     let wrap;
-    if (side.getElementsByClassName('askman-chrome-extension-content-action-button-wrap').length) {
-      wrap = side.getElementsByClassName('askman-chrome-extension-content-action-button-wrap')[0];
+    if (side && side.getElementsByTagName('askman-chrome-extension-content-action-button-wrap').length) {
+      wrap = side.getElementsByTagName('askman-chrome-extension-content-action-button-wrap')[0];
     } else {
-      wrap = doc.createElement('div');
-      wrap.className = 'askman-chrome-extension-content-action-button-wrap';
+      wrap = ActionButtonHelper.createShadowRoot()
       side.insertBefore(wrap, side.firstChild);
     }
 
@@ -24,6 +23,6 @@ export class PageStackoverflowAgent implements BaseAgent {
     console.log('找到 side:', side);
 
     // editBtn[0].parentNode.insertBefore(button, editBtn[0]);
-    return wrap;
+    return wrap.shadowRoot.getElementById("shadow-root");
   }
 }

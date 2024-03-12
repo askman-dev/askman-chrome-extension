@@ -30,8 +30,22 @@ shadowRoot.appendChild(styleElement);
 
 attachTwindStyle(rootIntoShadow, shadowRoot);
 
-// 三方网站会插入一些按钮，对按钮启用 twind 支持
-attachTwindStyle(document.getElementsByTagName('askman-chrome-extension-content-action-button-wrap')[0], document);
+
+// 会在某些网站插入唤起按钮，对按钮启用 twind 支持
+const observer = new MutationObserver(function(mutationsList){
+    for (const mutation of mutationsList) {
+        if (mutation.type === "childList") {
+            for (const node of mutation.addedNodes) {
+                if (node instanceof Element && node.tagName === "ASKMAN-CHROME-EXTENSION-CONTENT-ACTION-BUTTON-WRAP"){
+                    attachTwindStyle(node.shadowRoot.getElementById('shadow-root'), node.shadowRoot);
+                }
+
+            }
+        } 
+    }
+});
+observer.observe(document, { childList: true, subtree: true })
+
 
 /**
  * https://github.com/askman-dev/askman-chrome-extension/pull/174
