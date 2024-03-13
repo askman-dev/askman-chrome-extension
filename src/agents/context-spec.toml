@@ -1,0 +1,20 @@
+[chat]
+input = ""
+language = ""
+
+[page]
+selection = ""
+title = ""
+url = ""
+content = ""
+
+[stackoverflow]
+question = ""
+
+[clipboard]
+text = ""
+
+[[browser.history]]
+title = ""
+url = ""
+lastVisitTime = 0

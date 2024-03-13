@@ -38,6 +38,7 @@
     "react-dom": "18.2.0",
     "react-highlight": "^0.15.0",
     "react-textarea-autosize": "^8.5.3",
+    "smol-toml": "^1.1.4",
     "webextension-polyfill": "0.10.0"
   },
   "devDependencies": {

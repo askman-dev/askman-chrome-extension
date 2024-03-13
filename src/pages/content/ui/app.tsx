@@ -97,7 +97,8 @@ export default function App() {
         return;
       }
       console.log('收到后台消息 ', message);
-      showChat();
+      const selection = document.getSelection()?.toString();
+      showChat(selection);
       return;
     }
   };
