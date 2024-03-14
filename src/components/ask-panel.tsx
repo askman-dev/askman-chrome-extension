@@ -186,6 +186,10 @@ function AskPanel(props: AskPanelProps) {
             onKeyDown={e => {
               // console.log('onKeyDown', e.key);
               if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+                if (e.nativeEvent instanceof InputEvent && e.nativeEvent.isComposing) {
+                  return;
+                }
+
                 onSend();
                 e.preventDefault();
               }

@@ -1,5 +1,6 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
+import { ViteToml } from 'vite-plugin-toml';
 import react from '@vitejs/plugin-react';
 import path, { resolve } from 'path';
 import makeManifest from './utils/plugins/make-manifest';
@@ -32,6 +33,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    ViteToml(),
     makeManifest({
       getCacheInvalidationKey,
     }),

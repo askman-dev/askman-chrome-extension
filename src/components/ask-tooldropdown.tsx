@@ -2,6 +2,8 @@ import { Menu, Transition } from '@headlessui/react';
 import { useEffect, useState, Fragment, forwardRef } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
+import test from '@assets/conf/default-tools.toml';
+console.log('content from default-tools.toml', test);
 interface ToolDropdownProps {
   className: string;
   onItemClick: (tool: ToolsPromptInterface) => void;
