@@ -66,7 +66,7 @@ export class ChatCoreContext implements ChatCoreInterface {
       })
       .filter(p => p);
     if (quotesPrompts.length) {
-      prompt = 'Quotes:\n' + quotesPrompts.join('\n') + '\n';
+      prompt = '' + quotesPrompts.join('\n') + '\n';
     }
     if (userPrompt) {
       prompt += userPrompt;
@@ -154,7 +154,7 @@ export class ChatCoreContext implements ChatCoreInterface {
     ---`);
   }
   async testAskWithQuotes(quotes: QuoteContext[], userPrompt: null | string) {
-    let prompt = 'Quotes:\n';
+    let prompt = '';
     quotes.forEach(quote => {
       if (quote.pageTitle && quote.pageUrl && quote.selection) {
         prompt += `* \`${quote.selection}\` from [${quote.pageTitle}](${quote.pageUrl})\n`;

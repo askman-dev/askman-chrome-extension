@@ -38,7 +38,7 @@ export const myObject = {
 ---`);
   },
   askWithQuotes: async (quotes: QuoteContext[], userPrompt: null | string) => {
-    let prompt = 'Quotes:\n';
+    let prompt = '';
     quotes.forEach(quote => {
       if (quote.pageTitle && quote.pageUrl && quote.selection) {
         prompt += `* \`${quote.selection}\` from [${quote.pageTitle}](${quote.pageUrl})\n`;

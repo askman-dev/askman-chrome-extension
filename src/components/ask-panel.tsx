@@ -186,7 +186,8 @@ function AskPanel(props: AskPanelProps) {
             onKeyDown={e => {
               // console.log('onKeyDown', e.key);
               if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
-                if (e.nativeEvent instanceof InputEvent && e.nativeEvent.isComposing) {
+                if (e.nativeEvent instanceof KeyboardEvent && e.nativeEvent.isComposing) {
+                  e.preventDefault();
                   return;
                 }
 
