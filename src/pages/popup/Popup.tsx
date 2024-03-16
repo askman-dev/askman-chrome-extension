@@ -18,23 +18,23 @@ const Popup = () => {
       <header className="App-header" style={{ color: theme === 'light' ? '#000' : '#fff' }}>
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/pages/popup/Popup.tsx</code> and save to reload.
+          请先打开一个页面，如{' '}
+          <a href="https://github.com" target="_blank" rel="noreferrer">
+            github.com
+          </a>{' '}
+          <br />
+          1. 使用 Command + I 激活 Ask Man. <br />
+          2. 或在右键菜单中选择 <span>「Ask That Man」</span>
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: theme === 'light' && '#0281dc', marginBottom: '10px' }}>
-          Learn React!
-        </a>
         <button
           style={{
             backgroundColor: theme === 'light' ? '#fff' : '#000',
             color: theme === 'light' ? '#000' : '#fff',
+            border: '1px solid #000',
+            borderRadius: '4px',
           }}
           onClick={exampleThemeStorage.toggle}>
-          Toggle theme
+          试一试
         </button>
       </header>
     </div>
