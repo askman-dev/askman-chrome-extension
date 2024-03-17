@@ -122,26 +122,28 @@ function AskPanel(props: AskPanelProps) {
   return (
     <div
       className={classNames(
-        'bg-white text-black fixed border-1 border-solid border-gray-100 drop-shadow-lg text-sm rounded-lg w-[473px] min-w-80 max-w-lg min-h-[155px]',
+        'bg-white text-black fixed border-1 border-solid border-gray-200 drop-shadow-lg text-sm rounded-lg w-[473px] min-w-80 max-w-lg min-h-[155px] p-4',
         `${askPanelVisible ? 'visible' : 'invisible'}`,
       )}
       {...rest}>
-      <div className="font-semibold absolute rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 w-full text-sm px-3 py-2 flex justify-between">
+      <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between">
         <span>
           Ask That Man{' '}
-          <b className="border-1 border-solid border-slate-300 rounded-md p-0.5 pl-1 pr-1 text-sm">
-            快捷键 Command + I
-          </b>
+          <b className="bg-gray-100 rounded-md py-1 px-2 text-sm text-black text-opacity-50">快捷键 Command + I</b>
         </span>
-        <XMarkIcon
-          className="w-4 h-4 "
-          onClick={() => {
-            setAskPanelVisible(false);
-            onHide();
-          }}
-        />
+
+        <div className="grow"></div>
+        <span className="bg-gray-100 rounded-full p-1">
+          <XMarkIcon
+            className="w-4 h-4 text-gray-600 cursor-pointer"
+            onClick={() => {
+              setAskPanelVisible(false);
+              onHide();
+            }}
+          />
+        </span>
       </div>
-      <div className="px-3 py-10 max-h-80 overflow-x-hidden overflow-y-auto mb-2">
+      <div className="py-2 max-h-80 overflow-x-hidden overflow-y-auto mb-2">
         {history.map((message, index) => (
           <AskMessage
             key={index}
@@ -151,11 +153,11 @@ function AskPanel(props: AskPanelProps) {
         ))}
       </div>
 
-      <div className="user-tools relative w-full bg-cover pb-2 bg-[50%_50%]">
+      <div className="user-tools relative w-full bg-cover bg-[50%_50%]">
         {userTools && (
           <div className="w-full relative flex-col justify-start items-start inline-flex text-left px-2 pb-2">
             <button
-              className="bg-black text-white rounded-md py-0.5 px-2 border-solid border-1 text-xs"
+              className="bg-black text-white rounded-md py-0.5 px-2 cursor-pointer border-solid border-1 text-xs"
               title="点击删除"
               onClick={() => {
                 setUserTools(null);
@@ -166,7 +168,7 @@ function AskPanel(props: AskPanelProps) {
         )}
 
         {initQuotes.length > 0 && (
-          <div className="quotes w-full relative flex-col justify-start items-start inline-flex text-left px-2 pb-3">
+          <div className="quotes w-full relative flex-col justify-start items-start inline-flex text-left pb-3">
             {initQuotes.map((quote, index) => (
               <div className="border-l border-black w-full" key={index + '-' + quote}>
                 <div className="text-black text-xs font-normal px-2 overflow-hidden whitespace-nowrap text-ellipsis max-h-[2.25rem] leading-[1.125rem] line-clamp-2">
@@ -177,7 +179,7 @@ function AskPanel(props: AskPanelProps) {
           </div>
         )}
 
-        <div className="w-full overflow-hidden pl-2 pr-2 mb-2">
+        <div className="w-full overflow-hidden pr-2 mb-2">
           <TextareaAutosize
             ref={inputRef}
             maxRows={5}
@@ -204,8 +206,7 @@ function AskPanel(props: AskPanelProps) {
             value={userInput}
             placeholder="请输入问题或要求"></TextareaAutosize>
         </div>
-        <div className="w-full h-34 px-2 flex">
-          <div className="grow"></div>
+        <div className="w-full h-34 flex">
           <ToolDropdown
             className="right-[100px] mt-[1px] text-right"
             onItemClick={item => {
@@ -224,6 +225,7 @@ function AskPanel(props: AskPanelProps) {
             }}>
             发送
           </AskButton>
+          <div className="grow"></div>
         </div>
       </div>
     </div>
