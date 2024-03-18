@@ -122,14 +122,16 @@ function AskPanel(props: AskPanelProps) {
   return (
     <div
       className={classNames(
-        'bg-white text-black fixed border-1 border-solid border-gray-200 drop-shadow-lg text-sm rounded-lg w-[473px] min-w-80 max-w-lg min-h-[155px] p-4',
+        'bg-white text-black text-left fixed border-1 border-solid border-gray-200 drop-shadow-lg text-sm rounded-lg w-[473px] min-w-80 max-w-lg min-h-[155px] p-4',
         `${askPanelVisible ? 'visible' : 'invisible'}`,
       )}
       {...rest}>
       <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between">
         <span>
           Ask That Man{' '}
-          <b className="bg-gray-100 rounded-md py-1 px-2 text-sm text-black text-opacity-50">快捷键 Command + I</b>
+          <b className="bg-gray-100 rounded-md py-1 px-2 font-medium text-sm text-black text-opacity-50">
+            快捷键 Command + I
+          </b>
         </span>
 
         <div className="grow"></div>

@@ -28,9 +28,9 @@ export class ChatCoreContext implements ChatCoreInterface {
     this.history.push(
       new HumanMessage({
         content: `你是 问那个人，你需要帮助用户解决问题.你需要遵循以下指导:
-        1. 使用中文回答
-        2. 用户的 Quote 需要你关注，但并不要求一定用到
-        3. 用户的问题回跟在 UserPrompt 后面`,
+1. 使用中文回答
+2. 用户的 Quote 需要你关注，但并不要求一定用到
+3. 用户的问题回跟在 UserPrompt 后面`,
         name: 'human',
       }),
     );
