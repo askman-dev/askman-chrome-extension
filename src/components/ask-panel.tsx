@@ -37,9 +37,9 @@ function AskPanel(props: AskPanelProps) {
   const [userInput, setUserInput] = useState<string>('');
   const [askPanelVisible, setAskPanelVisible] = useState<boolean>(visible);
   //TODO 需要定义一个可渲染、可序列号的类型，疑似是 StoredMessage
-  const [history, setHistory] = useState<{ name: string; type: string; text: string }[]>([]);
+  const [history, setHistory] = useState<{ id: string; name: string; type: string; text: string }[]>([]);
   const [initQuotes, setInitQuotes] = useState<Array<QuoteContext>>([]);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [userTools, setUserTools] = useState<ToolsPromptInterface>();
 
   // chat list ref
@@ -64,13 +64,14 @@ function AskPanel(props: AskPanelProps) {
     // console.log('chatContext.history = ' + JSON.stringify(chatContext.history));
     function rerenderHistory() {
       setHistory(
-        chatContext.history.map(message => {
+        chatContext.history.map((message, idx) => {
           if (typeof message.content == 'string') {
-            return { type: 'text', text: message.content, name: message.name };
+            return { type: 'text', id: `history-${idx}`, text: message.content, name: message.name };
           } else if (message.content instanceof Array) {
             //TODO 怎么约束 message 是 MessageContentComplex[] 类型？
             return {
               type: 'text',
+              id: `history-${idx}`,
               name: message.name,
               text: message.content.reduce((acc, cur) => {
                 if (cur.type == 'text') {
@@ -146,10 +147,10 @@ function AskPanel(props: AskPanelProps) {
         </span>
       </div>
       <div className="py-2 max-h-80 overflow-x-hidden overflow-y-auto mb-2">
-        {history.map((message, index) => (
+        {history.map(message => (
           <AskMessage
-            key={index}
-            // key={message.id}
+            // key={index}
+            key={message.id}
             {...message}
           />
         ))}

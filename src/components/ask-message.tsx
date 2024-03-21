@@ -13,6 +13,44 @@ interface AskMessageItem {
   name?: string;
 }
 
+const TextWithLineBreaks = text => {
+  let quoteStart = false;
+  let quoteText = '';
+  console.log('text', text, 'lines', text.split('\n'));
+  // 先解决 quote 的格式
+
+  return (
+    <div>
+      {text.split('\n').map(line => {
+        if (!quoteStart && line.startsWith('> [!QUOTE')) {
+          quoteStart = true;
+          return;
+        }
+        if (quoteStart && !quoteText) {
+          quoteText = '引用 ' + line.replace('> ', '');
+          return (
+            <b key={line}>
+              {quoteText}
+              <br />
+            </b>
+          );
+        }
+        if (quoteStart && line.startsWith('>')) {
+          return;
+        } else {
+          quoteStart = false;
+        }
+        console.log('quoteEnd, line content is ', line);
+        return (
+          <span key={line}>
+            {line}
+            <br />
+          </span>
+        );
+      })}
+    </div>
+  );
+};
 function AskMessage(props: AskMessageItem) {
   const { type, text, name } = props;
   let messageItem = <div>{text}</div>;
@@ -20,7 +58,7 @@ function AskMessage(props: AskMessageItem) {
   // 根据不同的类型，渲染不同的内容
   switch (type) {
     case AskMessageType.TEXT:
-      messageItem = <>{text}</>;
+      messageItem = <>{TextWithLineBreaks(text)}</>;
       break;
     case AskMessageType.CODE:
       messageItem = <AskCode code={text} />;

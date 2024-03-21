@@ -25,3 +25,8 @@ export interface TabMessage {
   linkText?: string; // 被点击的链接文本
   linkUrl?: string; // 被点击的链接URL
 }
+
+export interface PromptTool {
+  name: string;
+  hbs: string;
+}

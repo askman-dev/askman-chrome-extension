@@ -2,10 +2,10 @@
 name = "解释"
 hbs = """
 {{#if page.selection}}
-请用 ${chat.language} 解释: ${page.selection}
-${chat.input}
+请用 {{chat.language}} 解释: {{page.selection}}
+{{chat.input}}
 {{^}}
-请用 ${chat.language} 解释: ${chat.input}
+请用 {{chat.language}} 解释: {{chat.input}}
 {{/if}}
 """
 
@@ -13,10 +13,10 @@ ${chat.input}
 name = "解释代码"
 hbs = """
 {{#if page.selection}}
-请用 ${chat.language} 解释这段代码: ${page.selection}
-${chat.input}
+请用 {{chat.language}} 解释这段代码: {{page.selection}}
+{{chat.input}}
 {{^}}
-请用 ${chat.language} 解释这段代码: ${chat.input}
+请用 {{chat.language}} 解释这段代码: {{chat.input}}
 {{/if}}
 """
 
@@ -24,10 +24,10 @@ ${chat.input}
 name = "总结"
 hbs = """
 {{#if page.selection}}
-请用 ${chat.language} 总结: ${page.selection}
-${chat.input}
+请用 {{chat.language}} 总结: {{page.selection}}
+{{chat.input}}
 {{^}}
-请用 ${chat.language} 总结: ${chat.input}
+请用 {{chat.language}} 总结: {{chat.input}}
 {{/if}}
 """
 
@@ -35,10 +35,10 @@ ${chat.input}
 name = "回答"
 hbs = """
 {{#if page.selection}}
-请用 ${chat.language} 回答: ${page.selection}
-${chat.input}
+请用 {{chat.language}} 回答: {{page.selection}}
+{{chat.input}}
 {{^}}
-请用 ${chat.language} 回答: ${chat.input}
+请用 {{chat.language}} 回答: {{chat.input}}
 {{/if}}
 """
 
@@ -46,10 +46,10 @@ ${chat.input}
 name = "翻译为中文"
 hbs = """
 {{#if page.selection}}
-请翻译成中文: ${page.selection}
-${chat.input}
+请翻译成中文: {{page.selection}}
+{{chat.input}}
 {{^}}
-请翻译成中文: ${chat.input}
+请翻译成中文: {{chat.input}}
 {{/if}}
 """
 
@@ -57,10 +57,10 @@ ${chat.input}
 name = "翻译为英文"
 hbs = """
 {{#if page.selection}}
-请翻译成英文: ${page.selection}
-${chat.input}
+请翻译成英文: {{page.selection}}
+{{chat.input}}
 {{^}}
-请翻译成英文: ${chat.input}
+请翻译成英文: {{chat.input}}
 {{/if}}
 """
 
@@ -68,10 +68,10 @@ ${chat.input}
 name = "代码加注释"
 hbs = """
 {{#if page.selection}}
-请给代码添加 ${chat.language} 注释: ${page.selection}
-${chat.input}
+请给代码添加 {{chat.language}} 注释: {{page.selection}}
+{{chat.input}}
 {{^}}
-请给代码添加 ${chat.language} 注释: ${chat.input}
+请给代码添加 {{chat.language}} 注释: {{chat.input}}
 {{/if}}
 """
 

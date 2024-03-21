@@ -1,9 +1,9 @@
 import { Menu, Transition } from '@headlessui/react';
-import { useEffect, useState, Fragment, forwardRef } from 'react';
+import { useEffect, useState, Fragment, forwardRef , Ref } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
-import test from '@assets/conf/default-tools.toml';
-console.log('content from default-tools.toml', test);
+import defaultTools from '@assets/conf/default-tools.toml';
+import Handlebars, { TemplateDelegate } from 'kbn-handlebars';
 interface ToolDropdownProps {
   className: string;
   onItemClick: (tool: ToolsPromptInterface) => void;
@@ -11,10 +11,10 @@ interface ToolDropdownProps {
 
 export interface ToolsPromptInterface {
   name: string;
-  template: string;
+  template: TemplateDelegate;
 }
 
-const CustomToolButton = forwardRef(function (props: { onClick: (e) => void }, ref) {
+const CustomToolButton = forwardRef(function (props: { onClick: (e) => void }, ref: Ref<HTMLButtonElement>) {
   return (
     <button
       className="inline-flex w-full justify-center rounded-md border-black border-1 border-solid bg-white px-2 py-1 text-xs font-medium text-black hover:bg-black/5 focus:outline-none"
@@ -25,36 +25,18 @@ const CustomToolButton = forwardRef(function (props: { onClick: (e) => void }, r
 });
 CustomToolButton.displayName = 'CustomToolButton';
 
-const Tools: ToolsPromptInterface[] = [
-  {
-    name: '解释',
-    template: '请用 中文 解释: ${INPUT}',
-  },
-  {
-    name: '解释代码',
-    template: '请用 中文 解释这段代码: ${INPUT}',
-  },
-  {
-    name: '翻译为中文',
-    template: '请翻译成中文: ${INPUT}',
-  },
-  {
-    name: '翻译为英文',
-    template: '请翻译成英文: ${INPUT}',
-  },
-  {
-    name: '总结',
-    template: '请用 中文 总结: ${INPUT}',
-  },
-  {
-    name: '回答',
-    template: '请用 中文 回答这个问题: ${INPUT}',
-  },
-  {
-    name: '代码加注释',
-    template: '请给代码添加 中文 注释: ${INPUT}',
-  },
-];
+const tools: ToolsPromptInterface[] = [];
+
+for (const k in defaultTools) {
+  try {
+    tools.push({
+      name: defaultTools[k].name,
+      template: Handlebars.compileAST(defaultTools[k].hbs),
+    });
+  } catch (e) {
+    console.error('Cannot parse default tools', e);
+  }
+}
 
 export default function ToolDropdown({ className, onItemClick }: ToolDropdownProps) {
   // className = "fixed top-36 w-56 text-right"
@@ -96,7 +78,7 @@ export default function ToolDropdown({ className, onItemClick }: ToolDropdownPro
             className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
             static>
             <div className="px-1 py-1 ">
-              {Tools.map(tool => (
+              {tools.map(tool => (
                 <Menu.Item key={tool.name}>
                   {({ active }) => (
                     <button

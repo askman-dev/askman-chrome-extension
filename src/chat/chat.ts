@@ -1,6 +1,4 @@
 import { ChatOpenAI } from '@langchain/openai';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { StringOutputParser } from '@langchain/core/output_parsers';
 import { QuoteAgent, QuoteContext } from '../agents/quote';
 import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
 import { createContext } from 'react';
@@ -90,19 +88,39 @@ export class ChatCoreContext implements ChatCoreInterface {
     let prompt = '';
     const quotesPrompts = quotes
       .map(quote => {
+        if (quote.type == 'selection') return null;
         return QuoteAgent.formatQuote(quote);
       })
       .filter(p => p);
-    if (quotesPrompts.length) {
-      prompt = quotesPrompts.join('\n') + '\n';
-    }
-    if (userPrompt) {
-      prompt += userPrompt;
-    }
+    // if (quotesPrompts.length) {
+    //   prompt = quotesPrompts.join('\n') + '\n';
+    // }
+    // if (userPrompt) {
+    //   prompt += userPrompt;
+    // }
 
-    if (tool.template.indexOf('${INPUT}') > -1) {
-      prompt = tool.template.replace('${INPUT}', prompt);
-    }
+    const context = {
+      //TODO 这里 quote 和 selection 有重复定义的问题，需要解决
+      quotes: quotesPrompts,
+      page: {
+        pageUrl: '',
+        pageTitle: '',
+        selection: '',
+      },
+      chat: {
+        language: 'zh',
+        input: userPrompt,
+      },
+    };
+    quotes.forEach(quote => {
+      //TODO 只保留最后一个，有什么问题呢？
+      if (quote.selection) {
+        context.page.selection = quote.selection;
+      }
+    });
+
+    prompt = tool.template(context);
+    // prompt = nunjucks.renderString(tool.template, context);
 
     this.history.push(new HumanMessage({ content: prompt, name: 'human' }));
     this._onDataListener && setTimeout(() => this._onDataListener(this.history));
@@ -129,44 +147,6 @@ export class ChatCoreContext implements ChatCoreInterface {
 
       this._onDataListener && setTimeout(() => this._onDataListener(this.history));
     }
-  }
-  async test(userPrompt: string) {
-    const prompt = ChatPromptTemplate.fromMessages([
-      [
-        'human',
-        `你是 问那个人，你需要帮助用户解决问题.你需要遵循以下指导:
-          1. 使用中文回答
-          2. 用户的 Quote 需要你关注，但并不要求一定用到
-          3. 用户的问题回跟在 UserPrompt 后面`,
-      ],
-      ['ai', '遵命，无论如何我都会帮助你'],
-      ['human', '{topic}'],
-    ]);
-    const outputParser = new StringOutputParser();
-
-    const chain = prompt.pipe(this.model).pipe(outputParser);
-    const response = await chain.invoke({
-      topic: userPrompt,
-    });
-    console.log(`> ${userPrompt}
-    
-    < ${response}
-    ---`);
-  }
-  async testAskWithQuotes(quotes: QuoteContext[], userPrompt: null | string) {
-    let prompt = '';
-    quotes.forEach(quote => {
-      if (quote.pageTitle && quote.pageUrl && quote.selection) {
-        prompt += `* \`${quote.selection}\` from [${quote.pageTitle}](${quote.pageUrl})\n`;
-      } else {
-        prompt += `* ${quote.selection}\n`;
-      }
-    });
-    if (userPrompt) {
-      prompt += 'User Prompt:\n' + userPrompt;
-    }
-
-    this.test(prompt);
   }
   setOnDataListener(callback: (data: BaseMessage[]) => void) {
     this._onDataListener = callback;
