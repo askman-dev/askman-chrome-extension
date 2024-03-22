@@ -8,10 +8,8 @@ export interface ChatCoreInterface {
   model: ChatOpenAI;
   history: BaseMessage[];
   init();
-  test(userPrompt: string);
   askWithQuotes(quotes: QuoteContext[], userPrompt: null | string);
   askWithTool(tool: ToolsPromptInterface, quotes: QuoteContext[], userPrompt: null | string);
-  testAskWithQuotes(quotes: QuoteContext[], userPrompt: null | string);
   setOnDataListener(callback: (data: BaseMessage[]) => void);
   removeOnDataListener();
 }
@@ -120,6 +118,7 @@ export class ChatCoreContext implements ChatCoreInterface {
     });
 
     prompt = tool.template(context);
+    prompt = prompt.trim();
     // prompt = nunjucks.renderString(tool.template, context);
 
     this.history.push(new HumanMessage({ content: prompt, name: 'human' }));
@@ -127,7 +126,7 @@ export class ChatCoreContext implements ChatCoreInterface {
     return this.stream(this.history);
   }
   async stream(history) {
-    console.log('start stream ', new Date());
+    // console.log('start stream ', new Date());
     if (this._onDataListener == null) {
       console.warn('no this._onDataListener');
     }
@@ -136,7 +135,7 @@ export class ChatCoreContext implements ChatCoreInterface {
     this._onDataListener && setTimeout(() => this._onDataListener(this.history));
     const stream = await this.model.stream(history);
     // 这里会等一小会
-    console.log('start stream 2 ', new Date());
+    // console.log('start stream 2 ', new Date());
     const chunks = [];
     for await (const chunk of stream) {
       chunks.push(chunk);

@@ -16,12 +16,12 @@ interface AskMessageItem {
 const TextWithLineBreaks = text => {
   let quoteStart = false;
   let quoteText = '';
-  console.log('text', text, 'lines', text.split('\n'));
+  // console.log('text', text, 'lines', text.split('\n'));
   // 先解决 quote 的格式
 
   return (
     <div>
-      {text.split('\n').map(line => {
+      {text.split('\n').map((line, idx) => {
         if (!quoteStart && line.startsWith('> [!QUOTE')) {
           quoteStart = true;
           return;
@@ -29,7 +29,7 @@ const TextWithLineBreaks = text => {
         if (quoteStart && !quoteText) {
           quoteText = '引用 ' + line.replace('> ', '');
           return (
-            <b key={line}>
+            <b key={`${idx}-${line}`}>
               {quoteText}
               <br />
             </b>
@@ -40,9 +40,9 @@ const TextWithLineBreaks = text => {
         } else {
           quoteStart = false;
         }
-        console.log('quoteEnd, line content is ', line);
+        // console.log('quoteEnd, line content is ', line);
         return (
-          <span key={line}>
+          <span key={`${idx}-${line}`}>
             {line}
             <br />
           </span>

@@ -8,7 +8,7 @@
     "url": "https://github.com/askman-dev/askman-chrome-extension.git"
   },
   "scripts": {
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --project tsconfig.json --noEmit && vite build",
     "build:firefox": "tsc --noEmit && cross-env __FIREFOX__=true vite build",
     "build:watch": "cross-env __DEV__=true vite build -w --mode development",
     "build:firefox:watch": "cross-env __DEV__=true __FIREFOX__=true vite build -w --mode development",
@@ -33,6 +33,7 @@
     "ahooks": "^3.7.9",
     "classnames": "^2.5.1",
     "construct-style-sheets-polyfill": "3.1.0",
+    "handlebars": "^4.7.8",
     "highlight.js": "^11.9.0",
     "kbn-handlebars": "^1.0.0",
     "react": "18.2.0",
