@@ -3,6 +3,8 @@ import { QuoteAgent, QuoteContext } from '../agents/quote';
 import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
 import { createContext } from 'react';
 import { ToolsPromptInterface } from '../components/ask-tooldropdown';
+import chatPresets from '@assets/conf/chat-presets.toml';
+import { AIInvisibleMessage, HumanInvisibleMessage } from '../types';
 
 export interface ChatCoreInterface {
   model: ChatOpenAI;
@@ -22,15 +24,12 @@ export class ChatCoreContext implements ChatCoreInterface {
     this.history = [];
     this.history.length = 0;
     this.history.push(
-      new HumanMessage({
-        content: `你是 问那个人，你需要帮助用户解决问题.你需要遵循以下指导:
-1. 使用中文回答
-2. 用户的 Quote 需要你关注，但并不要求一定用到
-3. 用户的问题回跟在 UserPrompt 后面`,
+      new HumanInvisibleMessage({
+        content: chatPresets['system-init']['human'],
         name: 'human',
       }),
     );
-    this.history.push(new AIMessage({ content: `遵命，无论如何我都会帮助你`, name: 'ai' }));
+    this.history.push(new AIInvisibleMessage({ content: chatPresets['system-init']['ai'], name: 'ai' }));
     // this.history.push(new HumanMessage({content: 'Quotes: * ` 404. That’s an error. The requested URL /not+found was not found on this server. That’s all we know.` from [Error 404 (Not Found)!!1](https://google.com/not+found)', name: "human"}));
     // this.history.push(new AIMessage({content: "遵命，无论如何我都会帮助你", name: "ai"}));
     // this.history.push(new HumanMessage("fff"))

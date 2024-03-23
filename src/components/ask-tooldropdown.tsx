@@ -1,5 +1,5 @@
 import { Menu, Transition } from '@headlessui/react';
-import { useEffect, useState, Fragment, forwardRef , Ref } from 'react';
+import { useEffect, useState, Fragment, forwardRef, Ref } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import defaultTools from '@assets/conf/default-tools.toml';
@@ -56,7 +56,7 @@ export default function ToolDropdown({ className, onItemClick }: ToolDropdownPro
       <Menu as="div" className="relative" onMouseOver={() => setOpen(true)}>
         <div>
           <Menu.Button
-            className="inline-flex w-full justify-center rounded-md border-black border-1 border-solid bg-white px-2 py-1 text-xs font-medium text-black hover:bg-black/30 focus:outline-none"
+            className="inline-flex w-full justify-center rounded-md border-black border-1 border-solid bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
             onClick={e => {
               setOpen(!open);
               e.stopPropagation();

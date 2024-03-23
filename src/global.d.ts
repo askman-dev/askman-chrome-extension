@@ -33,3 +33,8 @@ declare module '*/default-tools.toml' {
   const content: { name: string; hbs: string }[];
   export default content;
 }
+
+declare module '*/chat-presets.toml' {
+  const content: { human: string; ai: string }[];
+  export default content;
+}

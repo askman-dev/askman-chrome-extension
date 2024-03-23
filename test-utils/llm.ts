@@ -1,7 +1,7 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { QuoteContext } from './quote';
+import { QuoteContext } from '../src/agents/quote';
 
 const model = new ChatOpenAI({
   temperature: 0.2,

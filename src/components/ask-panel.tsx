@@ -8,6 +8,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 import AskMessage from './ask-message';
 import AskButton from './ask-button';
+import { AIInvisibleMessage, HumanInvisibleMessage } from '../types';
 
 interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -64,27 +65,29 @@ function AskPanel(props: AskPanelProps) {
     // console.log('chatContext.history = ' + JSON.stringify(chatContext.history));
     function rerenderHistory() {
       setHistory(
-        chatContext.history.map((message, idx) => {
-          if (typeof message.content == 'string') {
-            return { type: 'text', id: `history-${idx}`, text: message.content, name: message.name };
-          } else if (message.content instanceof Array) {
-            //TODO 怎么约束 message 是 MessageContentComplex[] 类型？
-            return {
-              type: 'text',
-              id: `history-${idx}`,
-              name: message.name,
-              text: message.content.reduce((acc, cur) => {
-                if (cur.type == 'text') {
-                  return acc + '\n' + cur.text;
-                } else if (cur.type == 'image_url') {
-                  return acc + '\n' + cur.image_url;
-                } else {
-                  return acc + '\n<unknown>';
-                }
-              }, ''),
-            };
-          }
-        }),
+        chatContext.history
+          .filter(message => !(message instanceof HumanInvisibleMessage || message instanceof AIInvisibleMessage))
+          .map((message, idx) => {
+            if (typeof message.content == 'string') {
+              return { type: 'text', id: `history-${idx}`, text: message.content, name: message.name };
+            } else if (message.content instanceof Array) {
+              //TODO 怎么约束 message 是 MessageContentComplex[] 类型？
+              return {
+                type: 'text',
+                id: `history-${idx}`,
+                name: message.name,
+                text: message.content.reduce((acc, cur) => {
+                  if (cur.type == 'text') {
+                    return acc + '\n' + cur.text;
+                  } else if (cur.type == 'image_url') {
+                    return acc + '\n' + cur.image_url;
+                  } else {
+                    return acc + '\n<unknown>';
+                  }
+                }, ''),
+              };
+            }
+          }),
       );
     }
 
@@ -136,15 +139,14 @@ function AskPanel(props: AskPanelProps) {
         </span>
 
         <div className="grow"></div>
-        <span className="bg-gray-100 rounded-full p-1">
-          <XMarkIcon
-            className="w-4 h-4 text-gray-600 cursor-pointer"
-            onClick={() => {
-              setAskPanelVisible(false);
-              onHide();
-            }}
-          />
-        </span>
+        <button
+          className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white"
+          onClick={() => {
+            setAskPanelVisible(false);
+            onHide();
+          }}>
+          <XMarkIcon className="w-4 h-4 cursor-pointer" />
+        </button>
       </div>
       <div className="py-2 max-h-80 overflow-x-hidden overflow-y-auto mb-2">
         {history.map(message => (
@@ -158,7 +160,7 @@ function AskPanel(props: AskPanelProps) {
 
       <div className="user-tools relative w-full bg-cover bg-[50%_50%]">
         {userTools && (
-          <div className="w-full relative flex-col justify-start items-start inline-flex text-left px-2 pb-2">
+          <div className="w-full relative flex-col justify-start items-start inline-flex text-left pb-2">
             <button
               className="bg-black text-white rounded-md py-0.5 px-2 cursor-pointer border-solid border-1 text-xs"
               title="点击删除"
@@ -187,7 +189,8 @@ function AskPanel(props: AskPanelProps) {
             ref={inputRef}
             maxRows={5}
             minRows={1}
-            className="rounded border-solid border-1 border-gray outline-none rounded-md text-gray-800 text-sm w-full font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none"
+            className="rounded border-solid border-1 border-gray outline-none rounded-md text-gray-800 text-sm w-full font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none 
+              focus:border-black focus:shadow-md"
             onKeyDown={e => {
               // console.log('onKeyDown', e.key);
               if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {

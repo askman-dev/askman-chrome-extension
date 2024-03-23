@@ -1,3 +1,13 @@
+import { HumanMessage } from '@langchain/core/messages';
+
+export class HumanInvisibleMessage extends HumanMessage {
+  isVisible = false;
+}
+
+export class AIInvisibleMessage extends HumanMessage {
+  isVisible = false;
+}
+
 export interface AgentContext {
   selection?: string;
   pageUrl?: string;
