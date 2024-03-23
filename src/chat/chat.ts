@@ -130,6 +130,7 @@ export class ChatCoreContext implements ChatCoreInterface {
       console.warn('no this._onDataListener');
     }
     const pendingResponse = new AIMessage({ content: '正在思考...', name: 'ai' });
+    let hasResponse = false;
     setTimeout(() => this.history.push(pendingResponse));
     this._onDataListener && setTimeout(() => this._onDataListener(this.history));
     const stream = await this.model.stream(history);
@@ -139,10 +140,16 @@ export class ChatCoreContext implements ChatCoreInterface {
     for await (const chunk of stream) {
       chunks.push(chunk);
       // console.log(`${chunk.content}|`, new Date());
-      pendingResponse.content = chunks.reduce((acc, cur) => {
+      const content = chunks.reduce((acc, cur) => {
         return acc + cur.content;
       }, '');
-
+      if (content.trim() == '') continue;
+      pendingResponse.content = content;
+      hasResponse = true;
+      this._onDataListener && setTimeout(() => this._onDataListener(this.history));
+    }
+    if (!hasResponse) {
+      pendingResponse.content = '(无返回内容或返回空格)';
       this._onDataListener && setTimeout(() => this._onDataListener(this.history));
     }
   }

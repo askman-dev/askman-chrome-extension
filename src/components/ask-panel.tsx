@@ -112,9 +112,9 @@ function AskPanel(props: AskPanelProps) {
 
   function onSend() {
     if (userTools) {
-      chatContext.askWithTool(userTools, initQuotes, userInput);
+      chatContext.askWithTool(userTools, initQuotes, userInput.trim());
     } else {
-      chatContext.askWithQuotes(initQuotes!, userInput);
+      chatContext.askWithQuotes(initQuotes!, userInput.trim());
     }
     setUserTools(null);
     setUserInput('');
