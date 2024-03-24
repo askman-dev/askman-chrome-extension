@@ -9,6 +9,7 @@ import { XMarkIcon } from '@heroicons/react/20/solid';
 import AskMessage from './ask-message';
 import AskButton from './ask-button';
 import { AIInvisibleMessage, HumanInvisibleMessage } from '../types';
+import QuoteDropdown from './ask-quotedropdown';
 
 interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -175,10 +176,18 @@ function AskPanel(props: AskPanelProps) {
         {initQuotes.length > 0 && (
           <div className="quotes w-full relative flex-col justify-start items-start inline-flex text-left pb-3">
             {initQuotes.map((quote, index) => (
-              <div className="border-l border-black w-full" key={index + '-' + quote}>
+              <div className="border-l border-black w-full flex" key={index + '-' + quote}>
                 <div className="text-black text-xs font-normal px-2 overflow-hidden whitespace-nowrap text-ellipsis max-h-[2.25rem] leading-[1.125rem] line-clamp-2">
-                  引用 {quote.type == 'page' ? quote.pageTitle : quote?.selection}
+                  引用{quote.type == 'page' ? '标题 ' + quote.pageTitle : '选择 ' + quote?.selection}
                 </div>
+                <button
+                  title="点击删除 开发中"
+                  className="bg-gray-100 text-gray-600 rounded-full h-4 mt-0.5 hover:bg-black hover:text-white"
+                  onClick={() => {
+                    // alert("没实现")
+                  }}>
+                  <XMarkIcon className="w-4 h-4 cursor-pointer" />
+                </button>
               </div>
             ))}
           </div>
@@ -213,12 +222,6 @@ function AskPanel(props: AskPanelProps) {
             placeholder="请输入问题或要求"></TextareaAutosize>
         </div>
         <div className="w-full h-34 flex">
-          <ToolDropdown
-            className="right-[100px] mt-[1px] text-right"
-            onItemClick={item => {
-              setUserTools(item);
-            }}
-          />
           <AskButton
             primary
             disabled={!(userInput || initQuotes.length)}
@@ -231,6 +234,18 @@ function AskPanel(props: AskPanelProps) {
             }}>
             发送
           </AskButton>
+          <QuoteDropdown
+            className="right-[100px] text-right"
+            onItemClick={item => {
+              setUserTools(item);
+            }}
+          />
+          <ToolDropdown
+            className="right-[100px] text-right"
+            onItemClick={item => {
+              setUserTools(item);
+            }}
+          />
           <div className="grow"></div>
         </div>
       </div>

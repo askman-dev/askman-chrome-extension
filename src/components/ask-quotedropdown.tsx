@@ -2,16 +2,13 @@ import { Menu, Transition } from '@headlessui/react';
 import { useEffect, useState, Fragment, forwardRef, Ref } from 'react';
 import { ChevronDownIcon, BookOpenIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
-import defaultTools from '@assets/conf/default-tools.toml';
-import Handlebars, { TemplateDelegate } from 'kbn-handlebars';
-interface ToolDropdownProps {
+interface QuoteDropdownProps {
   className: string;
   onItemClick: (tool: ToolsPromptInterface) => void;
 }
 
 export interface ToolsPromptInterface {
   name: string;
-  template: TemplateDelegate;
 }
 
 const CustomToolButton = forwardRef(function (props: { onClick: (e) => void }, ref: Ref<HTMLButtonElement>) {
@@ -25,20 +22,25 @@ const CustomToolButton = forwardRef(function (props: { onClick: (e) => void }, r
 });
 CustomToolButton.displayName = 'CustomToolButton';
 
-const tools: ToolsPromptInterface[] = [];
+const tools: ToolsPromptInterface[] = [
+  {
+    name: '页面标题',
+  },
+  {
+    name: '页面域名',
+  },
+  {
+    name: '页面网址',
+  },
+  {
+    name: '页面内容',
+  },
+  {
+    name: '选中文字',
+  },
+];
 
-for (const k in defaultTools) {
-  try {
-    tools.push({
-      name: defaultTools[k].name,
-      template: Handlebars.compileAST(defaultTools[k].hbs),
-    });
-  } catch (e) {
-    console.error('Cannot parse default tools', e);
-  }
-}
-
-export default function ToolDropdown({ className, onItemClick }: ToolDropdownProps) {
+export default function QuoteDropdown({ className, onItemClick }: QuoteDropdownProps) {
   // className = "fixed top-36 w-56 text-right"
   const [open, setOpen] = useState(false);
   useEffect(() => {
@@ -61,7 +63,7 @@ export default function ToolDropdown({ className, onItemClick }: ToolDropdownPro
               setOpen(!open);
               e.stopPropagation();
             }}>
-            工具
+            引用
             <ChevronDownIcon className="-mr-1 ml-2 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
           </Menu.Button>
         </div>

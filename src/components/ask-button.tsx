@@ -13,10 +13,10 @@ function AskButton(props: AskButtonProps) {
   return (
     <button
       className={classNames(
-        'py-1 px-3 text-sm font-bold rounded focus:outline-none cursor-pointer text-sky-600 border-1 border-solid border-sky-600',
+        'py-1 px-3 mr-2 font-medium rounded-md focus:outline-none cursor-pointer text-sky-600 border-1 border-solid border-black',
         `${visible ? 'visible' : 'invisible'}`,
-        primary && 'border-none bg-sky-600 text-white focus:bg-sky-700',
-        disabled && 'cursor-not-allowed opacity-50 focus:bg-sky-700',
+        primary && 'cursor-pointer bg-black text-white',
+        disabled && 'cursor-not-allowed opacity-50',
         className,
       )}
       {...rest}>
