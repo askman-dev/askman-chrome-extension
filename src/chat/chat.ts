@@ -37,16 +37,11 @@ export class ChatCoreContext implements ChatCoreInterface {
 
     this.model = new ChatOpenAI({
       temperature: 0.2,
-      topP: 0.2,
-      // modelName: 'glm-3-turbo',
-      // openAIApiKey: 'sk-1234567890',
-      // configuration: {
-      //   baseURL: 'https://dev.bricks.cool/api',
-      // },
-      modelName: 'deepseek-chat',
-      openAIApiKey: 'sk-f3cf17259a04443a8fb63e5802679cd7',
+      topP: 0.95,
+      modelName: 'THUDM/glm-4-9b-chat',
+      openAIApiKey: 'sk-agzmzfqelxhzapofceejwntchamthknztzsbfmlzlojkxejs',
       configuration: {
-        baseURL: 'https://api.deepseek.com/v1',
+        baseURL: 'https://api.siliconflow.cn/v1',
       },
     });
     this.init();

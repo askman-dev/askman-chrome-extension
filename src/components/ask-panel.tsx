@@ -151,11 +151,7 @@ function AskPanel(props: AskPanelProps) {
       </div>
       <div className="py-2 max-h-80 overflow-x-hidden overflow-y-auto mb-2">
         {history.map(message => (
-          <AskMessage
-            // key={index}
-            key={message.id}
-            {...message}
-          />
+          <AskMessage key={message.id} {...message} />
         ))}
       </div>
 
