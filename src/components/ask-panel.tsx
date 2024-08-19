@@ -10,6 +10,7 @@ import AskMessage from './ask-message';
 import AskButton from './ask-button';
 import { ToolsPromptInterface, AIInvisibleMessage, HumanInvisibleMessage } from '../types';
 import QuoteDropdown from './ask-quotedropdown';
+import KeyBinding from './icons'
 
 interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -134,9 +135,7 @@ function AskPanel(props: AskPanelProps) {
       <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between">
         <span>
           Ask That Man{' '}
-          <b className="bg-gray-100 rounded-md py-1 px-2 font-medium text-sm text-black text-opacity-50">
-            快捷键 Command + I
-          </b>
+          <KeyBinding text="⌘ I"></KeyBinding>
         </span>
 
         <div className="grow"></div>
@@ -154,7 +153,22 @@ function AskPanel(props: AskPanelProps) {
           <AskMessage key={message.id} {...message} />
         ))}
       </div>
-
+      {/* inputs area */}
+      <div className=''>
+        <ToolDropdown
+              className="left-[100px] inline-block"
+              onItemClick={item => {
+                setUserTools(item);
+              }}
+            />
+        
+        <QuoteDropdown
+              className="left-[100px] inline-block"
+            onItemClick={item => {
+                setUserTools(item);
+              }}
+            />
+      </div>
       <div className="user-tools relative w-full bg-cover bg-[50%_50%]">
         {userTools && (
           <div className="w-full relative flex-col justify-start items-start inline-flex text-left pb-2">
@@ -169,33 +183,36 @@ function AskPanel(props: AskPanelProps) {
           </div>
         )}
 
-        {initQuotes.length > 0 && (
-          <div className="quotes w-full relative flex-col justify-start items-start inline-flex text-left pb-3">
-            {initQuotes.map((quote, index) => (
-              <div className="border-l border-black w-full flex" key={index + '-' + quote}>
-                <div className="text-black text-xs font-normal px-2 overflow-hidden whitespace-nowrap text-ellipsis max-h-[2.25rem] leading-[1.125rem] line-clamp-2">
-                  引用{quote.type == 'page' ? '标题 ' + quote.pageTitle : '选择 ' + quote?.selection}
-                </div>
-                <button
-                  title="点击删除 开发中"
-                  className="bg-gray-100 text-gray-600 rounded-full h-4 mt-0.5 hover:bg-black hover:text-white"
-                  onClick={() => {
-                    // alert("没实现")
-                  }}>
-                  <XMarkIcon className="w-4 h-4 cursor-pointer" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
 
-        <div className="w-full overflow-hidden pr-2 mb-2">
+        <div className="w-full pr-2 mb-2 pb-1 rounded-md border-solid border-1 border-gray ">
+          <div className=''>
+            {initQuotes.length > 0 && (
+            <div className="quotes relative flex-col justify-start items-start inline-flex pb-3">
+              {initQuotes.map((quote, index) => (
+                <div className="border-l border-black w-full flex" key={index + '-' + quote}>
+                  <div className="text-black text-xs font-normal px-2 overflow-hidden whitespace-nowrap text-ellipsis max-h-[2.25rem] leading-[1.125rem] line-clamp-2">
+                    {quote.type == 'page' ? 'PageTitle ' : 'Selection ' }
+                  </div>
+                  <button
+                    title="点击删除 开发中"
+                    className="bg-gray-100 text-gray-600 rounded-full h-4 mt-0.5 hover:bg-black hover:text-white"
+                    onClick={() => {
+                      // alert("没实现")
+                    }}>
+                    <XMarkIcon className="w-4 h-4 cursor-pointer" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          </div>
+          <div className='flex'>
           <TextareaAutosize
             ref={inputRef}
             maxRows={5}
             minRows={1}
-            className="rounded border-solid border-1 border-gray outline-none rounded-md text-gray-800 text-sm w-full font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none 
-              focus:border-black focus:shadow-md"
+            className="flex-grow outline-none text-gray-800 text-sm inline-block font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none 
+              focus:border-black"
             onKeyDown={e => {
               // console.log('onKeyDown', e.key);
               if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
@@ -216,8 +233,6 @@ function AskPanel(props: AskPanelProps) {
             }}
             value={userInput}
             placeholder="请输入问题或要求"></TextareaAutosize>
-        </div>
-        <div className="w-full h-34 flex">
           <AskButton
             primary
             disabled={!(userInput || initQuotes.length)}
@@ -228,20 +243,11 @@ function AskPanel(props: AskPanelProps) {
                 onSend();
               }
             }}>
-            发送
+            ➔
           </AskButton>
-          <QuoteDropdown
-            className="right-[100px] text-right"
-            onItemClick={item => {
-              setUserTools(item);
-            }}
-          />
-          <ToolDropdown
-            className="right-[100px] text-right"
-            onItemClick={item => {
-              setUserTools(item);
-            }}
-          />
+          </div>
+        </div>
+        <div className="w-full h-34 flex">
           <div className="grow"></div>
         </div>
       </div>

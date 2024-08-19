@@ -82,6 +82,10 @@ export default defineConfig({
     include: ['**/*.test.ts', '**/*.test.tsx'],
     setupFiles: './test-utils/vitest.setup.js',
   },
+  server: {
+    host: 'localhost', // or '127.0.0.1'
+    port: 8081, // specify the port
+  },
 });
 
 function getCacheInvalidationKey() {

@@ -13,11 +13,12 @@ function AskButton(props: AskButtonProps) {
   return (
     <button
       className={classNames(
-        'py-1 px-3 mr-2 font-medium rounded-md focus:outline-none cursor-pointer text-sky-600 border-1 border-solid border-black',
+        'py-1 px-3 font-medium rounded-md focus:outline-none cursor-pointer text-black border-gray-300',
         `${visible ? 'visible' : 'invisible'}`,
-        primary && 'cursor-pointer bg-black text-white',
+        primary && 'cursor-pointer',
         disabled && 'cursor-not-allowed opacity-50',
         className,
+        'hover:bg-gray-300'
       )}
       {...rest}>
       {children}
