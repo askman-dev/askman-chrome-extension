@@ -3,15 +3,12 @@ import { useEffect, useState, Fragment, forwardRef, Ref } from 'react';
 import { ChevronDownIcon, BookOpenIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import defaultTools from '@assets/conf/default-tools.toml';
-import Handlebars, { TemplateDelegate } from 'kbn-handlebars';
+import { ToolsPromptInterface } from '../types';
+import Handlebars from '../../third-party/kbn-handlebars';
+
 interface ToolDropdownProps {
   className: string;
   onItemClick: (tool: ToolsPromptInterface) => void;
-}
-
-export interface ToolsPromptInterface {
-  name: string;
-  template: TemplateDelegate;
 }
 
 const CustomToolButton = forwardRef(function (props: { onClick: (e) => void }, ref: Ref<HTMLButtonElement>) {

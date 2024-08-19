@@ -2,9 +2,8 @@ import { ChatOpenAI } from '@langchain/openai';
 import { QuoteAgent, QuoteContext } from '../agents/quote';
 import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
 import { createContext } from 'react';
-import { ToolsPromptInterface } from '../components/ask-tooldropdown';
 import chatPresets from '@assets/conf/chat-presets.toml';
-import { AIInvisibleMessage, HumanInvisibleMessage } from '../types';
+import { ToolsPromptInterface, AIInvisibleMessage, HumanInvisibleMessage } from '../types';
 
 export interface ChatCoreInterface {
   model: ChatOpenAI;

@@ -1,1 +1,3 @@
 18.12.0
+engine-strict=true
+use-pnpm=true

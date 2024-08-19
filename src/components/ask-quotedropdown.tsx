@@ -2,13 +2,10 @@ import { Menu, Transition } from '@headlessui/react';
 import { useEffect, useState, Fragment, forwardRef, Ref } from 'react';
 import { ChevronDownIcon, BookOpenIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
+import { ToolsPromptInterface } from '../types';
 interface QuoteDropdownProps {
   className: string;
   onItemClick: (tool: ToolsPromptInterface) => void;
-}
-
-export interface ToolsPromptInterface {
-  name: string;
 }
 
 const CustomToolButton = forwardRef(function (props: { onClick: (e) => void }, ref: Ref<HTMLButtonElement>) {

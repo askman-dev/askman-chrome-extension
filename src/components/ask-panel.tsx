@@ -3,12 +3,12 @@ import 'highlight.js/styles/default.min.css';
 import { QuoteContext } from '../agents/quote';
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ChatPopupContext } from '../chat/chat';
-import ToolDropdown, { ToolsPromptInterface } from './ask-tooldropdown';
+import ToolDropdown from './ask-tooldropdown';
 import TextareaAutosize from 'react-textarea-autosize';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 import AskMessage from './ask-message';
 import AskButton from './ask-button';
-import { AIInvisibleMessage, HumanInvisibleMessage } from '../types';
+import { ToolsPromptInterface, AIInvisibleMessage, HumanInvisibleMessage } from '../types';
 import QuoteDropdown from './ask-quotedropdown';
 
 interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {

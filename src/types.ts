@@ -1,4 +1,5 @@
 import { HumanMessage } from '@langchain/core/messages';
+import { TemplateDelegate } from 'third-party/kbn-handlebars';
 
 export class HumanInvisibleMessage extends HumanMessage {
   isVisible = false;
@@ -39,4 +40,9 @@ export interface TabMessage {
 export interface PromptTool {
   name: string;
   hbs: string;
+}
+
+export interface ToolsPromptInterface {
+  name: string;
+  template?: TemplateDelegate;
 }
