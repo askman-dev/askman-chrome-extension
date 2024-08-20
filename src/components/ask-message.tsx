@@ -1,5 +1,7 @@
 import classNames from 'classnames';
 import AskCode from './ask-code';
+import { QuoteAgent } from '../agents/quote';
+import React from 'react';
 
 export enum AskMessageType {
   TEXT = 'text',
@@ -14,42 +16,41 @@ interface AskMessageItem {
 }
 
 const TextWithLineBreaks = text => {
-  let quoteStart = false;
-  let quoteText = '';
   // console.log('text', text, 'lines', text.split('\n'));
   // 先解决 quote 的格式
+  // console.log(text)
+  const blocks = QuoteAgent.parseBlocks(text);
+  const rendered = blocks.map((block, index) => {
+    // console.info(index, block)
+    if (block.type === 'quote') {
+      return (
+        <div
+          key={index}
+          className="bg-gray-100 border-l-4 border-blue-500 p-2 mb-2 overflow-hidden whitespace-nowrap text-ellipsis">
+          <span className="font-bold mr-2">{block.content.join(', ')}</span>
+        </div>
+      );
+    } else if (block.type === 'code') {
+      return (
+        <pre key={`code-${index}`} className="bg-gray-800 text-white p-4 rounded mb-2 overflow-x-auto">
+          <code>{block.content.join('\n')}</code>
+        </pre>
+      );
+    } else {
+      return (
+        <div key={`text-${index}`} className="mb-2">
+          {block.content.map((line, lineIndex) => (
+            <React.Fragment key={`line-${lineIndex}`}>
+              {line}
+              {lineIndex < block.content.length - 1 && <br />}
+            </React.Fragment>
+          ))}
+        </div>
+      );
+    }
+  });
 
-  return (
-    <div>
-      {text.split('\n').map((line, idx) => {
-        if (!quoteStart && line.startsWith('> [!QUOTE')) {
-          quoteStart = true;
-          return;
-        }
-        if (quoteStart && !quoteText) {
-          quoteText = '引用 ' + line.replace('> ', '');
-          return (
-            <b key={`${idx}-${line}`}>
-              {quoteText}
-              <br />
-            </b>
-          );
-        }
-        if (quoteStart && line.startsWith('>')) {
-          return;
-        } else {
-          quoteStart = false;
-        }
-        // console.log('quoteEnd, line content is ', line);
-        return (
-          <span key={`${idx}-${line}`}>
-            {line}
-            <br />
-          </span>
-        );
-      })}
-    </div>
-  );
+  return rendered;
 };
 function AskMessage(props: AskMessageItem) {
   const { type, text, name } = props;

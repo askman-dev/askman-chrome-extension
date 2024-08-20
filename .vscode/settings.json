@@ -1,3 +1,5 @@
 {
-    "Codegeex.RepoIndex": true
+    "Codegeex.RepoIndex": true,
+    "Codegeex.CompletionDelay": 1,
+    "Codegeex.GenerationPreference": "line by line"
 }
