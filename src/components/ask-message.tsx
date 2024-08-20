@@ -42,7 +42,12 @@ const TextWithLineBreaks = text => {
           {block.content.map((line, lineIndex) => (
             <React.Fragment key={`line-${lineIndex}`}>
               {line}
-              {lineIndex < block.content.length - 1 && <br />}
+              {lineIndex < block.content.length - 1 && (
+                <>
+                  <br />
+                  <br />
+                </>
+              )}
             </React.Fragment>
           ))}
         </div>
