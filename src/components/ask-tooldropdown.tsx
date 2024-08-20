@@ -4,7 +4,7 @@ import { ChevronDownIcon, BookOpenIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import defaultTools from '@assets/conf/default-tools.toml';
 import { ToolsPromptInterface } from '../types';
-import Handlebars from '../../third-party/kbn-handlebars';
+import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
 
 interface ToolDropdownProps {
   className: string;
@@ -50,8 +50,10 @@ export default function ToolDropdown({ className, onItemClick }: ToolDropdownPro
   }, []);
   return (
     <div className={classNames(`mr-2 ${className}`)}>
-      <Menu as="div" className="relative" 
-      // onMouseOver={() => setOpen(true)}
+      <Menu
+        as="div"
+        className="relative"
+        // onMouseOver={() => setOpen(true)}
       >
         <div>
           <Menu.Button
@@ -60,7 +62,7 @@ export default function ToolDropdown({ className, onItemClick }: ToolDropdownPro
               setOpen(!open);
               e.stopPropagation();
             }}>
-             Tool ⌘ K
+            Tool ⌘ K
             <ChevronDownIcon className="-mr-1 ml-2 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
           </Menu.Button>
         </div>
