@@ -76,7 +76,9 @@ function AskMessage(props: AskMessageItem) {
   return (
     <div
       className={classNames(
-        name === 'ai' ? 'text-gray-800 mb-3' : 'text-sky-600 mb-2 max-h-60 overflow-scroll',
+        name === 'ai'
+          ? 'text-gray-800 mb-3 leading-relaxed'
+          : 'text-sky-600 mb-2 leading-relaxed max-h-60 overflow-auto',
         'font-bold',
       )}>
       {messageItem}

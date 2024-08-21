@@ -10,7 +10,7 @@ import AskMessage from './ask-message';
 import AskButton from './ask-button';
 import { ToolsPromptInterface, AIInvisibleMessage, HumanInvisibleMessage } from '../types';
 import QuoteDropdown from './ask-quotedropdown';
-import KeyBinding from './icons'
+import KeyBinding from './icons';
 
 interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -134,8 +134,7 @@ function AskPanel(props: AskPanelProps) {
       {...rest}>
       <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between">
         <span>
-          Ask That Man{' '}
-          <KeyBinding text="⌘ I"></KeyBinding>
+          Ask That Man <KeyBinding text="⌘ I"></KeyBinding>
         </span>
 
         <div className="grow"></div>
@@ -154,20 +153,20 @@ function AskPanel(props: AskPanelProps) {
         ))}
       </div>
       {/* inputs area */}
-      <div className=''>
+      <div className="">
         <ToolDropdown
-              className="left-[100px] inline-block"
-              onItemClick={item => {
-                setUserTools(item);
-              }}
-            />
-        
+          className="left-[100px] inline-block"
+          onItemClick={item => {
+            setUserTools(item);
+          }}
+        />
+
         <QuoteDropdown
-              className="left-[100px] inline-block"
-            onItemClick={item => {
-                setUserTools(item);
-              }}
-            />
+          className="left-[100px] inline-block"
+          onItemClick={item => {
+            setUserTools(item);
+          }}
+        />
       </div>
       <div className="user-tools relative w-full bg-cover bg-[50%_50%]">
         {userTools && (
@@ -183,68 +182,68 @@ function AskPanel(props: AskPanelProps) {
           </div>
         )}
 
-
-        <div className="w-full pr-2 mb-2 pb-1 rounded-md border-solid border-1 border-gray ">
-          <div className=''>
+        <div className="w-full pr-2 mb-2 p-1 rounded-md border-solid border-1 border-gray ">
+          <div className="">
             {initQuotes.length > 0 && (
-            <div className="quotes relative flex-col justify-start items-start inline-flex pb-3">
-              {initQuotes.map((quote, index) => (
-                <div className="border-l border-black w-full flex" key={index + '-' + quote}>
-                  <div className="text-black text-xs font-normal px-2 overflow-hidden whitespace-nowrap text-ellipsis max-h-[2.25rem] leading-[1.125rem] line-clamp-2">
-                    {quote.type == 'page' ? 'PageTitle ' : 'Selection ' }
+              <div className="quotes relative flex-col justify-start items-start inline-flex pb-3">
+                {initQuotes.map((quote, index) => (
+                  <div className="border-l border-black w-full flex items-center" key={index + '-' + quote}>
+                    <div className="text-black text-xs font-normal px-2 overflow-hidden whitespace-nowrap text-ellipsis max-h-[2.25rem] leading-[1.125rem] line-clamp-2">
+                      {quote.type == 'page' ? 'PageTitle ' : 'Selection '}
+                    </div>
+                    <button
+                      title="点击删除 开发中"
+                      className="bg-gray-100 text-gray-600 rounded-full h-4 mt-0.5 hover:bg-black hover:text-white"
+                      onClick={() => {
+                        // alert("没实现")
+                      }}>
+                      <XMarkIcon className="w-4 h-4 cursor-pointer" />
+                    </button>
                   </div>
-                  <button
-                    title="点击删除 开发中"
-                    className="bg-gray-100 text-gray-600 rounded-full h-4 mt-0.5 hover:bg-black hover:text-white"
-                    onClick={() => {
-                      // alert("没实现")
-                    }}>
-                    <XMarkIcon className="w-4 h-4 cursor-pointer" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
           </div>
-          <div className='flex'>
-          <TextareaAutosize
-            ref={inputRef}
-            maxRows={5}
-            minRows={1}
-            className="flex-grow outline-none text-gray-800 text-sm inline-block font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none 
+          <div className="flex">
+            <TextareaAutosize
+              ref={inputRef}
+              maxRows={5}
+              minRows={1}
+              className="flex-grow outline-none text-gray-800 text-sm inline-block font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none 
               focus:border-black"
-            onKeyDown={e => {
-              // console.log('onKeyDown', e.key);
-              if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
-                if (e.nativeEvent instanceof KeyboardEvent && e.nativeEvent.isComposing) {
-                  e.preventDefault();
-                  return;
-                }
+              //TODO 输入在有字/无字时会发生高度变化，需要修复
+              onKeyDown={e => {
+                // console.log('onKeyDown', e.key);
+                if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+                  if (e.nativeEvent instanceof KeyboardEvent && e.nativeEvent.isComposing) {
+                    e.preventDefault();
+                    return;
+                  }
 
-                onSend();
+                  onSend();
+                  e.preventDefault();
+                }
+                // github 上面按 s 会触发页面搜索
+                if (e.key.match(/^[a-z/\\]$/) && !e.shiftKey && !e.ctrlKey && !e.altKey) e.stopPropagation();
+              }}
+              onChange={e => {
+                setUserInput(e.currentTarget.value);
                 e.preventDefault();
-              }
-              // github 上面按 s 会触发页面搜索
-              if (e.key.match(/^[a-z/\\]$/) && !e.shiftKey && !e.ctrlKey && !e.altKey) e.stopPropagation();
-            }}
-            onChange={e => {
-              setUserInput(e.currentTarget.value);
-              e.preventDefault();
-            }}
-            value={userInput}
-            placeholder="请输入问题或要求"></TextareaAutosize>
-          <AskButton
-            primary
-            disabled={!(userInput || initQuotes.length)}
-            onClick={onSend}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
-                e.preventDefault();
-                onSend();
-              }
-            }}>
-            ➔
-          </AskButton>
+              }}
+              value={userInput}
+              placeholder="请输入问题或要求"></TextareaAutosize>
+            <AskButton
+              primary
+              disabled={!(userInput || initQuotes.length)}
+              onClick={onSend}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+                  e.preventDefault();
+                  onSend();
+                }
+              }}>
+              ➔
+            </AskButton>
           </div>
         </div>
         <div className="w-full h-34 flex">
