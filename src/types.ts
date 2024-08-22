@@ -5,6 +5,20 @@ export class HumanInvisibleMessage extends HumanMessage {
   isVisible = false;
 }
 
+export type HumanAskMessageFields = {
+  content: string;
+  name: string;
+  rendered?: string;
+};
+export class HumanAskMessage extends HumanMessage {
+  rendered?: string;
+
+  constructor(fields: HumanAskMessageFields) {
+    super({ content: fields.content, name: fields.name });
+    this.rendered = fields.rendered;
+  }
+}
+
 export class AIInvisibleMessage extends HumanMessage {
   isVisible = false;
 }

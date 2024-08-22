@@ -37,12 +37,30 @@ export class QuoteAgent implements BaseAgent {
    * @param quote 引用上下文对象，包含引用类型和相关信息
    * @returns 返回格式化后的引用文本字符串
    */
-  public static formatQuote(quote: QuoteContext): string {
+  public static formatQuotes(quotes: string[]): string {
+    // 如果有需要格式化的文本行，添加引用标识并格式化文本
+    if (quotes.length) {
+      quotes.unshift('[!QUOTE]');
+      // 如果有多行，需要同时加上 '> ' 前缀
+      quotes = quotes.map(q => {
+        let lines = q.split('\n');
+        lines = lines.map(l => `> ${l}`);
+        return lines.join('\n');
+      });
+      return quotes.join('\n') + '\n';
+    }
+
+    // 如果引用类型未知，输出警告并返回空字符串
+    console.warn('未知的引用类型', quotes);
+    return '';
+  }
+
+  public static promptQuote(quote: QuoteContext): string {
     // 初始化一个空数组，用于存储格式化的引用文本行
-    let quotes: string[] = [];
+    const quotes: string[] = [];
 
     // 根据引用类型添加页面标题和URL
-    if (quote.type == 'selection' || quote.type == 'page') {
+    if (quote.type == 'page') {
       quotes.push(`Title: ${quote.pageTitle}`);
       quotes.push(`URL: ${quote.pageUrl}`);
     }
@@ -51,21 +69,11 @@ export class QuoteAgent implements BaseAgent {
     if (quote.type == 'selection') {
       quotes.push(`Selection: ${quote.selection}`);
     }
-
-    // 如果有需要格式化的文本行，添加引用标识并格式化文本
-    if (quotes.length) {
-      quotes.unshift('[!QUOTE]');
-      quotes = quotes.map(q => `> ${q}`);
-      return quotes.join('\n') + '\n';
-    }
-
-    // 如果引用类型未知，输出警告并返回空字符串
-    console.warn('未知的引用类型', quote);
-    return '';
+    return quotes.join('\n');
   }
 
   public static parseBlocks(text) {
-    console.info('INPUT:', text);
+    // console.info('INPUT:', text);
     const lines = text.split('\n');
     const blocks = [];
     let currentBlock = null;
@@ -108,7 +116,7 @@ export class QuoteAgent implements BaseAgent {
       blocks.push(currentBlock);
     }
 
-    console.info('OUTPUT:', blocks);
+    // console.info('OUTPUT:', blocks);
     return blocks;
   }
 }

@@ -3,7 +3,7 @@ import { QuoteAgent, QuoteContext } from '../agents/quote';
 import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
 import { createContext } from 'react';
 import chatPresets from '@assets/conf/chat-presets.toml';
-import { ToolsPromptInterface, AIInvisibleMessage, HumanInvisibleMessage } from '../types';
+import { ToolsPromptInterface, AIInvisibleMessage, HumanInvisibleMessage, HumanAskMessage } from '../types';
 
 export interface ChatCoreInterface {
   model: ChatOpenAI;
@@ -17,7 +17,7 @@ export interface ChatCoreInterface {
 
 export class ChatCoreContext implements ChatCoreInterface {
   model: ChatOpenAI;
-  history: BaseMessage[];
+  history: BaseMessage[] | HumanAskMessage[];
   _onDataListener: (data: BaseMessage[]) => void;
   constructor() {
     this.history = [];
@@ -49,19 +49,22 @@ export class ChatCoreContext implements ChatCoreInterface {
   async askWithQuotes(quotes: QuoteContext[], userPrompt: null | string) {
     //TODO 需要替换成从模版中读取，以方便用户自定义
     let prompt = '';
+    let rendered = '';
     const quotesPrompts = quotes
       .map(quote => {
-        return QuoteAgent.formatQuote(quote);
+        return QuoteAgent.promptQuote(quote);
       })
       .filter(p => p);
     if (quotesPrompts.length) {
       prompt = '' + quotesPrompts.join('\n') + '\n';
+      rendered = QuoteAgent.formatQuotes(quotesPrompts) + '\n';
     }
     if (userPrompt) {
       prompt += userPrompt;
+      rendered += userPrompt;
     }
 
-    this.history.push(new HumanMessage({ content: prompt, name: 'human' }));
+    this.history.push(new HumanAskMessage({ content: prompt, rendered: rendered, name: 'human' }));
     this._onDataListener && setTimeout(() => this._onDataListener(this.history));
     return this.stream(this.history);
   }
@@ -80,7 +83,7 @@ export class ChatCoreContext implements ChatCoreInterface {
     const quotesPrompts = quotes
       .map(quote => {
         if (quote.type == 'selection') return null;
-        return QuoteAgent.formatQuote(quote);
+        return QuoteAgent.promptQuote(quote);
       })
       .filter(p => p);
     // if (quotesPrompts.length) {

@@ -52,8 +52,10 @@ export default function QuoteDropdown({ className, onItemClick }: QuoteDropdownP
   }, []);
   return (
     <div className={classNames(`mr-2 ${className}`)}>
-      <Menu as="div" className="relative" 
-      // onMouseOver={() => setOpen(true)}
+      <Menu
+        as="div"
+        className="relative"
+        // onMouseOver={() => setOpen(true)}
       >
         <div>
           <Menu.Button
@@ -62,7 +64,7 @@ export default function QuoteDropdown({ className, onItemClick }: QuoteDropdownP
               setOpen(!open);
               e.stopPropagation();
             }}>
-            Add ⌘ K K
+            Add ⌘ J J
             <ChevronDownIcon className="-mr-1 ml-2 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
           </Menu.Button>
         </div>
