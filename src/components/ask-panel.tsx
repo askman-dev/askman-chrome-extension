@@ -43,6 +43,8 @@ function AskPanel(props: AskPanelProps) {
   const [history, setHistory] = useState<{ id: string; name: string; type: string; text: string }[]>([]);
   const [initQuotes, setInitQuotes] = useState<Array<QuoteContext>>([]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null); // Add this line
+
   const [userTools, setUserTools] = useState<ToolsPromptInterface>();
 
   // chat list ref
@@ -120,6 +122,9 @@ function AskPanel(props: AskPanelProps) {
     } else {
       chatContext.askWithQuotes(initQuotes!, userInput.trim());
     }
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
     setUserTools(null);
     setUserInput('');
     setInitQuotes([]);
@@ -153,6 +158,10 @@ function AskPanel(props: AskPanelProps) {
         {history.map(message => (
           <AskMessage key={message.id} {...message} />
         ))}
+
+        <div className="pt-64">
+          <footer ref={messagesEndRef} />
+        </div>
       </div>
       {/* inputs area */}
       <div className="">
