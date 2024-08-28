@@ -2,12 +2,14 @@ import { AgentContext } from '../types';
 import { BaseAgent } from './base';
 
 export class QuoteContext implements AgentContext {
-  public type: 'selection' | 'page' | 'link';
+  public type: 'selection' | 'page' | 'link' | 'text';
+  public name?: string;
   public selection?: string;
   public pageUrl?: string;
   public pageTitle?: string;
   public linkText?: string;
   public linkUrl?: string;
+  public text?: string;
 }
 export class QuoteAgent implements BaseAgent {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -68,6 +70,11 @@ export class QuoteAgent implements BaseAgent {
     // 如果是选文引用类型，添加选文内容
     if (quote.type == 'selection') {
       quotes.push(`Selection: ${quote.selection}`);
+    }
+
+    // 如果是选文引用类型，添加选文内容
+    if (quote.type == 'text') {
+      quotes.push(`Text: ${quote.text}`);
     }
     return quotes.join('\n');
   }

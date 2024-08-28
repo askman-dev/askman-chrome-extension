@@ -78,7 +78,7 @@ function AskMessage(props: AskMessageItem) {
       className={classNames(
         name === 'ai'
           ? 'text-gray-800 mb-3 leading-relaxed'
-          : 'text-sky-600 mb-2 leading-relaxed max-h-60 overflow-auto',
+          : 'text-sky-600 mb-2 leading-relaxed max-h-16 overflow-auto',
         'font-bold',
       )}>
       {messageItem}

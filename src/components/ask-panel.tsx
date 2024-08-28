@@ -197,6 +197,10 @@ function AskPanel(props: AskPanelProps) {
     }
   }, [isToolDropdownOpen, isQuoteDropdownOpen]);
 
+  const addQuote = (newQuote: QuoteContext) => {
+    setInitQuotes(prevQuotes => [...prevQuotes, newQuote]);
+  };
+
   function onSend() {
     if (userTools) {
       chatContext.askWithTool(userTools, initQuotes, userInput.trim());
@@ -249,6 +253,7 @@ function AskPanel(props: AskPanelProps) {
       {/* inputs area */}
       <div className="">
         <ToolDropdown
+          displayName={userTools?.name || 'Tool'}
           isOpen={isToolDropdownOpen}
           setIsOpen={setIsToolDropdownOpen}
           className="left-[100px] inline-block"
@@ -262,12 +267,14 @@ function AskPanel(props: AskPanelProps) {
           setIsOpen={setIsQuoteDropdownOpen}
           className="left-[100px] inline-block"
           onItemClick={item => {
-            setUserTools(item);
+            // 假设 item 是 QuoteContext 类型
+            addQuote(item);
+            // setIsQuoteDropdownOpen(false); // 选择后关闭下拉菜单
           }}
         />
       </div>
       <div className="user-tools relative w-full bg-cover bg-[50%_50%]">
-        {userTools && (
+        {/* {userTools && (
           <div className="w-full relative flex-col justify-start items-start inline-flex text-left pb-2">
             <button
               className="bg-black text-white rounded-md py-0.5 px-2 cursor-pointer border-solid border-1 text-xs"
@@ -278,24 +285,24 @@ function AskPanel(props: AskPanelProps) {
               {userTools.name}
             </button>
           </div>
-        )}
+        )} */}
 
         <div className="w-full pr-2 mb-2 p-1 rounded-md border-solid border-1 border-gray ">
           <div className="">
             {initQuotes.length > 0 && (
-              <div className="quotes relative flex-col justify-start items-start inline-flex pb-3">
+              <div className="quotes relative flex flex-wrap gap-2 pb-3">
                 {initQuotes.map((quote, index) => (
-                  <div className="border-l border-black w-full flex items-center" key={index + '-' + quote}>
-                    <div className="text-black text-xs font-normal px-2 overflow-hidden whitespace-nowrap text-ellipsis max-h-[2.25rem] leading-[1.125rem] line-clamp-2">
-                      {quote.type == 'page' ? 'PageTitle ' : 'Selection '}
+                  <div className="flex items-center bg-gray-100 rounded-md px-2 py-1" key={index + '-' + quote}>
+                    <div className="text-black text-xs font-normal overflow-hidden whitespace-nowrap text-ellipsis max-w-[150px]">
+                      {quote.name || quote.type || 'Quote'}
                     </div>
                     <button
-                      title="点击删除 开发中"
-                      className="bg-gray-100 text-gray-600 rounded-full h-4 mt-0.5 hover:bg-black hover:text-white"
+                      title="删除引用"
+                      className="ml-2 text-gray-600 hover:text-black"
                       onClick={() => {
-                        // alert("没实现")
+                        setInitQuotes(quotes => quotes.filter((_, i) => i !== index));
                       }}>
-                      <XMarkIcon className="w-4 h-4 cursor-pointer" />
+                      <XMarkIcon className="w-3 h-3 cursor-pointer" />
                     </button>
                   </div>
                 ))}

@@ -7,6 +7,7 @@ import { ToolsPromptInterface } from '../types';
 import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
 
 interface ToolDropdownProps {
+  displayName: string;
   className: string;
   onItemClick: (tool: ToolsPromptInterface) => void;
   isOpen: boolean;
@@ -26,7 +27,7 @@ for (const k in defaultTools) {
   }
 }
 
-export default function ToolDropdown({ className, onItemClick, isOpen, setIsOpen }: ToolDropdownProps) {
+export default function ToolDropdown({ displayName, className, onItemClick, isOpen, setIsOpen }: ToolDropdownProps) {
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
@@ -55,7 +56,7 @@ export default function ToolDropdown({ className, onItemClick, isOpen, setIsOpen
             setIsOpen(!isOpen);
             e.stopPropagation();
           }}>
-          Tool ⌘ K
+          {displayName} ⌘ K
           <ChevronDownIcon className="-mr-1 ml-2 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
         </Menu.Button>
         <Transition
