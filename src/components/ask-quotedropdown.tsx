@@ -1,11 +1,13 @@
 import { Menu, Transition } from '@headlessui/react';
-import { useEffect, useState, Fragment, forwardRef, Ref } from 'react';
+import { useEffect, Fragment, forwardRef, Ref } from 'react';
 import { ChevronDownIcon, BookOpenIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import { ToolsPromptInterface } from '../types';
 interface QuoteDropdownProps {
   className: string;
   onItemClick: (tool: ToolsPromptInterface) => void;
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
 }
 
 const CustomToolButton = forwardRef(function (props: { onClick: (e) => void }, ref: Ref<HTMLButtonElement>) {
@@ -37,12 +39,12 @@ const tools: ToolsPromptInterface[] = [
   },
 ];
 
-export default function QuoteDropdown({ className, onItemClick }: QuoteDropdownProps) {
+export default function QuoteDropdown({ className, onItemClick, isOpen, setIsOpen }: QuoteDropdownProps) {
   // className = "fixed top-36 w-56 text-right"
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
   useEffect(() => {
     function handleClickOutside() {
-      setOpen(false);
+      setIsOpen(false);
     }
 
     document.addEventListener('click', handleClickOutside);
@@ -61,7 +63,7 @@ export default function QuoteDropdown({ className, onItemClick }: QuoteDropdownP
           <Menu.Button
             className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
             onClick={e => {
-              setOpen(!open);
+              setIsOpen(!isOpen);
               e.stopPropagation();
             }}>
             Add ⌘ K K
@@ -69,7 +71,7 @@ export default function QuoteDropdown({ className, onItemClick }: QuoteDropdownP
           </Menu.Button>
         </div>
         <Transition
-          show={open}
+          show={isOpen}
           as={Fragment}
           enter="transition ease-out duration-100"
           enterFrom="transform opacity-0 scale-95"
@@ -87,7 +89,7 @@ export default function QuoteDropdown({ className, onItemClick }: QuoteDropdownP
                     <button
                       onClick={() => {
                         onItemClick(tool);
-                        setOpen(false);
+                        setIsOpen(false);
                       }}
                       className={`${
                         active ? 'bg-violet-500 text-white' : 'text-gray-900'

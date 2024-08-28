@@ -1,5 +1,5 @@
 import { Menu, Transition } from '@headlessui/react';
-import { useEffect, useState, Fragment, forwardRef, Ref } from 'react';
+import { useEffect, Fragment, forwardRef, Ref } from 'react';
 import { ChevronDownIcon, BookOpenIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import defaultTools from '@assets/conf/default-tools.toml';
@@ -9,6 +9,8 @@ import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
 interface ToolDropdownProps {
   className: string;
   onItemClick: (tool: ToolsPromptInterface) => void;
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
 }
 
 const CustomToolButton = forwardRef(function (props: { onClick: (e) => void }, ref: Ref<HTMLButtonElement>) {
@@ -35,19 +37,19 @@ for (const k in defaultTools) {
   }
 }
 
-export default function ToolDropdown({ className, onItemClick }: ToolDropdownProps) {
+export default function ToolDropdown({ className, onItemClick, isOpen, setIsOpen }: ToolDropdownProps) {
   // className = "fixed top-36 w-56 text-right"
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
   useEffect(() => {
     function handleClickOutside() {
-      setOpen(false);
+      setIsOpen(false);
     }
 
     document.addEventListener('click', handleClickOutside);
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, []);
+  }, [setIsOpen]);
   return (
     <div className={classNames(`mr-2 ${className}`)}>
       <Menu
@@ -59,7 +61,7 @@ export default function ToolDropdown({ className, onItemClick }: ToolDropdownPro
           <Menu.Button
             className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
             onClick={e => {
-              setOpen(!open);
+              setIsOpen(!isOpen);
               e.stopPropagation();
             }}>
             Tool ⌘ K
@@ -67,7 +69,7 @@ export default function ToolDropdown({ className, onItemClick }: ToolDropdownPro
           </Menu.Button>
         </div>
         <Transition
-          show={open}
+          show={isOpen}
           as={Fragment}
           enter="transition ease-out duration-100"
           enterFrom="transform opacity-0 scale-95"
@@ -85,7 +87,7 @@ export default function ToolDropdown({ className, onItemClick }: ToolDropdownPro
                     <button
                       onClick={() => {
                         onItemClick(tool);
-                        setOpen(false);
+                        setIsOpen(false);
                       }}
                       className={`${
                         active ? 'bg-violet-500 text-white' : 'text-gray-900'

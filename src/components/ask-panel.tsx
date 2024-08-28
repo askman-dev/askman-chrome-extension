@@ -46,9 +46,20 @@ function AskPanel(props: AskPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null); // Add this line
 
   const [userTools, setUserTools] = useState<ToolsPromptInterface>();
-
+  const [isToolDropdownOpen, setIsToolDropdownOpen] = useState(false);
+  const [isQuoteDropdownOpen, setIsQuoteDropdownOpen] = useState(false);
+  const showToolDropdown = () => {
+    setIsToolDropdownOpen(true);
+    setIsQuoteDropdownOpen(false);
+  };
+  const showQuoteDropdown = () => {
+    setIsQuoteDropdownOpen(true);
+    setIsToolDropdownOpen(false);
+  };
   // chat list ref
   // const chatListRef = useRef<HTMLDivElement>(null);
+
+  const [lastKPressTime, setLastKPressTime] = useState<number | null>(null);
 
   useEffect(() => {
     quotes.forEach(quote => {
@@ -168,6 +179,8 @@ function AskPanel(props: AskPanelProps) {
       {/* inputs area */}
       <div className="">
         <ToolDropdown
+          isOpen={isToolDropdownOpen}
+          setIsOpen={setIsToolDropdownOpen}
           className="left-[100px] inline-block"
           onItemClick={item => {
             setUserTools(item);
@@ -175,6 +188,8 @@ function AskPanel(props: AskPanelProps) {
         />
 
         <QuoteDropdown
+          isOpen={isQuoteDropdownOpen}
+          setIsOpen={setIsQuoteDropdownOpen}
           className="left-[100px] inline-block"
           onItemClick={item => {
             setUserTools(item);
@@ -226,7 +241,43 @@ function AskPanel(props: AskPanelProps) {
               focus:border-black"
               //TODO 输入在有字/无字时会发生高度变化，需要修复
               onKeyDown={e => {
-                // console.log('onKeyDown', e.key);
+                // 检测 ESC 键
+                if (e.key === 'Escape') {
+                  if (isQuoteDropdownOpen) {
+                    setIsQuoteDropdownOpen(false);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                  }
+                  if (isToolDropdownOpen) {
+                    setIsToolDropdownOpen(false);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                  }
+                }
+                // 检测 Command+K (Mac) 或 Ctrl+K (Windows/Linux)
+                if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                  e.preventDefault();
+
+                  // 使用一个计时器来检测是否是双击 K
+                  if (lastKPressTime && Date.now() - lastKPressTime < 300) {
+                    // 双击 K，触发 QuoteDropdown
+                    showQuoteDropdown();
+                  } else {
+                    if (isToolDropdownOpen) {
+                      showQuoteDropdown();
+                    } else {
+                      // 单击 K，触发 ToolDropdown
+                      showToolDropdown();
+                    }
+                  }
+
+                  setLastKPressTime(Date.now());
+                  return;
+                }
+
+                // 现有的 Enter 键逻辑
                 if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
                   if (e.nativeEvent instanceof KeyboardEvent && e.nativeEvent.isComposing) {
                     e.preventDefault();
