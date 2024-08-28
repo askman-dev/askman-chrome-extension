@@ -126,6 +126,76 @@ function AskPanel(props: AskPanelProps) {
       chatContext.removeOnDataListener();
     };
   }, []);
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      // 检测 ESC 键
+      if (e.key === 'Escape') {
+        if (isQuoteDropdownOpen) {
+          setIsQuoteDropdownOpen(false);
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        if (isToolDropdownOpen) {
+          setIsToolDropdownOpen(false);
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+      }
+
+      // 检测 Command+K (Mac) 或 Ctrl+K (Windows/Linux)
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+
+        // 使用一个计时器来检测是否是双击 K
+        if (lastKPressTime && Date.now() - lastKPressTime < 300) {
+          // 双击 K，触发 QuoteDropdown
+          showQuoteDropdown();
+        } else {
+          if (isToolDropdownOpen) {
+            showQuoteDropdown();
+          } else {
+            // 单击 K，触发 ToolDropdown
+            showToolDropdown();
+          }
+        }
+
+        setLastKPressTime(Date.now());
+        return;
+      }
+
+      // 检测左右方向键
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        if (isToolDropdownOpen || isQuoteDropdownOpen) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (isToolDropdownOpen) {
+            setIsToolDropdownOpen(false);
+            setIsQuoteDropdownOpen(true);
+          } else {
+            setIsQuoteDropdownOpen(false);
+            setIsToolDropdownOpen(true);
+          }
+          return;
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isToolDropdownOpen, isQuoteDropdownOpen, lastKPressTime]);
+
+  // Add this new useEffect to focus on input when menus are closed
+  useEffect(() => {
+    if (!isToolDropdownOpen && !isQuoteDropdownOpen && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current.focus();
+      }, 33);
+    }
+  }, [isToolDropdownOpen, isQuoteDropdownOpen]);
 
   function onSend() {
     if (userTools) {
@@ -243,37 +313,14 @@ function AskPanel(props: AskPanelProps) {
               onKeyDown={e => {
                 // 检测 ESC 键
                 if (e.key === 'Escape') {
-                  if (isQuoteDropdownOpen) {
-                    setIsQuoteDropdownOpen(false);
+                  if (isQuoteDropdownOpen || isToolDropdownOpen) {
                     e.preventDefault();
-                    e.stopPropagation();
-                    return;
-                  }
-                  if (isToolDropdownOpen) {
-                    setIsToolDropdownOpen(false);
-                    e.preventDefault();
-                    e.stopPropagation();
                     return;
                   }
                 }
                 // 检测 Command+K (Mac) 或 Ctrl+K (Windows/Linux)
                 if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
                   e.preventDefault();
-
-                  // 使用一个计时器来检测是否是双击 K
-                  if (lastKPressTime && Date.now() - lastKPressTime < 300) {
-                    // 双击 K，触发 QuoteDropdown
-                    showQuoteDropdown();
-                  } else {
-                    if (isToolDropdownOpen) {
-                      showQuoteDropdown();
-                    } else {
-                      // 单击 K，触发 ToolDropdown
-                      showToolDropdown();
-                    }
-                  }
-
-                  setLastKPressTime(Date.now());
                   return;
                 }
 
@@ -284,8 +331,33 @@ function AskPanel(props: AskPanelProps) {
                     return;
                   }
 
-                  onSend();
+                  if (isToolDropdownOpen) {
+                    // 如果 Tool 下拉菜单打开，确认选择并关闭菜单
+                    setIsToolDropdownOpen(false);
+                  } else if (isQuoteDropdownOpen) {
+                    // 如果 Quote 下拉菜单打开，确认选择并关闭菜单
+                    setIsQuoteDropdownOpen(false);
+                  } else {
+                    // 如果没有下拉菜单打开，发送消息
+                    onSend();
+                  }
+
                   e.preventDefault();
+                }
+                // 检测左右方向键
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                  if (isToolDropdownOpen || isQuoteDropdownOpen) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (isToolDropdownOpen) {
+                      setIsToolDropdownOpen(false);
+                      setIsQuoteDropdownOpen(true);
+                    } else {
+                      setIsQuoteDropdownOpen(false);
+                      setIsToolDropdownOpen(true);
+                    }
+                    return;
+                  }
                 }
                 // github 上面按 s 会触发页面搜索
                 if (e.key.match(/^[a-z/\\]$/) && !e.shiftKey && !e.ctrlKey && !e.altKey) e.stopPropagation();

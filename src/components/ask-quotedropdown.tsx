@@ -1,8 +1,9 @@
 import { Menu, Transition } from '@headlessui/react';
-import { useEffect, Fragment, forwardRef, Ref } from 'react';
+import { Fragment, useEffect, useRef } from 'react';
 import { ChevronDownIcon, BookOpenIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import { ToolsPromptInterface } from '../types';
+
 interface QuoteDropdownProps {
   className: string;
   onItemClick: (tool: ToolsPromptInterface) => void;
@@ -10,66 +11,48 @@ interface QuoteDropdownProps {
   setIsOpen: (isOpen: boolean) => void;
 }
 
-const CustomToolButton = forwardRef(function (props: { onClick: (e) => void }, ref: Ref<HTMLButtonElement>) {
-  return (
-    <button
-      className="inline-flex w-full justify-center rounded-md border-black border-1 border-solid bg-white px-2 py-1 text-xs font-medium text-black hover:bg-black/5 focus:outline-none"
-      ref={ref}
-      {...props}
-    />
-  );
-});
-CustomToolButton.displayName = 'CustomToolButton';
-
 const tools: ToolsPromptInterface[] = [
-  {
-    name: '页面标题',
-  },
-  {
-    name: '页面域名',
-  },
-  {
-    name: '页面网址',
-  },
-  {
-    name: '页面内容',
-  },
-  {
-    name: '选中文字',
-  },
+  { name: '页面标题' },
+  { name: '页面域名' },
+  { name: '页面网址' },
+  { name: '页面内容' },
+  { name: '选中文字' },
 ];
 
 export default function QuoteDropdown({ className, onItemClick, isOpen, setIsOpen }: QuoteDropdownProps) {
-  // className = "fixed top-36 w-56 text-right"
-  // const [open, setOpen] = useState(false);
+  const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
+
   useEffect(() => {
-    function handleClickOutside() {
+    if (isOpen) {
+      setTimeout(() => menuItemsRef.current[0]?.focus(), 0);
+    }
+  }, [isOpen]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape' && isOpen) {
+      e.preventDefault();
+      e.stopPropagation();
       setIsOpen(false);
     }
+  };
 
-    document.addEventListener('click', handleClickOutside);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, []);
   return (
-    <div className={classNames(`mr-2 ${className}`)}>
-      <Menu
-        as="div"
-        className="relative"
-        // onMouseOver={() => setOpen(true)}
-      >
-        <div>
-          <Menu.Button
-            className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
-            onClick={e => {
-              setIsOpen(!isOpen);
-              e.stopPropagation();
-            }}>
-            Add ⌘ K K
-            <ChevronDownIcon className="-mr-1 ml-2 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
-          </Menu.Button>
-        </div>
+    <button
+      className={classNames(`mr-2 ${className}`)}
+      onKeyDown={handleKeyDown}
+      aria-haspopup="true"
+      aria-expanded={isOpen}
+      type="button">
+      <Menu as="div" className="relative">
+        <Menu.Button
+          className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
+          onClick={e => {
+            setIsOpen(!isOpen);
+            e.stopPropagation();
+          }}>
+          Add ⌘ K K
+          <ChevronDownIcon className="-mr-1 ml-2 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
+        </Menu.Button>
         <Transition
           show={isOpen}
           as={Fragment}
@@ -80,20 +63,21 @@ export default function QuoteDropdown({ className, onItemClick, isOpen, setIsOpe
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95">
           <Menu.Items
-            className="absolute right-0 mt-2 w-36 origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10"
-            static>
-            <div className="px-1 py-1 ">
-              {tools.map(tool => (
+            static
+            className="absolute right-0 mt-2 w-36 origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10">
+            <div className="px-1 py-1">
+              {tools.map((tool, index) => (
                 <Menu.Item key={tool.name}>
                   {({ active }) => (
                     <button
+                      ref={el => (menuItemsRef.current[index] = el)}
                       onClick={() => {
                         onItemClick(tool);
                         setIsOpen(false);
                       }}
                       className={`${
                         active ? 'bg-violet-500 text-white' : 'text-gray-900'
-                      } group flex w-full items-center rounded-md px-2 py-2 text-sm`}>
+                      } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}>
                       <BookOpenIcon className="mr-2 h-5 w-5 color-gray" aria-hidden="true" />
                       {tool.name}
                     </button>
@@ -104,6 +88,6 @@ export default function QuoteDropdown({ className, onItemClick, isOpen, setIsOpe
           </Menu.Items>
         </Transition>
       </Menu>
-    </div>
+    </button>
   );
 }
