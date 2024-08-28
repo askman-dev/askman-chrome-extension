@@ -159,9 +159,11 @@ function AskPanel(props: AskPanelProps) {
           <AskMessage key={message.id} {...message} />
         ))}
 
-        <div className="pt-64">
-          <footer ref={messagesEndRef} />
-        </div>
+        {history.length > 0 && (
+          <div className="pt-64">
+            <footer ref={messagesEndRef} />
+          </div>
+        )}
       </div>
       {/* inputs area */}
       <div className="">
