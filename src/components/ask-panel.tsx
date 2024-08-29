@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import 'highlight.js/styles/default.min.css';
 import { QuoteContext } from '../agents/quote';
-import React, { useState, useContext, useEffect, useRef } from 'react';
+import React, { useState, useContext, useEffect, useRef, useCallback } from 'react';
 import { ChatPopupContext } from '../chat/chat';
 import ToolDropdown from './ask-tooldropdown';
 import TextareaAutosize from 'react-textarea-autosize';
@@ -36,6 +36,21 @@ const ToolBtn = (props: DomProps) => {
 function AskPanel(props: AskPanelProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { code, visible, quotes, onHide, ...rest } = props;
+  const panelRef = useRef<HTMLDivElement>(null);
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+      setIsToolDropdownOpen(false);
+      setIsQuoteDropdownOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [handleClickOutside]);
+
   const chatContext = useContext(ChatPopupContext);
   const [userInput, setUserInput] = useState<string>('');
   const [askPanelVisible, setAskPanelVisible] = useState<boolean>(visible);
@@ -219,6 +234,7 @@ function AskPanel(props: AskPanelProps) {
   // console.log('history = ' + JSON.stringify(history));
   return (
     <div
+      ref={panelRef}
       className={classNames(
         'bg-white text-black text-left fixed border-1 border-solid border-gray-200 drop-shadow-lg text-sm rounded-lg w-[473px] min-w-80 max-w-lg min-h-[155px] p-4',
         `${askPanelVisible ? 'visible' : 'invisible'}`,

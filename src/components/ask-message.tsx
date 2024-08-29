@@ -26,7 +26,7 @@ const TextWithLineBreaks = text => {
       return (
         <div
           key={index}
-          className="bg-gray-100 border-l-4 border-blue-500 p-2 mb-2 overflow-hidden whitespace-nowrap text-ellipsis">
+          className="bg-gray-100 border-l-4 border-blue-500 p-2 mr-4 mb-2 overflow-hidden whitespace-nowrap text-ellipsis">
           <span className="font-bold mr-2">{block.content.join(', ')}</span>
         </div>
       );
