@@ -38,3 +38,12 @@ declare module '*/chat-presets.toml' {
   const content: { human: string; ai: string }[];
   export default content;
 }
+
+declare module '*/models.toml' {
+  const content: {
+    [provider: string]: {
+      [key: string]: string | number | { name: string; max_tokens: number }[];
+    };
+  };
+  export default content;
+}
