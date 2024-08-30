@@ -27,20 +27,25 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({ activeTab }) => {
       .map(([provider, config]) => {
         let providerText = `[${provider}]\n`;
         Object.entries(config).forEach(([key, value]) => {
-          if (key === 'models') {
+          if (
+            key === 'api_key' ||
+            key === 'base_url' ||
+            key === 'cloudflare_gateway_url' ||
+            key === 'endpoint' ||
+            key === 'api_base'
+          ) {
+            providerText += `${key} = "${value}"\n`;
+          } else if (key === 'send_api_key') {
+            providerText += `${key} = ${value}\n`;
+          } else if (key === 'models') {
             providerText += 'models = [\n';
-            if (Array.isArray(value)) {
-              value.forEach(model => {
-                if (typeof model === 'string') {
-                  providerText += `  "${model}",\n`;
-                } else if (typeof model === 'object') {
-                  providerText += `  { name = "${model.name}", max_tokens = ${model.max_tokens} },\n`;
-                }
-              });
-            }
+            (value as Array<{ name: string; max_tokens: number }>).forEach(model => {
+              providerText += `  { name = "${model.name}", max_tokens = ${model.max_tokens} },\n`;
+            });
             providerText += ']\n';
           } else {
-            providerText += `${key} = "${value}"\n`;
+            // 处理其他可能的字段
+            providerText += `${key} = ${JSON.stringify(value)}\n`;
           }
         });
         return providerText;
