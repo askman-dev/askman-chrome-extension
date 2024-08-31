@@ -41,7 +41,9 @@ const Options: React.FC = () => {
         <h1 className="text-xl font-bold">
           问那个人 <span className="text-lg font-normal text-gray-500">v0.0.7</span>
         </h1>
-        <button className="bg-black text-white px-4 py-2 rounded">联系作者</button>
+        <a href="https://support.qq.com/product/667701" target="_blank" rel="noopener noreferrer">
+          <button className="bg-black text-white px-4 py-2 rounded">联系作者</button>
+        </a>
       </header>
 
       {/* 主要内容区 */}

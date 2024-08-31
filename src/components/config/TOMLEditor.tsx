@@ -19,6 +19,7 @@ const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = fal
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEditorReady, setIsEditorReady] = useState(false);
   const valueRef = useRef(value);
+  const [isModified, setIsModified] = useState(false);
 
   useEffect(() => {
     import('monaco-editor').then(monaco => {
@@ -76,6 +77,7 @@ const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = fal
         if (newValue !== valueRef.current) {
           valueRef.current = newValue;
           onChange?.(newValue);
+          setIsModified(true);
         }
       });
     }
@@ -88,6 +90,12 @@ const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = fal
     return () => window.removeEventListener('resize', handleResize);
   };
 
+  // Add this function to reset the modified state
+  const handleSave = () => {
+    onSave?.();
+    setIsModified(false);
+  };
+
   return (
     <div className="bg-[#272822] p-4 pt-2 rounded-lg">
       <div className="flex items-center mb-2 h-6">
@@ -95,14 +103,17 @@ const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = fal
           {readOnly ? '[只读]' : '[可编辑]'} {filename}
         </span>
         <div className="flex items-center ml-2">
-          {!readOnly && onSave && (
-            <button
-              className="relative cursor-pointer font-semibold text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2 hover:text-blue-500"
-              onClick={onSave}
-              disabled={!!error}>
-              保存配置
-            </button>
-          )}
+          {!readOnly &&
+            (isModified ? (
+              <button
+                className="relative cursor-pointer font-semibold text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2 hover:text-blue-500"
+                onClick={handleSave}
+                disabled={!!error}>
+                保存配置
+              </button>
+            ) : (
+              <span className="text-gray-400">未更改</span>
+            ))}
         </div>
       </div>
       <div ref={containerRef} style={{ height: '400px', border: '1px solid #3e3d32' }} />
