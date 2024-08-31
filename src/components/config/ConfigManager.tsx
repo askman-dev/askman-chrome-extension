@@ -58,12 +58,34 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
 
   const renderActiveEditor = () => {
     switch (activeTab) {
-      case '用户值':
-        return <ConfigEditorInstance initialValue={userConfig} readOnly={!isEditable} onSave={handleSaveUserConfig} />;
-      case '系统值':
-        return <ConfigEditorInstance initialValue={systemConfig} readOnly={true} />;
       case '预览':
-        return <ConfigEditorInstance initialValue={mergedConfig} readOnly={true} />;
+        return (
+          <ConfigEditorInstance
+            key={configType + '/preview'}
+            initialValue={mergedConfig}
+            readOnly={true}
+            filename={configType}
+          />
+        );
+      case '用户值':
+        return (
+          <ConfigEditorInstance
+            key={configType + '/user'}
+            initialValue={userConfig}
+            readOnly={!isEditable}
+            onSave={handleSaveUserConfig}
+            filename={userConfigStorageKey}
+          />
+        );
+      case '系统值':
+        return (
+          <ConfigEditorInstance
+            key={configType + '/system'}
+            initialValue={systemConfig}
+            readOnly={true}
+            filename={systemConfigPath}
+          />
+        );
       default:
         return null;
     }
@@ -72,7 +94,12 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
   return (
     <div>
       <h2 className="text-2xl font-bold mb-2">{configType}</h2>
-      <div className="text-lg mb-4">这里是模型参数配置文件。你可以修改「用户值」来覆盖系统值。</div>
+      <div className="text-lg mb-4">
+        这里是参数配置文件。你可以修改「用户值」来覆盖「系统值」。
+        <a className="pl-2" href="https://toml.io/cn/v1.0.0" target="_blank" rel="noreferrer noopener">
+          🔗 学习 TOML 语法
+        </a>
+      </div>
       <div className="mb-4">
         {['预览', '用户值', '系统值'].map(tab => (
           <button

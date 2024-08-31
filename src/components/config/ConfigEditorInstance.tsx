@@ -4,10 +4,11 @@ import * as TOML from '@iarna/toml';
 interface ConfigEditorInstanceProps {
   initialValue: string;
   readOnly: boolean;
+  filename: string;
   onSave?: (value: string) => void;
 }
 
-const ConfigEditorInstance: React.FC<ConfigEditorInstanceProps> = ({ initialValue, readOnly, onSave }) => {
+const ConfigEditorInstance: React.FC<ConfigEditorInstanceProps> = ({ initialValue, readOnly, onSave, filename }) => {
   const [value, setValue] = useState(initialValue);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,6 +43,7 @@ const ConfigEditorInstance: React.FC<ConfigEditorInstanceProps> = ({ initialValu
 
   return (
     <TOMLEditor
+      filename={filename}
       value={value}
       onChange={handleChange}
       readOnly={readOnly}

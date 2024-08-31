@@ -10,9 +10,10 @@ interface TOMLEditorProps {
   readOnly?: boolean;
   onSave?: () => void;
   error?: string | null;
+  filename: string; // 新增的属性
 }
 
-const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = false, onSave, error }) => {
+const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = false, onSave, error, filename }) => {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<typeof monaco | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -88,17 +89,17 @@ const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = fal
   };
 
   return (
-    <div className="bg-[#272822] p-4 rounded-lg">
-      <div className="flex items-center justify-between mb-2 h-8">
+    <div className="bg-[#272822] p-4 pt-2 rounded-lg">
+      <div className="flex items-center mb-2 h-6">
         <span className="text-white">
-          models.toml
-          <a className="pl-2" href="https://toml.io/cn/v1.0.0" target="_blank" rel="noreferrer noopener">
-            🔗 学习 TOML 语法
-          </a>
+          {readOnly ? '[只读]' : '[可编辑]'} {filename}
         </span>
-        <div className="flex items-center">
+        <div className="flex items-center ml-2">
           {!readOnly && onSave && (
-            <button className="mr-4 px-4 py-2 bg-blue-500 text-white rounded" onClick={onSave} disabled={!!error}>
+            <button
+              className="relative cursor-pointer font-semibold text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2 hover:text-blue-500"
+              onClick={onSave}
+              disabled={!!error}>
               保存配置
             </button>
           )}

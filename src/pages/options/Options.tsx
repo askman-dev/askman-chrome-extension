@@ -2,32 +2,32 @@ import React, { useState } from 'react';
 import ConfigManager from '@src/components/config/ConfigManager';
 
 const Options: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('模型列表');
+  const [activeTab, setActiveTab] = useState('配置模型');
 
-  const tabs = ['模型列表', '对话偏好', '配置文件', '站点智能'];
+  const tabs = ['配置模型', '配置对话', '配置工具', '站点智能（即将到来）'];
 
   const getConfigProps = () => {
     switch (activeTab) {
-      case '模型列表':
+      case '配置模型':
         return {
-          configType: '模型列表',
+          configType: '配置模型',
           systemConfigPath: '/assets/conf/models.toml',
-          userConfigStorageKey: 'userModelConfig',
+          userConfigStorageKey: 'models.toml',
           isEditable: true,
         };
-      case '对话偏好':
+      case '配置对话':
         return {
-          configType: '对话偏好',
+          configType: '配置对话',
           systemConfigPath: '/assets/conf/chat-presets.toml',
-          userConfigStorageKey: 'userChatConfig',
+          userConfigStorageKey: 'chat-presets.toml',
           isEditable: true,
         };
-      case '配置文件':
+      case '配置工具':
         return {
-          configType: '配置文件',
+          configType: '配置工具',
           systemConfigPath: '/assets/conf/default-tools.toml',
-          userConfigStorageKey: 'userToolConfig',
-          isEditable: false,
+          userConfigStorageKey: 'tools.toml',
+          isEditable: true,
         };
       default:
         return null;
