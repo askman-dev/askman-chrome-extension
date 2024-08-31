@@ -1,7 +1,7 @@
 [chatglm]
 sdk = "openai"
 api_key = "" 
-base_url = "https://egoist-openai-proxy-askman-dev.vercel.app/v1/"
+base_url = "https://extapi.askman.dev/v1/"
 send_api_key = false
 cloudflare_gateway_url = ""
 models = [
