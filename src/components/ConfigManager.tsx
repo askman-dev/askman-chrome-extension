@@ -1,120 +1,89 @@
 import React, { useState, useEffect } from 'react';
-import chatPresets from '@assets/conf/chat-presets.toml';
 import models from '@assets/conf/models.toml';
-// import configStorage from '@src/shared/storages/configStorage';
 
 interface ConfigManagerProps {
   activeTab: string;
 }
 
 const ConfigManager: React.FC<ConfigManagerProps> = ({ activeTab }) => {
-  const [configFile, setConfigFile] = useState('');
-  const [chatPresetsContent, setChatPresetsContent] = useState('');
-  const [modelsContent, setModelsContent] = useState('');
+  const [activeModelTab, setActiveModelTab] = useState('用户值');
+  const [userConfig, setUserConfig] = useState('');
+  const [systemConfig, setSystemConfig] = useState('');
+  const [mergedConfig, setMergedConfig] = useState('');
 
   useEffect(() => {
-    const chatPresetsText = Object.entries(chatPresets)
-      .map(
-        ([key, value]) =>
-          `[${key}]\n${Object.entries(value)
-            .map(([k, v]) => `${k} = "${v}"`)
-            .join('\n')}`,
-      )
-      .join('\n\n');
-    setChatPresetsContent(chatPresetsText);
+    // 加载系统配置
+    setSystemConfig(JSON.stringify(models, null, 2));
 
-    const modelsText = Object.entries(models)
-      .map(([provider, config]) => {
-        let providerText = `[${provider}]\n`;
-        Object.entries(config).forEach(([key, value]) => {
-          if (
-            key === 'api_key' ||
-            key === 'base_url' ||
-            key === 'cloudflare_gateway_url' ||
-            key === 'endpoint' ||
-            key === 'api_base'
-          ) {
-            providerText += `${key} = "${value}"\n`;
-          } else if (key === 'send_api_key') {
-            providerText += `${key} = ${value}\n`;
-          } else if (key === 'models') {
-            providerText += 'models = [\n';
-            (value as Array<{ name: string; max_tokens: number }>).forEach(model => {
-              providerText += `  { name = "${model.name}", max_tokens = ${model.max_tokens} },\n`;
-            });
-            providerText += ']\n';
-          } else {
-            // 处理其他可能的字段
-            providerText += `${key} = ${JSON.stringify(value)}\n`;
-          }
-        });
-        return providerText;
-      })
-      .join('\n');
+    // 从 localStorage 加载用户配置
+    const savedUserConfig = localStorage.getItem('userModelConfig');
+    if (savedUserConfig) {
+      setUserConfig(savedUserConfig);
+    }
 
-    setModelsContent(modelsText);
+    // 合并配置
+    mergeConfigs();
   }, []);
 
-  const handleConfigFileChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setConfigFile(e.target.value);
+  const mergeConfigs = () => {
+    // 这里需要实现合并逻辑
+    // 暂时只是占位
+    setMergedConfig('Merged configuration will be shown here');
   };
 
-  const handleSaveConfig = () => {
-    console.log('Saving config:', configFile);
+  const handleUserConfigChange = (value: string) => {
+    setUserConfig(value);
+    localStorage.setItem('userModelConfig', value);
+    mergeConfigs();
   };
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case '配置文件':
+  const renderModelContent = () => {
+    switch (activeModelTab) {
+      case '用户值':
         return (
           <div>
-            <h2 className="text-lg font-bold mb-2">配置文件</h2>
-            <p className="text-sm text-gray-600 mb-2">config.toml</p>
             <textarea
-              className="w-full h-64 p-2 bg-gray-200 rounded resize-none font-mono mb-4"
-              value={configFile}
-              onChange={handleConfigFileChange}
-              placeholder="Enter your config.toml here"
+              className="w-full h-64 p-2 border rounded font-mono"
+              value={userConfig}
+              onChange={e => handleUserConfigChange(e.target.value)}
+              placeholder="Enter your custom model configuration here"
             />
-            <div className="flex justify-end">
-              <button className="px-4 py-2 bg-gray-700 text-white rounded" onClick={handleSaveConfig}>
-                加载配置
-              </button>
-            </div>
+            <button
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+              onClick={() => localStorage.setItem('userModelConfig', userConfig)}>
+              保存配置
+            </button>
           </div>
         );
-      case '对话偏好':
-        return (
-          <div>
-            <h2 className="text-lg font-bold mb-2">对话偏好</h2>
-            <p className="text-sm text-gray-600 mb-2">chat-presets.toml</p>
-            <textarea
-              className="w-full h-64 p-2 bg-gray-200 rounded resize-none font-mono mb-4"
-              value={chatPresetsContent}
-              readOnly
-              placeholder="Loading chat-presets.toml..."
-            />
-          </div>
-        );
-      case '模型列表':
-        return (
-          <div>
-            <h2 className="text-lg font-bold mb-2">模型列表</h2>
-            <p className="text-sm text-gray-600 mb-2">models.toml</p>
-            <textarea
-              className="w-full h-64 p-2 bg-gray-200 rounded resize-none font-mono mb-4"
-              value={modelsContent}
-              readOnly
-              placeholder="Loading models.toml..."
-            />
-          </div>
-        );
+      case '系统值':
+        return <pre className="w-full h-64 p-2 border rounded font-mono overflow-auto">{systemConfig}</pre>;
+      case '预览':
+        return <pre className="w-full h-64 p-2 border rounded font-mono overflow-auto">{mergedConfig}</pre>;
       default:
-        return <div>Content for {activeTab}</div>;
+        return null;
     }
   };
 
-  return renderContent();
+  if (activeTab !== '模型列表') {
+    return null;
+  }
+
+  return (
+    <div>
+      <h2 className="text-lg font-bold mb-4">模型列表</h2>
+      <div className="mb-4">
+        {['用户值', '系统值', '预览'].map(tab => (
+          <button
+            key={tab}
+            className={`mr-2 px-4 py-2 rounded ${activeModelTab === tab ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            onClick={() => setActiveModelTab(tab)}>
+            {tab}
+          </button>
+        ))}
+      </div>
+      {renderModelContent()}
+    </div>
+  );
 };
 
 export default ConfigManager;
