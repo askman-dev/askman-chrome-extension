@@ -38,7 +38,7 @@ export class ChatCoreContext implements ChatCoreInterface {
       temperature: 0.2,
       topP: 0.95,
       modelName: 'free',
-      openAIApiKey: '',
+      openAIApiKey: 'sk-example', //必须得是非空字符串，否则会报错
       configuration: {
         baseURL: 'https://extapi.askman.dev/v1',
       },
