@@ -41,7 +41,16 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({ activeTab }) => {
       initializeEditor();
     });
 
+    const handleResize = () => {
+      if (editorRef.current) {
+        editorRef.current.layout();
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
     return () => {
+      window.removeEventListener('resize', handleResize);
       if (editorRef.current) {
         editorRef.current.dispose();
       }
@@ -81,10 +90,24 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({ activeTab }) => {
             editorRef.current = monaco.editor.create(container, {
               value: userConfig,
               language: 'toml',
-              theme: 'github-dark',
+              theme: 'vs-dark', // 使用暗色主题
               minimap: { enabled: false },
               scrollBeyondLastLine: false,
+              fontSize: 14, // 设置字体大小
+              lineHeight: 20, // 设置行高
             });
+
+            // 自定义编辑器样式
+            const style = document.createElement('style');
+            style.textContent = `
+              .monaco-editor .margin {
+                background-color: #272822 !important;
+              }
+              .monaco-editor .monaco-editor-background {
+                background-color: #272822 !important;
+              }
+            `;
+            document.head.appendChild(style);
 
             editorRef.current.onDidChangeModelContent(() => {
               const newValue = editorRef.current?.getValue() || '';
@@ -152,10 +175,18 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({ activeTab }) => {
     switch (activeModelTab) {
       case '用户值':
         return (
-          <div>
-            <div id="monaco-editor-container" style={{ height: '400px' }}></div>
+          <div className="bg-[#272822] p-4 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-white">user-models.toml</span>
+              <span className="text-blue-600">
+                <a href="https://toml.io/cn/v1.0.0" target="_blank" rel="noreferrer noopener">
+                  学习 TOML 语法
+                </a>
+              </span>
+            </div>
+            <div id="monaco-editor-container" style={{ height: '400px', border: '1px solid #3e3d32' }}></div>
             <button
-              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
               onClick={handleSaveConfig}
               disabled={!!error}>
               保存配置
