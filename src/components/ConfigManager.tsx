@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as TOML from '@iarna/toml';
 import models from '@assets/conf/models.toml';
 import { editor } from 'monaco-editor';
+import { createHighlighter } from 'shiki';
+import { shikiToMonaco } from '@shikijs/monaco';
+import * as monaco from 'monaco-editor-core';
 
 interface ConfigManagerProps {
   activeTab: string;
@@ -15,8 +18,14 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({ activeTab }) => {
   const [error, setError] = useState<string | null>(null);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<typeof import('monaco-editor') | null>(null);
+  const [isEditorReady, setIsEditorReady] = useState(false);
+  // const [setHighlighter] = useState<Awaited<ReturnType<typeof createHighlighter>> | null>(null);
+  const highlighterRef = useRef<Awaited<ReturnType<typeof createHighlighter>> | null>(null);
+  const [highlighterError, setHighlighterError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('Starting to create highlighter...');
+
     // 加载系统配置
     setSystemConfig(TOML.stringify(models));
 
@@ -26,7 +35,6 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({ activeTab }) => {
 
     // 验证和合并配置
     validateAndMergeConfigs(savedUserConfig);
-
     // 动态加载 Monaco Editor
     import('monaco-editor').then(monaco => {
       monacoRef.current = monaco;
@@ -41,31 +49,61 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({ activeTab }) => {
   }, []);
 
   useEffect(() => {
-    if (activeModelTab === '用户值' && monacoRef.current) {
+    if (isEditorReady && activeTab === '模型列表' && activeModelTab === '用户值' && highlighterRef.current) {
+      console.log('Initializing editor...');
       initializeEditor();
     }
-  }, [activeModelTab]);
+  }, [isEditorReady, activeTab, activeModelTab]);
 
   const initializeEditor = () => {
     if (editorRef.current) {
       editorRef.current.dispose();
     }
 
-    const container = document.getElementById('monaco-editor-container');
-    if (container && monacoRef.current) {
-      editorRef.current = monacoRef.current.editor.create(container, {
-        value: userConfig,
-        language: 'toml',
-        minimap: { enabled: false },
-        scrollBeyondLastLine: false,
-      });
+    // 注册语言
+    monaco.languages.register({ id: 'toml' });
+    createHighlighter({
+      themes: ['github-dark'],
+      langs: ['toml'],
+    })
+      .then(hl => {
+        console.log('Highlighter created successfully:', hl);
+        // setHighlighter(hl);
+        highlighterRef.current = hl;
+        console.log('Highlighter object:', highlighterRef.current);
+        if (highlighterRef.current && typeof highlighterRef.current.getLoadedThemes === 'function') {
+          console.log('Highlighter is properly initialized, applying to Monaco...');
+          // 注册 Shiki 主题并提供语法高亮
+          shikiToMonaco(highlighterRef.current, monaco);
 
-      editorRef.current.onDidChangeModelContent(() => {
-        const newValue = editorRef.current.getValue();
-        setUserConfig(newValue);
-        validateAndMergeConfigs(newValue);
+          const container = document.getElementById('monaco-editor-container');
+          if (container) {
+            editorRef.current = monaco.editor.create(container, {
+              value: userConfig,
+              language: 'toml',
+              theme: 'github-dark',
+              minimap: { enabled: false },
+              scrollBeyondLastLine: false,
+            });
+
+            editorRef.current.onDidChangeModelContent(() => {
+              const newValue = editorRef.current?.getValue() || '';
+              setUserConfig(newValue);
+              validateAndMergeConfigs(newValue);
+            });
+          }
+        } else {
+          console.error('Highlighter is not properly initialized');
+          if (highlighterError) {
+            console.error('Highlighter creation error:', highlighterError);
+          }
+        }
+        setIsEditorReady(true);
+      })
+      .catch(error => {
+        console.error('Error creating highlighter:', error);
+        setHighlighterError(error.message);
       });
-    }
   };
 
   const validateAndMergeConfigs = (userConfigStr: string) => {

@@ -25,7 +25,7 @@ class ManifestParser {
       browser_style: false,
     };
     manifestCopy.content_security_policy = {
-      extension_pages: "script-src 'self'; object-src 'self'",
+      extension_pages: "script-src 'self'; object-src 'self' 'wasm-unsafe-eval'",
     };
     delete manifestCopy.options_page;
     return manifestCopy as Manifest;
