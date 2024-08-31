@@ -15,7 +15,7 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
   userConfigStorageKey,
   isEditable,
 }) => {
-  const [activeTab, setActiveTab] = useState('用户值');
+  const [activeTab, setActiveTab] = useState('预览');
   const [systemConfig, setSystemConfig] = useState('');
   const [userConfig, setUserConfig] = useState('');
   const [mergedConfig, setMergedConfig] = useState('');
@@ -71,9 +71,10 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
 
   return (
     <div>
-      <h2>{configType}</h2>
+      <h2 className="text-2xl font-bold mb-2">{configType}</h2>
+      <div className="text-lg mb-4">这里是模型参数配置文件。你可以修改「用户值」来覆盖系统值。</div>
       <div className="mb-4">
-        {['用户值', '系统值', '预览'].map(tab => (
+        {['预览', '用户值', '系统值'].map(tab => (
           <button
             key={tab}
             className={`mr-2 px-4 py-2 ${activeTab === tab ? 'bg-blue-500 text-white' : 'bg-gray-200'} rounded`}
