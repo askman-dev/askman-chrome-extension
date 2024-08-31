@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ConfigManager from '@src/components/ConfigManager';
+import ConfigManager from '@root/src/components/config/ConfigManager';
 
 const Options: React.FC = () => {
   const [activeTab, setActiveTab] = useState('模型列表');
