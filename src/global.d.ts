@@ -47,3 +47,7 @@ declare module '*/models.toml' {
   };
   export default content;
 }
+
+declare module 'monaco-editor/esm/vs/editor/editor.api' {
+  export * from 'monaco-editor';
+}

@@ -30,6 +30,7 @@ export default defineConfig({
       '@src': srcDir,
       '@assets': assetsDir,
       '@pages': pagesDir,
+      'monaco-editor': 'monaco-editor/esm/vs/editor/editor.api.js',
     },
   },
   plugins: [
@@ -86,8 +87,10 @@ export default defineConfig({
     host: 'localhost', // or '127.0.0.1'
     port: 8081, // specify the port
   },
+  optimizeDeps: {
+    include: ['monaco-editor'],
+  },
 });
-
 function getCacheInvalidationKey() {
   return cacheInvalidationKeyRef.current;
 }
