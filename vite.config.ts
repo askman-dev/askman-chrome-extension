@@ -8,6 +8,7 @@ import customDynamicImport from './utils/plugins/custom-dynamic-import';
 import addHmr from './utils/plugins/add-hmr';
 import watchRebuild from './utils/plugins/watch-rebuild';
 import inlineVitePreloadScript from './utils/plugins/inline-vite-preload-script';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 const rootDir = resolve(__dirname);
 const srcDir = resolve(rootDir, 'src');
@@ -43,6 +44,14 @@ export default defineConfig({
     addHmr({ background: enableHmrInBackgroundScript, view: true }),
     isDev && watchRebuild({ afterWriteBundle: regenerateCacheInvalidationKey }),
     inlineVitePreloadScript(),
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'src/assets/conf/*',
+          dest: 'assets/conf',
+        },
+      ],
+    }),
   ],
   publicDir,
   build: {

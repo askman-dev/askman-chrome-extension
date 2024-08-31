@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import TOMLEditor from '../TOMLEditor';
+import TOMLEditor from './TOMLEditor';
 import * as TOML from '@iarna/toml';
 interface ConfigEditorInstanceProps {
   initialValue: string;

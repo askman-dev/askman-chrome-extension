@@ -1,26 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import * as TOML from '@iarna/toml';
-import models from '@assets/conf/models.toml';
 import ConfigEditorInstance from './ConfigEditorInstance';
 
-const ConfigManager: React.FC = () => {
-  const [activeModelTab, setActiveModelTab] = useState('用户值');
+interface ConfigManagerProps {
+  configType: string;
+  systemConfigPath: string;
+  userConfigStorageKey: string;
+  isEditable: boolean;
+}
+
+const ConfigManager: React.FC<ConfigManagerProps> = ({
+  configType,
+  systemConfigPath,
+  userConfigStorageKey,
+  isEditable,
+}) => {
+  const [activeTab, setActiveTab] = useState('用户值');
   const [systemConfig, setSystemConfig] = useState('');
   const [userConfig, setUserConfig] = useState('');
   const [mergedConfig, setMergedConfig] = useState('');
 
   useEffect(() => {
-    const systemConfigStr = TOML.stringify(models);
-    setSystemConfig(systemConfigStr);
-    const savedUserConfig = localStorage.getItem('userModelConfig') || '';
-    setUserConfig(savedUserConfig);
-    updateMergedConfig(savedUserConfig);
-  }, []);
+    loadConfigs();
+  }, [systemConfigPath, userConfigStorageKey]);
 
-  const updateMergedConfig = (userConfigStr: string) => {
+  const loadConfigs = async () => {
+    try {
+      const systemConfigResponse = await fetch(systemConfigPath);
+      const systemConfigStr = await systemConfigResponse.text();
+      setSystemConfig(systemConfigStr);
+
+      const savedUserConfig = localStorage.getItem(userConfigStorageKey) || '';
+      setUserConfig(savedUserConfig);
+
+      updateMergedConfig(savedUserConfig, systemConfigStr);
+    } catch (e) {
+      console.error('Error loading configs:', e);
+    }
+  };
+
+  const updateMergedConfig = (userConfigStr: string, systemConfigStr: string) => {
     try {
       const userConfigObj = TOML.parse(userConfigStr);
-      const mergedConfigObj = { ...models, ...userConfigObj };
+      const systemConfigObj = TOML.parse(systemConfigStr);
+      const mergedConfigObj = { ...systemConfigObj, ...userConfigObj };
       setMergedConfig(TOML.stringify(mergedConfigObj));
     } catch (e) {
       console.error('Error merging configs:', e);
@@ -29,14 +52,14 @@ const ConfigManager: React.FC = () => {
 
   const handleSaveUserConfig = (newConfig: string) => {
     setUserConfig(newConfig);
-    localStorage.setItem('userModelConfig', newConfig);
-    updateMergedConfig(newConfig);
+    localStorage.setItem(userConfigStorageKey, newConfig);
+    updateMergedConfig(newConfig, systemConfig);
   };
 
   const renderActiveEditor = () => {
-    switch (activeModelTab) {
+    switch (activeTab) {
       case '用户值':
-        return <ConfigEditorInstance initialValue={userConfig} readOnly={false} onSave={handleSaveUserConfig} />;
+        return <ConfigEditorInstance initialValue={userConfig} readOnly={!isEditable} onSave={handleSaveUserConfig} />;
       case '系统值':
         return <ConfigEditorInstance initialValue={systemConfig} readOnly={true} />;
       case '预览':
@@ -48,12 +71,13 @@ const ConfigManager: React.FC = () => {
 
   return (
     <div>
+      <h2>{configType}</h2>
       <div className="mb-4">
         {['用户值', '系统值', '预览'].map(tab => (
           <button
             key={tab}
-            className={`mr-2 px-4 py-2 ${activeModelTab === tab ? 'bg-blue-500 text-white' : 'bg-gray-200'} rounded`}
-            onClick={() => setActiveModelTab(tab)}>
+            className={`mr-2 px-4 py-2 ${activeTab === tab ? 'bg-blue-500 text-white' : 'bg-gray-200'} rounded`}
+            onClick={() => setActiveTab(tab)}>
             {tab}
           </button>
         ))}

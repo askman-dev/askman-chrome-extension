@@ -1,10 +1,38 @@
 import React, { useState } from 'react';
-import ConfigManager from '@root/src/components/config/ConfigManager';
+import ConfigManager from '@src/components/config/ConfigManager';
 
 const Options: React.FC = () => {
   const [activeTab, setActiveTab] = useState('模型列表');
 
   const tabs = ['模型列表', '对话偏好', '配置文件', '站点智能'];
+
+  const getConfigProps = () => {
+    switch (activeTab) {
+      case '模型列表':
+        return {
+          configType: '模型列表',
+          systemConfigPath: '/assets/conf/models.toml',
+          userConfigStorageKey: 'userModelConfig',
+          isEditable: true,
+        };
+      case '对话偏好':
+        return {
+          configType: '对话偏好',
+          systemConfigPath: '/assets/conf/chat-presets.toml',
+          userConfigStorageKey: 'userChatConfig',
+          isEditable: true,
+        };
+      case '配置文件':
+        return {
+          configType: '配置文件',
+          systemConfigPath: '/assets/conf/default-tools.toml',
+          userConfigStorageKey: 'userToolConfig',
+          isEditable: false,
+        };
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen">
@@ -34,7 +62,7 @@ const Options: React.FC = () => {
 
         {/* 右侧内容区 */}
         <main className="flex-1 p-6 bg-white overflow-auto">
-          <ConfigManager activeTab={activeTab} />
+          {getConfigProps() && <ConfigManager {...getConfigProps()} />}
         </main>
       </div>
     </div>
