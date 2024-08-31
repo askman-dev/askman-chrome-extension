@@ -4,6 +4,7 @@ import { QuoteContext } from '../agents/quote';
 import React, { useState, useContext, useEffect, useRef, useCallback } from 'react';
 import { ChatPopupContext } from '../chat/chat';
 import ToolDropdown from './ask-tooldropdown';
+import ModelDropdown from './ask/ModelDropDown';
 import TextareaAutosize from 'react-textarea-autosize';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 import AskMessage from './ask-message';
@@ -41,6 +42,7 @@ function AskPanel(props: AskPanelProps) {
     if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
       setIsToolDropdownOpen(false);
       setIsQuoteDropdownOpen(false);
+      setIsModelDropdownOpen(false);
     }
   }, []);
 
@@ -63,18 +65,25 @@ function AskPanel(props: AskPanelProps) {
   const [userTools, setUserTools] = useState<ToolsPromptInterface>();
   const [isToolDropdownOpen, setIsToolDropdownOpen] = useState(false);
   const [isQuoteDropdownOpen, setIsQuoteDropdownOpen] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('free'); // 添加状态来跟踪选中的模型
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const showToolDropdown = () => {
     setIsToolDropdownOpen(true);
     setIsQuoteDropdownOpen(false);
+    setIsModelDropdownOpen(false);
   };
   const showQuoteDropdown = () => {
     setIsQuoteDropdownOpen(true);
     setIsToolDropdownOpen(false);
+    setIsModelDropdownOpen(false);
+  };
+  const showModelDropdown = () => {
+    setIsModelDropdownOpen(true);
+    setIsToolDropdownOpen(false);
+    setIsQuoteDropdownOpen(false);
   };
   // chat list ref
   // const chatListRef = useRef<HTMLDivElement>(null);
-
-  const [lastKPressTime, setLastKPressTime] = useState<number | null>(null);
 
   useEffect(() => {
     quotes.forEach(quote => {
@@ -157,40 +166,48 @@ function AskPanel(props: AskPanelProps) {
           e.stopPropagation();
           return;
         }
+        if (isModelDropdownOpen) {
+          setIsModelDropdownOpen(false);
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
       }
 
       // 检测 Command+K (Mac) 或 Ctrl+K (Windows/Linux)
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
 
-        // 使用一个计时器来检测是否是双击 K
-        if (lastKPressTime && Date.now() - lastKPressTime < 300) {
-          // 双击 K，触发 QuoteDropdown
+        if (!isToolDropdownOpen && !isQuoteDropdownOpen && !isModelDropdownOpen) {
+          showToolDropdown();
+        } else if (isToolDropdownOpen) {
           showQuoteDropdown();
-        } else {
-          if (isToolDropdownOpen) {
-            showQuoteDropdown();
-          } else {
-            // 单击 K，触发 ToolDropdown
-            showToolDropdown();
-          }
+        } else if (isQuoteDropdownOpen) {
+          showModelDropdown();
+        } else if (isModelDropdownOpen) {
+          showToolDropdown();
         }
 
-        setLastKPressTime(Date.now());
         return;
       }
 
       // 检测左右方向键
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-        if (isToolDropdownOpen || isQuoteDropdownOpen) {
+        if (isToolDropdownOpen || isQuoteDropdownOpen || isModelDropdownOpen) {
           e.preventDefault();
           e.stopPropagation();
-          if (isToolDropdownOpen) {
-            setIsToolDropdownOpen(false);
-            setIsQuoteDropdownOpen(true);
-          } else {
-            setIsQuoteDropdownOpen(false);
-            setIsToolDropdownOpen(true);
+          if (isToolDropdownOpen && e.key === 'ArrowRight') {
+            showQuoteDropdown();
+          } else if (isQuoteDropdownOpen && e.key === 'ArrowRight') {
+            showModelDropdown();
+          } else if (isModelDropdownOpen && e.key === 'ArrowRight') {
+            showToolDropdown();
+          } else if (isToolDropdownOpen && e.key === 'ArrowLeft') {
+            showModelDropdown();
+          } else if (isQuoteDropdownOpen && e.key === 'ArrowLeft') {
+            showToolDropdown();
+          } else if (isModelDropdownOpen && e.key === 'ArrowLeft') {
+            showQuoteDropdown();
           }
           return;
         }
@@ -201,16 +218,16 @@ function AskPanel(props: AskPanelProps) {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isToolDropdownOpen, isQuoteDropdownOpen, lastKPressTime]);
+  }, [isToolDropdownOpen, isQuoteDropdownOpen, isModelDropdownOpen]);
 
   // Add this new useEffect to focus on input when menus are closed
   useEffect(() => {
-    if (!isToolDropdownOpen && !isQuoteDropdownOpen && inputRef.current) {
+    if (!isToolDropdownOpen && !isQuoteDropdownOpen && !isModelDropdownOpen && inputRef.current) {
       setTimeout(() => {
         inputRef.current.focus();
       }, 33);
     }
-  }, [isToolDropdownOpen, isQuoteDropdownOpen]);
+  }, [isToolDropdownOpen, isQuoteDropdownOpen, isModelDropdownOpen]);
 
   const addQuote = (newQuote: QuoteContext) => {
     setInitQuotes(prevQuotes => [...prevQuotes, newQuote]);
@@ -272,7 +289,7 @@ function AskPanel(props: AskPanelProps) {
           displayName={userTools?.name || 'Tool'}
           isOpen={isToolDropdownOpen}
           setIsOpen={setIsToolDropdownOpen}
-          className="left-[100px] inline-block"
+          className="inline-block"
           onItemClick={item => {
             setUserTools(item);
           }}
@@ -281,11 +298,22 @@ function AskPanel(props: AskPanelProps) {
         <QuoteDropdown
           isOpen={isQuoteDropdownOpen}
           setIsOpen={setIsQuoteDropdownOpen}
-          className="left-[100px] inline-block"
+          className="inline-block"
           onItemClick={item => {
             // 假设 item 是 QuoteContext 类型
             addQuote(item);
             // setIsQuoteDropdownOpen(false); // 选择后关闭下拉菜单
+          }}
+        />
+
+        <ModelDropdown
+          displayName={selectedModel}
+          isOpen={isModelDropdownOpen}
+          setIsOpen={setIsModelDropdownOpen}
+          className="inline-block" // 调整位置以适应布局
+          onItemClick={item => {
+            setSelectedModel(item);
+            // 这里可以添加更多逻辑，例如通知 chatContext 模型已更改
           }}
         />
       </div>
@@ -336,7 +364,7 @@ function AskPanel(props: AskPanelProps) {
               onKeyDown={e => {
                 // 检测 ESC 键
                 if (e.key === 'Escape') {
-                  if (isQuoteDropdownOpen || isToolDropdownOpen) {
+                  if (isQuoteDropdownOpen || isToolDropdownOpen || isModelDropdownOpen) {
                     e.preventDefault();
                     return;
                   }
@@ -360,6 +388,9 @@ function AskPanel(props: AskPanelProps) {
                   } else if (isQuoteDropdownOpen) {
                     // 如果 Quote 下拉菜单打开，确认选择并关闭菜单
                     setIsQuoteDropdownOpen(false);
+                  } else if (isModelDropdownOpen) {
+                    // 如果 Model 下拉菜单打开，确认选择并关闭菜单
+                    setIsModelDropdownOpen(false);
                   } else {
                     // 如果没有下拉菜单打开，发送消息
                     onSend();
@@ -369,15 +400,21 @@ function AskPanel(props: AskPanelProps) {
                 }
                 // 检测左右方向键
                 if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                  if (isToolDropdownOpen || isQuoteDropdownOpen) {
+                  if (isToolDropdownOpen || isQuoteDropdownOpen || isModelDropdownOpen) {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (isToolDropdownOpen) {
-                      setIsToolDropdownOpen(false);
-                      setIsQuoteDropdownOpen(true);
-                    } else {
-                      setIsQuoteDropdownOpen(false);
-                      setIsToolDropdownOpen(true);
+                    if (isToolDropdownOpen && e.key === 'ArrowRight') {
+                      showQuoteDropdown();
+                    } else if (isQuoteDropdownOpen && e.key === 'ArrowRight') {
+                      showModelDropdown();
+                    } else if (isModelDropdownOpen && e.key === 'ArrowRight') {
+                      showToolDropdown();
+                    } else if (isToolDropdownOpen && e.key === 'ArrowLeft') {
+                      showModelDropdown();
+                    } else if (isQuoteDropdownOpen && e.key === 'ArrowLeft') {
+                      showToolDropdown();
+                    } else if (isModelDropdownOpen && e.key === 'ArrowLeft') {
+                      showQuoteDropdown();
                     }
                     return;
                   }

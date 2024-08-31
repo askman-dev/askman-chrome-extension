@@ -1,37 +1,30 @@
+import React, { Fragment, useRef, useEffect } from 'react';
 import { Menu, Transition } from '@headlessui/react';
-import { Fragment, useEffect, useRef } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
-import { QuoteContext } from '../agents/quote';
 
-interface QuoteDropdownProps {
-  className: string;
-  onItemClick: (tool: QuoteContext) => void;
+interface ModelDropdownProps {
+  displayName: string;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  className?: string;
+  onItemClick: (model: string) => void;
 }
 
-const getQuoteContexts = (): QuoteContext[] => [
-  { type: 'page', pageTitle: document.title, pageUrl: window.location.href, name: 'pageMeta' },
-  { type: 'selection', selection: window.getSelection()?.toString() || '', name: 'selection' },
-  {
-    type: 'text',
-    pageTitle: document.title,
-    pageUrl: window.location.href,
-    selection: document.body.innerText,
-    name: 'pageContent',
-  },
+const models = [
+  { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
+  { id: 'gpt-4', name: 'GPT-4' },
+  { id: 'claude-v1', name: 'Claude v1' },
+  { id: 'claude-instant-v1', name: 'Claude Instant v1' },
 ];
 
-export default function QuoteDropdown({ className, onItemClick, isOpen, setIsOpen }: QuoteDropdownProps) {
+export default function ModelDropdown({ displayName, isOpen, setIsOpen, className, onItemClick }: ModelDropdownProps) {
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
-  const quoteContexts = getQuoteContexts();
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => menuItemsRef.current[0]?.focus(), 0);
     }
   }, [isOpen]);
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape' && isOpen) {
       e.preventDefault();
@@ -47,16 +40,14 @@ export default function QuoteDropdown({ className, onItemClick, isOpen, setIsOpe
       aria-haspopup="true"
       aria-expanded={isOpen}
       type="button">
-      <Menu as="div" className="relative">
+      <Menu as="div" className={classNames('relative inline-block text-left', className)}>
         <Menu.Button
           className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
-          onClick={e => {
-            setIsOpen(!isOpen);
-            e.stopPropagation();
-          }}>
-          Add ⌘ KK
+          onClick={() => setIsOpen(!isOpen)}>
+          {displayName == 'free' ? 'Model' : displayName} ⌘ KKK
           <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
         </Menu.Button>
+
         <Transition
           show={isOpen}
           as={Fragment}
@@ -68,24 +59,24 @@ export default function QuoteDropdown({ className, onItemClick, isOpen, setIsOpe
           leaveTo="transform opacity-0 scale-95">
           <Menu.Items
             static
-            className="absolute right-0 mt-2 w-36 origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10">
-            <div className="px-1 py-1">
-              {quoteContexts.map((quote, index) => (
-                <Menu.Item key={quote.name}>
+            className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+            <div className="py-1">
+              {models.map((model, index) => (
+                <Menu.Item key={model.id}>
                   {({ active }) => (
                     <button
                       ref={el => (menuItemsRef.current[index] = el)}
-                      onClick={() => {
-                        onItemClick(quote);
-                        setIsOpen(false);
-                      }}
                       className={`${
                         active ? 'bg-violet-500 text-white' : 'text-gray-900'
-                      } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}>
+                      } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
+                      onClick={() => {
+                        onItemClick(model.id);
+                        setIsOpen(false);
+                      }}>
                       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
                         {index}
                       </span>
-                      {quote.name}
+                      {model.name}
                     </button>
                   )}
                 </Menu.Item>

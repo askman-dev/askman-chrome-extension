@@ -17,6 +17,7 @@ function rem2px(theme, baseFontSize = 14) {
 }
 
 const defaultConfig = defineConfig({
+  hash: false,
   presets: [presetAutoprefix(), presetTailwind()],
   theme: {
     maxWidth: {

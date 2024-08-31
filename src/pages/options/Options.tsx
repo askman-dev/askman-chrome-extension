@@ -1,33 +1,34 @@
 import React, { useState } from 'react';
 import ConfigManager from '@src/components/config/ConfigManager';
+import { USER_TOOLS_KEY, USER_MODELS_KEY, USER_CHAT_PRESETS_KEY } from '@src/utils/StorageManager';
 
 const Options: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('模型列表');
+  const [activeTab, setActiveTab] = useState('配置模型');
 
-  const tabs = ['模型列表', '对话偏好', '配置文件', '站点智能'];
+  const tabs = ['配置模型', '配置对话', '配置工具', '站点智能（即将到来）'];
 
   const getConfigProps = () => {
     switch (activeTab) {
-      case '模型列表':
+      case '配置模型':
         return {
-          configType: '模型列表',
+          configType: '配置模型',
           systemConfigPath: '/assets/conf/models.toml',
-          userConfigStorageKey: 'userModelConfig',
+          userConfigStorageKey: USER_MODELS_KEY,
           isEditable: true,
         };
-      case '对话偏好':
+      case '配置对话':
         return {
-          configType: '对话偏好',
+          configType: '配置对话',
           systemConfigPath: '/assets/conf/chat-presets.toml',
-          userConfigStorageKey: 'userChatConfig',
+          userConfigStorageKey: USER_CHAT_PRESETS_KEY,
           isEditable: true,
         };
-      case '配置文件':
+      case '配置工具':
         return {
-          configType: '配置文件',
-          systemConfigPath: '/assets/conf/default-tools.toml',
-          userConfigStorageKey: 'userToolConfig',
-          isEditable: false,
+          configType: '配置工具',
+          systemConfigPath: '/assets/conf/tools.toml',
+          userConfigStorageKey: USER_TOOLS_KEY,
+          isEditable: true,
         };
       default:
         return null;
@@ -35,24 +36,26 @@ const Options: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen bg-gray-100">
       {/* 顶部栏 */}
-      <header className="flex justify-between items-center p-8 pl-16 pr-16 bg-gray-100 shadow">
+      <header className="flex justify-between items-center p-8 pl-16 pr-16 mb-4 bg-white shadow">
         <h1 className="text-xl font-bold">
-          问那个人 <span className="text-sm font-normal text-gray-500">v0.0.7</span>
+          问那个人 <span className="text-lg font-normal text-gray-500">v0.0.7</span>
         </h1>
-        <button className="bg-blue-500 text-white px-4 py-2 rounded">问开发者</button>
+        <a href="https://support.qq.com/product/667701" target="_blank" rel="noopener noreferrer">
+          <button className="bg-black text-white px-4 py-2 rounded">联系作者</button>
+        </a>
       </header>
 
       {/* 主要内容区 */}
       <div className="flex flex-1 overflow-hidden">
         {/* 左侧导航栏 */}
-        <nav className="w-48 bg-gray-200 p-4 pl-16">
+        <nav className="w-72 p-4 pl-16 text-lg">
           {tabs.map(tab => (
             <button
               key={tab}
               className={`w-full text-left p-2 mb-2 rounded ${
-                activeTab === tab ? 'bg-blue-500 text-white' : 'hover:bg-gray-300'
+                activeTab === tab ? 'bg-gray-200 text-black font-bold' : 'hover:bg-gray-300'
               }`}
               onClick={() => setActiveTab(tab)}>
               {tab}
@@ -61,7 +64,7 @@ const Options: React.FC = () => {
         </nav>
 
         {/* 右侧内容区 */}
-        <main className="flex-1 p-6 bg-white overflow-auto">
+        <main className="flex-1 p-6 mr-16 bg-white overflow-auto shadow">
           {getConfigProps() && <ConfigManager {...getConfigProps()} />}
         </main>
       </div>

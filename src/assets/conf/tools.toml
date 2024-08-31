@@ -1,15 +1,3 @@
-[explain-z]
-name = "总结 Z 计划"
-hbs = """
-{{#if page.selection}}
-请用 {{chat.language}} 总结: {{page.selection}}
-{{chat.input}}
-{{^}}
-请用 {{chat.language}} 总结: {{chat.input}}
-{{/if}}
-要求：
-1、写清楚任务的关键结论，并跟上一句话理由
-"""
 
 [explain]
 name = "解释"

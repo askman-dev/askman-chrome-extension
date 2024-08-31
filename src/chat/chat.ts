@@ -37,10 +37,10 @@ export class ChatCoreContext implements ChatCoreInterface {
     this.model = new ChatOpenAI({
       temperature: 0.2,
       topP: 0.95,
-      modelName: 'THUDM/glm-4-9b-chat',
-      openAIApiKey: 'sk-agzmzfqelxhzapofceejwntchamthknztzsbfmlzlojkxejs',
+      modelName: 'free',
+      openAIApiKey: 'sk-example', //必须得是非空字符串，否则会报错
       configuration: {
-        baseURL: 'https://api.siliconflow.cn/v1',
+        baseURL: 'https://extapi.askman.dev/v1',
       },
     });
     this.init();
