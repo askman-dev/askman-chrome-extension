@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ConfigManager from '@src/components/config/ConfigManager';
+import { USER_TOOLS_KEY, USER_MODELS_KEY, USER_CHAT_PRESETS_KEY } from '@src/utils/StorageManager';
 
 const Options: React.FC = () => {
   const [activeTab, setActiveTab] = useState('配置模型');
@@ -12,21 +13,21 @@ const Options: React.FC = () => {
         return {
           configType: '配置模型',
           systemConfigPath: '/assets/conf/models.toml',
-          userConfigStorageKey: 'models.toml',
+          userConfigStorageKey: USER_MODELS_KEY,
           isEditable: true,
         };
       case '配置对话':
         return {
           configType: '配置对话',
           systemConfigPath: '/assets/conf/chat-presets.toml',
-          userConfigStorageKey: 'chat-presets.toml',
+          userConfigStorageKey: USER_CHAT_PRESETS_KEY,
           isEditable: true,
         };
       case '配置工具':
         return {
           configType: '配置工具',
-          systemConfigPath: '/assets/conf/default-tools.toml',
-          userConfigStorageKey: 'tools.toml',
+          systemConfigPath: '/assets/conf/tools.toml',
+          userConfigStorageKey: USER_TOOLS_KEY,
           isEditable: true,
         };
       default:

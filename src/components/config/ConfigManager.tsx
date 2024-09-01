@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as TOML from '@iarna/toml';
 import ConfigEditorInstance from './ConfigEditorInstance';
-
+import { StorageManager } from '../../utils/StorageManager';
 interface ConfigManagerProps {
   configType: string;
   systemConfigPath: string;
@@ -30,7 +30,8 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
       const systemConfigStr = await systemConfigResponse.text();
       setSystemConfig(systemConfigStr);
 
-      const savedUserConfig = localStorage.getItem(userConfigStorageKey) || '';
+      const savedUserObject = (await StorageManager.get(userConfigStorageKey)) || {};
+      const savedUserConfig = TOML.stringify(savedUserObject);
       setUserConfig(savedUserConfig);
 
       updateMergedConfig(savedUserConfig, systemConfigStr);
@@ -51,9 +52,15 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
   };
 
   const handleSaveUserConfig = (newConfig: string) => {
-    setUserConfig(newConfig);
-    localStorage.setItem(userConfigStorageKey, newConfig);
-    updateMergedConfig(newConfig, systemConfig);
+    // Parse and save user tools
+    try {
+      const userConfigObj = TOML.parse(newConfig);
+      StorageManager.save(userConfigStorageKey, userConfigObj);
+      updateMergedConfig(newConfig, systemConfig);
+      setUserConfig(newConfig);
+    } catch (e) {
+      console.error('Error saving user tools:', e);
+    }
   };
 
   const renderActiveEditor = () => {

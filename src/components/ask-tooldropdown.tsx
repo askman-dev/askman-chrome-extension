@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
-import defaultTools from '@assets/conf/default-tools.toml';
+import defaultTools from '@assets/conf/tools.toml';
 import { ToolsPromptInterface } from '../types';
 import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
+import { StorageManager } from '../utils/StorageManager';
 
 interface ToolDropdownProps {
   displayName: string;
@@ -28,6 +29,22 @@ for (const k in defaultTools) {
 }
 
 export default function ToolDropdown({ displayName, className, onItemClick, isOpen, setIsOpen }: ToolDropdownProps) {
+  const [allTools, setAllTools] = useState<ToolsPromptInterface[]>([]);
+
+  useEffect(() => {
+    const fetchUserTools = async () => {
+      const userToolSettings = await StorageManager.getUserTools();
+      // Convert UserToolsObject to ToolsPromptInterface[]
+      const userTools = Object.values(userToolSettings).map(tool => ({
+        name: tool.name,
+        template: Handlebars.compileAST(tool.hbs),
+      }));
+      setAllTools([...tools, ...userTools]);
+    };
+
+    fetchUserTools();
+  }, []);
+
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
@@ -72,7 +89,7 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
             static
             className="absolute right-0 mt-2 w-36 origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10">
             <div className="px-1 py-1">
-              {tools.map((tool, index) => (
+              {allTools.map((tool, index) => (
                 <Menu.Item key={tool.name}>
                   {({ active }) => (
                     <button
