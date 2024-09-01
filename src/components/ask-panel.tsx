@@ -85,8 +85,6 @@ function AskPanel(props: AskPanelProps) {
   // chat list ref
   // const chatListRef = useRef<HTMLDivElement>(null);
 
-  const [lastKPressTime, setLastKPressTime] = useState<number | null>(null);
-
   useEffect(() => {
     quotes.forEach(quote => {
       quote
@@ -180,27 +178,16 @@ function AskPanel(props: AskPanelProps) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
 
-        // 使用一个计时器来检测是否是双击 K
-        if (lastKPressTime && Date.now() - lastKPressTime < 300) {
-          // 双击 K，触发 QuoteDropdown
+        if (!isToolDropdownOpen && !isQuoteDropdownOpen && !isModelDropdownOpen) {
+          showToolDropdown();
+        } else if (isToolDropdownOpen) {
           showQuoteDropdown();
-        } else {
-          if (isToolDropdownOpen) {
-            showQuoteDropdown();
-          } else {
-            // 单击 K，触发 ToolDropdown
-            showToolDropdown();
-          }
+        } else if (isQuoteDropdownOpen) {
+          showModelDropdown();
+        } else if (isModelDropdownOpen) {
+          showToolDropdown();
         }
 
-        setLastKPressTime(Date.now());
-        return;
-      }
-
-      // 添加新的快捷键，例如 Cmd+M 或 Ctrl+M 来打开模型下拉列表
-      if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
-        e.preventDefault();
-        showModelDropdown();
         return;
       }
 
@@ -231,7 +218,7 @@ function AskPanel(props: AskPanelProps) {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isToolDropdownOpen, isQuoteDropdownOpen, isModelDropdownOpen, lastKPressTime]);
+  }, [isToolDropdownOpen, isQuoteDropdownOpen, isModelDropdownOpen]);
 
   // Add this new useEffect to focus on input when menus are closed
   useEffect(() => {
@@ -384,10 +371,6 @@ function AskPanel(props: AskPanelProps) {
                 }
                 // 检测 Command+K (Mac) 或 Ctrl+K (Windows/Linux)
                 if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                  e.preventDefault();
-                  return;
-                }
-                if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
                   e.preventDefault();
                   return;
                 }

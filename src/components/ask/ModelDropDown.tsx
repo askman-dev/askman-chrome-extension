@@ -44,8 +44,8 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
         <Menu.Button
           className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
           onClick={() => setIsOpen(!isOpen)}>
-          {displayName == 'free' ? 'Model' : displayName} ⌘ J
-          <ChevronDownIcon className="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
+          {displayName == 'free' ? 'Model' : displayName} ⌘ KKK
+          <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
         </Menu.Button>
 
         <Transition
@@ -73,6 +73,9 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
                         onItemClick(model.id);
                         setIsOpen(false);
                       }}>
+                      <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
+                        {index}
+                      </span>
                       {model.name}
                     </button>
                   )}
