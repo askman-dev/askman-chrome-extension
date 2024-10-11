@@ -19,7 +19,7 @@ const exampleThemeStorage: ThemeStorage = {
   ...storage,
   // TODO: extends your own methods
   toggle: async () => {
-    chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
+    chrome.tabs?.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
       if (chrome.runtime.lastError) console.error(chrome.runtime.lastError);
       // `tab` will either be a `tabs.Tab` instance or `undefined`.
       if (tab) {
