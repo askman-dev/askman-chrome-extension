@@ -1,7 +1,9 @@
-import React, { Fragment, useRef, useEffect } from 'react';
+import React, { Fragment, useRef, useEffect, useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
+import configStorage from '@src/shared/storages/configStorage';
+
 
 interface ModelDropdownProps {
   displayName: string;
@@ -11,15 +13,11 @@ interface ModelDropdownProps {
   onItemClick: (model: string) => void;
 }
 
-const models = [
-  { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
-  { id: 'gpt-4', name: 'GPT-4' },
-  { id: 'claude-v1', name: 'Claude v1' },
-  { id: 'claude-instant-v1', name: 'Claude Instant v1' },
-];
 
 export default function ModelDropdown({ displayName, isOpen, setIsOpen, className, onItemClick }: ModelDropdownProps) {
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
+  const [models, setModels] = useState([]);
+
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => menuItemsRef.current[0]?.focus(), 0);
@@ -32,6 +30,27 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
       setIsOpen(false);
     }
   };
+
+  useEffect(() => {
+    const fetchModels = async () => {
+      const userModels = await configStorage.getModelConfig() || {};
+      const modelArray = [];
+      userModels.forEach(({ provider, config }) => {
+        if (config.models) {
+          config.models.forEach(m => {
+            modelArray.push({
+              name: provider + '/' + (m.name || m.id),
+              config,
+            });
+          });
+        }
+      });
+      setModels(modelArray);
+      modelArray.length && onItemClick(modelArray[0].name);
+    };
+
+    fetchModels();
+  }, []);
 
   return (
     <button
@@ -70,7 +89,7 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
                         active ? 'bg-violet-500 text-white' : 'text-gray-900'
                       } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
                       onClick={() => {
-                        onItemClick(model.id);
+                        onItemClick(model.name);
                         setIsOpen(false);
                       }}>
                       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">

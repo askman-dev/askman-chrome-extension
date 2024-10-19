@@ -233,7 +233,8 @@ function AskPanel(props: AskPanelProps) {
     setInitQuotes(prevQuotes => [...prevQuotes, newQuote]);
   };
 
-  function onSend() {
+  async function onSend() {
+    await chatContext.updateModelByName(selectedModel);
     if (userTools) {
       chatContext.askWithTool(userTools, initQuotes, userInput.trim());
     } else {
