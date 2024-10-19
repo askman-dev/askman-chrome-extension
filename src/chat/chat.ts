@@ -1,6 +1,7 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { QuoteAgent, QuoteContext } from '../agents/quote';
 import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
+import configStorage from '@src/shared/storages/configStorage';
 import { createContext } from 'react';
 import chatPresets from '@assets/conf/chat-presets.toml';
 import { ToolsPromptInterface, AIInvisibleMessage, HumanInvisibleMessage, HumanAskMessage } from '../types';
@@ -46,6 +47,30 @@ export class ChatCoreContext implements ChatCoreInterface {
     this.init();
   }
   init() {}
+  updateChatModel({ modelName, baseURL, apiKey }: { modelName: string; baseURL: string; apiKey: string }) {
+    this.model = new ChatOpenAI({
+      modelName: modelName,
+      openAIApiKey: apiKey || '-', //必须得是非空字符串，否则会报错
+      configuration: {
+        baseURL: baseURL,
+      },
+    });
+    return this;
+  }
+  async updateModelByName(modelName: string) {
+    // split by '/'
+    const [provider, model] = modelName.split('/');
+    if (!provider || !model) {
+      console.warn('Invalid model name, cant find provider or model.', modelName);
+      return this;
+    }
+    const modelConfigs = await configStorage.getModelConfig();
+    const modelConfig = modelConfigs.find(m => m.provider == provider && m.config.name == model);
+    if (modelConfig) {
+      this.model = new ChatOpenAI(modelConfig.config);
+    }
+    return this;
+  }
   async askWithQuotes(quotes: QuoteContext[], userPrompt: null | string) {
     //TODO 需要替换成从模版中读取，以方便用户自定义
     let prompt = '';
