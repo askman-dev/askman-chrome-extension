@@ -6,8 +6,7 @@ const octokit = new Octokit({
 
 async function getOrCreateIssue(milestone) {
   try {
-    const owner = process.env.GITHUB_REPOSITORY_OWNER;
-    const repo = process.env.GITHUB_REPOSITORY;
+    const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
     const { data: issues } = await octokit.issues.listForRepo({
       owner,
@@ -43,8 +42,7 @@ async function getOrCreateIssue(milestone) {
 
 async function listOpenMilestones() {
   try {
-    const owner = process.env.GITHUB_REPOSITORY_OWNER;
-    const repo = process.env.GITHUB_REPOSITORY;
+    const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
     const { data: milestones } = await octokit.issues.listMilestones({
       owner,
@@ -60,8 +58,7 @@ async function listOpenMilestones() {
 
 async function updateIterationPlan(issue, milestone) {
   try {
-    const owner = process.env.GITHUB_REPOSITORY_OWNER;
-    const repo = process.env.GITHUB_REPOSITORY;
+    const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
     const { data: issues } = await octokit.issues.listForRepo({
       owner,
