@@ -15,7 +15,7 @@ async function getOrCreateIssue(milestone) {
     });
     let hash = '#' + milestone.number
     let issue = issues.find((issue) => issue.title.includes(milestone.title));
-    let issue = issues.find((issue) => issue.title.includes(hash));
+    issue = issues.find((issue) => issue.title.includes(hash));
 
     if (issue) {
       await octokit.issues.update({
