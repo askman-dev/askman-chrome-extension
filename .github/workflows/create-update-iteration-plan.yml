@@ -22,7 +22,17 @@ jobs:
       - name: Install dependencies
         run: npm install --prefix .github/workflows
 
+      - name: List Open Milestones
+        run: node -e "import { listOpenMilestones } from './github.js'; listOpenMilestones();"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create or Update Issue
-        run: node .github/workflows/github.js
+        run: node -e "import { getOrCreateIssue } from './github.js'; getOrCreateIssue();"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Iteration Plan
+        run: node -e "import { updateIterationPlan } from './github.js'; updateIterationPlan();"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

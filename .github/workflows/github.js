@@ -37,6 +37,47 @@ async function getOrCreateIssue(milestone) {
       milestone: milestone.number,
     });
   }
+
+  // Update the Iteration Plan issue with a list of issue links
+  await updateIterationPlan(issue, milestone);
 }
 
-export { getOrCreateIssue };
+async function listOpenMilestones() {
+  const owner = process.env.GITHUB_REPOSITORY_OWNER;
+  const repo = process.env.GITHUB_REPOSITORY;
+
+  const { data: milestones } = await octokit.issues.listMilestones({
+    owner,
+    repo,
+    state: 'open',
+  });
+
+  const filteredMilestones = milestones.filter(milestone => milestone.title.startsWith('2024-'));
+
+  return filteredMilestones;
+}
+
+async function updateIterationPlan(issue, milestone) {
+  const owner = process.env.GITHUB_REPOSITORY_OWNER;
+  const repo = process.env.GITHUB_REPOSITORY;
+
+  // Fetch all issues related to the specific milestone
+  const { data: issues } = await octokit.issues.listForRepo({
+    owner,
+    repo,
+    milestone: milestone.number,
+  });
+
+  // Create a list of links to these issues
+  const issueLinks = issues.map(issue => `- [${issue.title}](${issue.html_url})`).join('\n');
+
+  // Update the body of the Iteration Plan issue with this list
+  await octokit.issues.update({
+    owner,
+    repo,
+    issue_number: issue.number,
+    body: `Iteration Plan for milestone: ${milestone.title}\n\n${issueLinks}`,
+  });
+}
+
+export { getOrCreateIssue, listOpenMilestones, updateIterationPlan };
