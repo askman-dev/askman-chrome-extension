@@ -13,22 +13,23 @@ async function getOrCreateIssue(milestone) {
       repo,
       milestone: milestone.number,
     });
-
+    let hash = '#' + milestone.number
     let issue = issues.find((issue) => issue.title.includes(milestone.title));
+    let issue = issues.find((issue) => issue.title.includes(hash));
 
     if (issue) {
       await octokit.issues.update({
         owner,
         repo,
         issue_number: issue.number,
-        title: 'Iteration Plan for ' + milestone.title,
+        title: 'Iteration Plan for ' + milestone.title + ' ' + hash,
         body: `Updated information for milestone: ${milestone.title}`,
       });
     } else {
       issue = await octokit.issues.create({
         owner,
         repo,
-        // title: 'Iteration Plan for ' + milestone.title,
+        title: 'Iteration Plan for ' + milestone.title + ' ' + hash,
         body: `New issue for milestone: ${milestone.title}`,
         milestone: milestone.number,
       });
