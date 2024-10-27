@@ -59,6 +59,7 @@ async function listOpenMilestones() {
 
 async function updateIterationPlan(issue, milestone) {
   try {
+    console.info(`Updating milestone ${milestone.title} plan to #${issue.number} `)
     const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
     const { data: issues } = await octokit.issues.listForRepo({
