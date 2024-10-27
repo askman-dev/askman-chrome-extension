@@ -20,7 +20,12 @@ jobs:
       - name: Install dependencies
         run: npm install --prefix .github/workflows
 
+      - name: Check issue title
+        id: check_title
+        run: echo "::set-output name=skip::$(echo '${{ github.event.issue.title }}' | grep -q 'Iteration Plan for' && echo true || echo false)"
+
       - name: Run GitHub Script
+        if: steps.check_title.outputs.skip == 'false'
         run: node .github/workflows/github.js
         env:
           ACTIONS_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
