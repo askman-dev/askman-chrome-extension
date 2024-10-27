@@ -21,14 +21,14 @@ async function getOrCreateIssue(milestone) {
         owner,
         repo,
         issue_number: issue.number,
-        title: milestone.title,
+        title: 'Iteration Plan for ' + milestone.title,
         body: `Updated information for milestone: ${milestone.title}`,
       });
     } else {
       issue = await octokit.issues.create({
         owner,
         repo,
-        title: milestone.title,
+        // title: 'Iteration Plan for ' + milestone.title,
         body: `New issue for milestone: ${milestone.title}`,
         milestone: milestone.number,
       });
