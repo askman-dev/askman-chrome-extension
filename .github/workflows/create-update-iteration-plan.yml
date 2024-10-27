@@ -25,4 +25,4 @@ jobs:
       - name: Run GitHub Script
         run: node .github/workflows/github.js
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTIONS_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
