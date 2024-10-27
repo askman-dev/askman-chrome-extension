@@ -17,7 +17,8 @@ jobs:
 
       - name: Check issue title
         id: check_title
-        run: echo "::set-output name=skip::$(echo '${{ github.event.issue.title }}' | grep -q 'Iteration Plan for' && echo true || echo false)"
+        run: echo "skip=$(echo '${{ github.event.issue.title }}' | grep -q 'Iteration Plan for' && echo true || echo false)" >> $GITHUB_OUTPUT
+        # run: echo "::set-output name=skip::$(echo '${{ github.event.issue.title }}' | grep -q 'Iteration Plan for' && echo true || echo false)"
 
       - name: Check out the repository
         if: steps.check_title.outputs.skip == 'false'
