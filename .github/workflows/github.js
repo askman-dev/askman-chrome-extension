@@ -39,4 +39,17 @@ async function getOrCreateIssue(milestone) {
   }
 }
 
-module.exports = { getOrCreateIssue };
+async function handleMilestoneEvent(event) {
+  const { action, issue, changes } = event;
+
+  if (action === 'milestoned') {
+    const milestoneBefore = issue.milestone;
+    const milestoneAfter = changes.milestone.after;
+
+    console.log(`Milestone changed from ${milestoneBefore.title} to ${milestoneAfter.title}`);
+
+    await getOrCreateIssue(milestoneAfter);
+  }
+}
+
+module.exports = { getOrCreateIssue, handleMilestoneEvent };
