@@ -69,9 +69,11 @@ async function updateIterationPlan(issue, milestone) {
       owner,
       repo,
       milestone: milestone.number,
+      state: 'all', // Include both open and closed issues
       sort: 'created',
       direction: 'asc'
     });
+    console.log(issues.map(_ => _.title))
     const issueLinks = issues.map(issue => {
       const status = issue.state === 'open' ? '[ ]' : '[x]';
       return `- ${status} [${issue.title}](${issue.html_url})`;
