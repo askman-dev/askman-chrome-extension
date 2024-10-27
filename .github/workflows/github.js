@@ -79,5 +79,8 @@ async function updateIterationPlan(issue, milestone) {
     body: `Iteration Plan for milestone: ${milestone.title}\n\n${issueLinks}`,
   });
 }
+listOpenMilestones();
+getOrCreateIssue();
+updateIterationPlan();
 
 export { getOrCreateIssue, listOpenMilestones, updateIterationPlan };
