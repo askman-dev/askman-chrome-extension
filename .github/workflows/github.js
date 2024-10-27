@@ -1,7 +1,7 @@
 import { Octokit } from "@octokit/rest";
 
 const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN,
+  auth: process.env.ACTIONS_TOKEN,
 });
 
 async function getOrCreateIssue(milestone) {
