@@ -32,6 +32,7 @@ async function getOrCreateIssue(milestone) {
         title: 'Iteration Plan for ' + milestone.title + ' ' + hash,
         body: `New issue for milestone: ${milestone.title}`,
         milestone: milestone.number,
+        labels: ['type: documentation'], // Add this line to include the label
       });
     }
 
