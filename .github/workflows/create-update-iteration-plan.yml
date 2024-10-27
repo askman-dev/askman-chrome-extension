@@ -3,6 +3,8 @@ name: Create or Update Iteration Plan
 on:
   milestone:
     types: [created, closed, edited, opened]
+  issues:
+    types: [milestoned, edited, opened, closed]
 
 jobs:
   create-update-issue:
