@@ -1,8 +1,10 @@
 import { Octokit } from "@octokit/rest";
 
 const octokit = new Octokit({
-  auth: process.env.ACTIONS_TOKEN,
+  auth: process.env.ACTIONS_TOKEN || process.env.GITHUB_TOKEN,
 });
+
+const botMessage = "**This issue was created by a bot. Please do not modify it directly.**";
 
 async function getOrCreateIssue(milestone) {
   try {
@@ -23,14 +25,14 @@ async function getOrCreateIssue(milestone) {
         repo,
         issue_number: issue.number,
         title: 'Iteration Plan for ' + milestone.title + ' ' + hash,
-        body: `Updated information for milestone: ${milestone.title}`,
+        body: `Updated information for milestone: ${milestone.title}\n\n${botMessage}`,
       });
     } else {
       issue = await octokit.issues.create({
         owner,
         repo,
         title: 'Iteration Plan for ' + milestone.title + ' ' + hash,
-        body: `New issue for milestone: ${milestone.title}`,
+        body: `New issue for milestone: ${milestone.title}\n\n${botMessage}`,
         milestone: milestone.number,
         labels: ['type: documentation'], // Add this line to include the label
       });
@@ -79,7 +81,7 @@ async function updateIterationPlan(issue, milestone) {
       owner,
       repo,
       issue_number: issue.number,
-      body: `Iteration Plan for milestone: ${milestone.title}\n\n${issueLinks}`,
+      body: `Iteration Plan for milestone: ${milestone.title}\n\n${issueLinks}\n\n${botMessage}`,
     });
   } catch (error) {
     console.error("Error in updateIterationPlan:", error);
