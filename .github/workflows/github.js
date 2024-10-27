@@ -39,4 +39,4 @@ async function getOrCreateIssue(milestone) {
   }
 }
 
-module.exports = { getOrCreateIssue };
+export { getOrCreateIssue };
