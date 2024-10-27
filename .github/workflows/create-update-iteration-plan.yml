@@ -13,6 +13,7 @@ jobs:
         run: |
           echo "Event: ${{ github.event_name }}"
           echo "Action: ${{ github.event.action }}"
+          echo "Issue: ${{ github.event.issue.title }} ${{ github.event.issue.number }}"
 
       - name: Check out the repository
         uses: actions/checkout@v2
