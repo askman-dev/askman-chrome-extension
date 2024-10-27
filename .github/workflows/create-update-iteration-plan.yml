@@ -20,7 +20,7 @@ jobs:
           node-version: '14'
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --prefix .github/workflows
 
       - name: Create or Update Issue
         run: node .github/workflows/github.js
