@@ -7,8 +7,13 @@ on:
 jobs:
   create-update-issue:
     runs-on: ubuntu-latest
-
+    
     steps:
+      - name: Log event details
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Action: ${{ github.event.action }}"
+
       - name: Check out the repository
         uses: actions/checkout@v2
 
