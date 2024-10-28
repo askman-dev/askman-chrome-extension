@@ -285,39 +285,7 @@ function AskPanel(props: AskPanelProps) {
         )}
       </div>
       {/* inputs area */}
-      <div className="">
-        <ToolDropdown
-          displayName={userTools?.name || 'Tool'}
-          isOpen={isToolDropdownOpen}
-          setIsOpen={setIsToolDropdownOpen}
-          className="inline-block"
-          onItemClick={item => {
-            setUserTools(item);
-          }}
-        />
-
-        <QuoteDropdown
-          isOpen={isQuoteDropdownOpen}
-          setIsOpen={setIsQuoteDropdownOpen}
-          className="inline-block"
-          onItemClick={item => {
-            // 假设 item 是 QuoteContext 类型
-            addQuote(item);
-            // setIsQuoteDropdownOpen(false); // 选择后关闭下拉菜单
-          }}
-        />
-
-        <ModelDropdown
-          displayName={selectedModel}
-          isOpen={isModelDropdownOpen}
-          setIsOpen={setIsModelDropdownOpen}
-          className="inline-block" // 调整位置以适应布局
-          onItemClick={item => {
-            setSelectedModel(item);
-            // 这里可以添加更多逻辑，例如通知 chatContext 模型已更改
-          }}
-        />
-      </div>
+      <div className=""></div>
       <div className="user-tools relative w-full bg-cover bg-[50%_50%]">
         {/* {userTools && (
           <div className="w-full relative flex-col justify-start items-start inline-flex text-left pb-2">
@@ -333,9 +301,9 @@ function AskPanel(props: AskPanelProps) {
         )} */}
 
         <div className="w-full pr-2 mb-2 p-1 rounded-md border-solid border-1 border-gray ">
-          <div className="">
+          <div className="flex">
             {initQuotes.length > 0 && (
-              <div className="quotes relative flex flex-wrap gap-2 pb-3">
+              <div className="quotes relative flex flex-wrap gap-2">
                 {initQuotes.map((quote, index) => (
                   <div className="flex items-center bg-gray-100 rounded-md px-2 py-1" key={index + '-' + quote}>
                     <div className="text-black text-xs font-normal overflow-hidden whitespace-nowrap text-ellipsis max-w-[150px]">
@@ -428,7 +396,39 @@ function AskPanel(props: AskPanelProps) {
                 e.preventDefault();
               }}
               value={userInput}
-              placeholder="请输入问题或要求"></TextareaAutosize>
+              placeholder="⌘ k to use presets"></TextareaAutosize>
+          </div>
+          <div className="flex">
+            <ToolDropdown
+              displayName={userTools?.name || 'Tool'}
+              isOpen={isToolDropdownOpen}
+              setIsOpen={setIsToolDropdownOpen}
+              className="inline-block"
+              onItemClick={item => {
+                setUserTools(item);
+              }}
+            />
+            <QuoteDropdown
+              isOpen={isQuoteDropdownOpen}
+              setIsOpen={setIsQuoteDropdownOpen}
+              className="inline-block"
+              onItemClick={item => {
+                // 假设 item 是 QuoteContext 类型
+                addQuote(item);
+                // setIsQuoteDropdownOpen(false); // 选择后关闭下拉菜单
+              }}
+            />
+
+            <ModelDropdown
+              displayName={selectedModel}
+              isOpen={isModelDropdownOpen}
+              setIsOpen={setIsModelDropdownOpen}
+              className="inline-block ml-auto" // 调整位置以适应布局
+              onItemClick={item => {
+                setSelectedModel(item);
+                // 这里可以添加更多逻辑，例如通知 chatContext 模型已更改
+              }}
+            />
             <AskButton
               primary
               disabled={!(userInput || initQuotes.length)}

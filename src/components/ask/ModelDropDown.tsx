@@ -4,7 +4,6 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import configStorage from '@src/shared/storages/configStorage';
 
-
 interface ModelDropdownProps {
   displayName: string;
   isOpen: boolean;
@@ -12,7 +11,6 @@ interface ModelDropdownProps {
   className?: string;
   onItemClick: (model: string) => void;
 }
-
 
 export default function ModelDropdown({ displayName, isOpen, setIsOpen, className, onItemClick }: ModelDropdownProps) {
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
@@ -33,7 +31,7 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
 
   useEffect(() => {
     const fetchModels = async () => {
-      const userModels = await configStorage.getModelConfig() || {};
+      const userModels = (await configStorage.getModelConfig()) || {};
       const modelArray = [];
       userModels.forEach(({ provider, config }) => {
         if (config.models) {
@@ -63,7 +61,7 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
         <Menu.Button
           className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
           onClick={() => setIsOpen(!isOpen)}>
-          {displayName == 'free' ? 'Model' : displayName} ⌘ KKK
+          {displayName == 'free' ? 'Model' : displayName}
           <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
         </Menu.Button>
 
@@ -86,7 +84,7 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
                     <button
                       ref={el => (menuItemsRef.current[index] = el)}
                       className={`${
-                        active ? 'bg-violet-500 text-white' : 'text-gray-900'
+                        active ? 'bg-black text-white' : 'text-gray-900'
                       } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
                       onClick={() => {
                         onItemClick(model.name);
