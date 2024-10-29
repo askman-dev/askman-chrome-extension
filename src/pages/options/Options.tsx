@@ -39,12 +39,16 @@ const Options: React.FC = () => {
     <div className="flex flex-col h-screen bg-gray-100">
       {/* 顶部栏 */}
       <header className="flex justify-between items-center p-8 pl-16 pr-16 mb-4 bg-white shadow">
-        <h1 className="text-xl font-bold">
-          问那个人 <span className="text-lg font-normal text-gray-500">v0.0.7</span>
+        <h1 className="text-xl font-bold flex items-center">
+          问那个人<span className="font-normal text-gray-500">(v0.0.7)</span>
+          <a
+            href="https://support.qq.com/product/667701"
+            className="ml-2 bg-black font-normal text-white px-2 py-1 text-sm rounded"
+            target="_blank"
+            rel="noopener noreferrer">
+            联系作者
+          </a>
         </h1>
-        <a href="https://support.qq.com/product/667701" target="_blank" rel="noopener noreferrer">
-          <button className="bg-black text-white px-4 py-2 rounded">联系作者</button>
-        </a>
       </header>
 
       {/* 主要内容区 */}
