@@ -52,7 +52,7 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
 
   return (
     <button
-      className={classNames(`mr-2 ${className}`)}
+      className={classNames(`${className}`)}
       onKeyDown={handleKeyDown}
       aria-haspopup="true"
       aria-expanded={isOpen}

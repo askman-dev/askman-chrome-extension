@@ -61,7 +61,7 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
   };
   return (
     <button
-      className={classNames(`mr-2 ${className}`)}
+      className={classNames(`${className}`)}
       onKeyDown={handleKeyDown}
       aria-haspopup="true"
       aria-expanded={isOpen}

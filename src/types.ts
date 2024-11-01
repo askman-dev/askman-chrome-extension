@@ -1,5 +1,9 @@
-import { HumanMessage } from '@langchain/core/messages';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { TemplateDelegate } from 'third-party/kbn-handlebars';
+
+export class SystemInvisibleMessage extends SystemMessage {
+  isVisible = false;
+}
 
 export class HumanInvisibleMessage extends HumanMessage {
   isVisible = false;

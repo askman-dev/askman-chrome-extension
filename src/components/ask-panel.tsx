@@ -9,7 +9,13 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 import AskMessage from './ask-message';
 import AskButton from './ask-button';
-import { ToolsPromptInterface, AIInvisibleMessage, HumanInvisibleMessage, HumanAskMessage } from '../types';
+import {
+  ToolsPromptInterface,
+  AIInvisibleMessage,
+  HumanInvisibleMessage,
+  HumanAskMessage,
+  SystemInvisibleMessage,
+} from '../types';
 import QuoteDropdown from './ask-quotedropdown';
 import KeyBinding from './icons';
 
@@ -105,14 +111,20 @@ function AskPanel(props: AskPanelProps) {
     function rerenderHistory() {
       setHistory(
         chatContext.history
-          .filter(message => !(message instanceof HumanInvisibleMessage || message instanceof AIInvisibleMessage))
+          .filter(
+            message =>
+              !(
+                message instanceof HumanInvisibleMessage ||
+                message instanceof AIInvisibleMessage ||
+                message instanceof SystemInvisibleMessage
+              ),
+          )
           .map((message, idx) => {
             if (message instanceof HumanAskMessage) {
               return { type: 'text', id: `history-${idx}`, text: message.rendered, name: message.name };
             } else if (typeof message.content == 'string') {
               return { type: 'text', id: `history-${idx}`, text: message.content, name: message.name };
             } else if (message.content instanceof Array) {
-              //TODO 怎么约束 message 是 MessageContentComplex[] 类型？
               return {
                 type: 'text',
                 id: `history-${idx}`,

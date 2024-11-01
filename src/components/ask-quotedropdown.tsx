@@ -42,7 +42,7 @@ export default function QuoteDropdown({ className, onItemClick, isOpen, setIsOpe
 
   return (
     <button
-      className={classNames(`mr-2 ${className}`)}
+      className={classNames(`${className}`)}
       onKeyDown={handleKeyDown}
       aria-haspopup="true"
       aria-expanded={isOpen}
