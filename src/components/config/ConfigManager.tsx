@@ -15,7 +15,7 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
   userConfigStorageKey,
   isEditable,
 }) => {
-  const [activeTab, setActiveTab] = useState('预览');
+  const [activeTab, setActiveTab] = useState('Preview');
   const [systemConfig, setSystemConfig] = useState('');
   const [userConfig, setUserConfig] = useState('');
   const [mergedConfig, setMergedConfig] = useState('');
@@ -65,7 +65,7 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
 
   const renderActiveEditor = () => {
     switch (activeTab) {
-      case '预览':
+      case 'Preview':
         return (
           <ConfigEditorInstance
             key={configType + '/preview'}
@@ -74,7 +74,7 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
             filename={configType}
           />
         );
-      case '用户值':
+      case 'User Values':
         return (
           <ConfigEditorInstance
             key={configType + '/user'}
@@ -84,7 +84,7 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
             filename={userConfigStorageKey}
           />
         );
-      case '系统值':
+      case 'System Values':
         return (
           <ConfigEditorInstance
             key={configType + '/system'}
@@ -102,13 +102,13 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
     <div>
       <h2 className="text-2xl font-bold mb-2">{configType}</h2>
       <div className="text-lg mb-4">
-        这里是参数配置文件。你可以修改「用户值」来覆盖「系统值」。
+        Here is the parameter configuration file. You can modify the “user values” to override the “system values.”
         <a className="pl-2" href="https://toml.io/cn/v1.0.0" target="_blank" rel="noreferrer noopener">
-          🔗 学习 TOML 语法
+          🔗 Learn TOML syntax
         </a>
       </div>
       <div className="mb-4">
-        {['预览', '用户值', '系统值'].map(tab => (
+        {['Preview', 'User Values', 'System Values'].map(tab => (
           <button
             key={tab}
             className={`mr-2 px-4 py-2 ${activeTab === tab ? 'bg-blue-500 text-white' : 'bg-gray-200'} rounded`}

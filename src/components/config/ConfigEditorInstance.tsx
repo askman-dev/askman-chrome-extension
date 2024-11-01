@@ -26,7 +26,7 @@ const ConfigEditorInstance: React.FC<ConfigEditorInstanceProps> = ({ initialValu
       const parsedConfig = TOML.parse(config);
       //   const stringifiedConfig = TOML.stringify(parsedConfig);
       if (!parsedConfig) {
-        setError('配置格式不正确');
+        setError('The configuration format is incorrect.');
       } else {
         setError(null);
       }

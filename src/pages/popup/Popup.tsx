@@ -18,13 +18,13 @@ const Popup = () => {
       <header className="App-header" style={{ color: theme === 'light' ? '#000' : '#fff' }}>
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          请先打开一个页面，如{' '}
-          <a href="https://github.com" target="_blank" rel="noreferrer">
+          Please first open a page, such as
+          <a href="https://github.com/askman-dev/askman-chrome-extension" target="_blank" rel="noreferrer">
             github.com
-          </a>{' '}
+          </a>
           <br />
-          1. 使用 Command + I 激活 Ask Man. <br />
-          2. 或在右键菜单中选择 <span>「Ask That Man」</span>
+          1. Use Command + I to activate Ask Man. <br />
+          2. Or select <span>Ask That Man</span> from the right-click menu.
         </p>
         <button
           style={{
@@ -34,7 +34,7 @@ const Popup = () => {
             borderRadius: '4px',
           }}
           onClick={exampleThemeStorage.toggle}>
-          试一试
+          Let&apos;s try
         </button>
       </header>
     </div>

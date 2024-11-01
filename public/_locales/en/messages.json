@@ -1,14 +1,14 @@
 {
   "extensionDescription": {
     "description": "Extension description",
-    "message": "【EN】纯国产扩展，可以在任何页面中向 ChatGLM 提问"
+    "message": "An intuitive tool that allows users to easily connect AI to their webpages, providing interactive chat and information retrieval capabilities."
   },
   "extensionName": {
     "description": "Extension name",
-    "message": "【EN】问那个人"
+    "message": "AskMan - Connect AI to pages"
   },
   "extensionCommandChatPopupDisplay": {
     "description": "Command to display the popup",
-    "message": "显示聊天弹窗"
+    "message": "Display AI Chat Popup"
   }
 }

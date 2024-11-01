@@ -17,11 +17,11 @@ export default function PageGithubReadmeToolDropdown({ className, onItemClick }:
         className="text-sm p-1.5 rounded-lg border-1 hover:bg-gray-100"
         onClick={() => {
           onItemClick({
-            name: '总结',
+            name: 'Summarize',
             text: document.getElementsByTagName('article')[0].innerText,
           });
         }}>
-        问那个人
+        AskMan
       </button>
     </div>
   );

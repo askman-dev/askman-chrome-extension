@@ -5,21 +5,21 @@ base_url = "https://extapi.askman.dev/v1/"
 send_api_key = false
 cloudflare_gateway_url = ""
 models = [
-  { name = "free", max_tokens = 32768 } # 在 siliconflow 托管的 THUDM/glm-4-9b-chat
+  { name = "free", max_tokens = 32768 } # THUDM/glm-4-9b-chat via siliconflow
 ]
 
-[openai]
-sdk = "openai"  # 使用哪种协议发起请求
-api_key = "sk-xxx" # 你的 OpenAI API 密钥
-base_url = "https://api.openai.com/v1" # 拼接逻辑为 {base_url}/chat/completions
-send_api_key = true # 是否将 API Key 加入到 headers
-cloudflare_gateway_url = "" # 使用 Cloudflare Gateway 代理
-models = [
-  { name = "gpt-3.5-turbo", max_tokens = 4096 },
-  { name = "gpt-4", max_tokens = 8192 }
-]
+# [openai]
+# sdk = "openai"  # Protocol used to send requests
+# api_key = "sk-xxx" # Your OpenAI API key
+# base_url = "https://api.openai.com/v1" # Concatenation logic is {base_url}/chat/completions
+# send_api_key = true # Whether to include the API Key in headers
+# cloudflare_gateway_url = "" # Use Cloudflare Gateway proxy
+# models = [
+#   { name = "gpt-3.5-turbo", max_tokens = 4096 },
+#   { name = "gpt-4", max_tokens = 8192 }
+# ]
 
-# 以下还未支持
+# The following is not yet supported
 # [azure]
 # api_key = ""
 # endpoint = ""

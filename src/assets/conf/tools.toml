@@ -1,79 +1,41 @@
 
 [explain]
-name = "解释"
+name = "Explain"
 hbs = """
-{{#if page.selection}}
-请用 {{chat.language}} 解释: {{page.selection}}
-{{chat.input}}
-{{^}}
-请用 {{chat.language}} 解释: {{chat.input}}
-{{/if}}
-"""
+Explain
+{{page.selection}}
+{{#if chat.input}}
 
-[explain-code]
-name = "解释代码"
-hbs = """
-{{#if page.selection}}
-请用 {{chat.language}} 解释这段代码: {{page.selection}}
+Rules:
 {{chat.input}}
-{{^}}
-请用 {{chat.language}} 解释这段代码: {{chat.input}}
 {{/if}}
 """
 
 [summarize]
-name = "总结"
+name = "Summarize"
 hbs = """
-{{#if page.selection}}
-请用 {{chat.language}} 总结: {{page.selection}}
+Summarize
+{{page.selection}}
+{{#if chat.input}}
+
+Rules:
 {{chat.input}}
-{{^}}
-请用 {{chat.language}} 总结: {{chat.input}}
 {{/if}}
 """
 
-[answer]
-name = "回答"
-hbs = """
-{{#if page.selection}}
-请用 {{chat.language}} 回答: {{page.selection}}
-{{chat.input}}
-{{^}}
-请用 {{chat.language}} 回答: {{chat.input}}
-{{/if}}
-"""
 
 [translate-to-zh]
-name = "翻译为中文"
+name = "Chinese"
 hbs = """
-{{#if page.selection}}
-请翻译成中文: {{page.selection}}
+请翻译成中文: 
+{{page.selection}}
 {{chat.input}}
-{{^}}
-请翻译成中文: {{chat.input}}
-{{/if}}
 """
 
 [translate-to-en]
-name = "翻译为英文"
+name = "English"
 hbs = """
-{{#if page.selection}}
-请翻译成英文: {{page.selection}}
+Translate to English:
+{{page.selection}}
 {{chat.input}}
-{{^}}
-请翻译成英文: {{chat.input}}
-{{/if}}
 """
-
-[comment-code]
-name = "代码加注释"
-hbs = """
-{{#if page.selection}}
-请给代码添加 {{chat.language}} 注释: {{page.selection}}
-{{chat.input}}
-{{^}}
-请给代码添加 {{chat.language}} 注释: {{chat.input}}
-{{/if}}
-"""
-
-

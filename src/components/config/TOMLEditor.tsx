@@ -100,7 +100,7 @@ const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = fal
     <div className="bg-[#272822] p-4 pt-2 rounded-lg">
       <div className="flex items-center mb-2 h-6">
         <span className="text-white">
-          {readOnly ? '[只读]' : '[可编辑]'} {filename}
+          {readOnly ? '[Read Only]' : '[Editable]'} {filename}
         </span>
         <div className="flex items-center ml-2">
           {!readOnly &&
@@ -109,10 +109,10 @@ const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = fal
                 className="relative cursor-pointer font-semibold text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2 hover:text-blue-500"
                 onClick={handleSave}
                 disabled={!!error}>
-                保存配置
+                Save
               </button>
             ) : (
-              <span className="text-gray-400">未更改</span>
+              <span className="text-gray-400">Unchanged</span>
             ))}
         </div>
       </div>

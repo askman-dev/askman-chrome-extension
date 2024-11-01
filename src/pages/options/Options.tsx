@@ -3,29 +3,29 @@ import ConfigManager from '@src/components/config/ConfigManager';
 import { USER_TOOLS_KEY, USER_MODELS_KEY, USER_CHAT_PRESETS_KEY } from '@src/utils/StorageManager';
 
 const Options: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('配置模型');
+  const [activeTab, setActiveTab] = useState('Models');
 
-  const tabs = ['配置模型', '配置对话', '配置工具', '站点智能（即将到来）'];
+  const tabs = ['Models', 'System Prompt', 'Prompts', 'Page Intelligence (coming soon)'];
 
   const getConfigProps = () => {
     switch (activeTab) {
-      case '配置模型':
+      case 'Models':
         return {
-          configType: '配置模型',
+          configType: 'Models',
           systemConfigPath: '/assets/conf/models.toml',
           userConfigStorageKey: USER_MODELS_KEY,
           isEditable: true,
         };
-      case '配置对话':
+      case 'System Prompt':
         return {
-          configType: '配置对话',
+          configType: 'System Prompt',
           systemConfigPath: '/assets/conf/chat-presets.toml',
           userConfigStorageKey: USER_CHAT_PRESETS_KEY,
           isEditable: true,
         };
-      case '配置工具':
+      case 'Prompts':
         return {
-          configType: '配置工具',
+          configType: 'Prompts',
           systemConfigPath: '/assets/conf/tools.toml',
           userConfigStorageKey: USER_TOOLS_KEY,
           isEditable: true,
