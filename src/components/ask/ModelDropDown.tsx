@@ -31,7 +31,7 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
 
   useEffect(() => {
     const fetchModels = async () => {
-      const userModels = (await configStorage.getModelConfig()) || {};
+      const userModels = (await configStorage.getModelConfig()) || [];
       const modelArray = [];
       userModels.forEach(({ provider, config }) => {
         if (config.models) {

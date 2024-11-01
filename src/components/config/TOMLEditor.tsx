@@ -23,6 +23,7 @@ const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = fal
 
   useEffect(() => {
     import('monaco-editor').then(monaco => {
+      // @ts-expect-error 忽略类型不匹配的错误
       monacoRef.current = monaco;
       initializeEditor();
     });
@@ -60,6 +61,7 @@ const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = fal
 
     shikiToMonaco(highlighter, monaco);
 
+    // @ts-expect-error 忽略类型不匹配的错误
     editorRef.current = monaco.editor.create(containerRef.current, {
       value: valueRef.current,
       language: 'toml',

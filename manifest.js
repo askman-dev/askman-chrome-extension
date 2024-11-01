@@ -33,6 +33,7 @@ const manifest = {
   // },
   icons: {
     128: 'icon-128.png',
+    512: 'icon-512.png',
   },
   content_scripts: [
     {
