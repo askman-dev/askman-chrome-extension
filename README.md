@@ -9,9 +9,9 @@ AskMan is an open-source browser extension that connects AI to web pages, provid
 - Data Privacy: AskMan only shares data with your chosen AI service provider, without storing or tracking any information on external servers.
 - Side Panel for Persistent Conversations: Keep your chat session fixed, even when switching pages, ensuring data is retained and your flow remains uninterrupted.
 - Custom Prompts: Easily set up common prompts that use page-specific elements, like titles and selected text, for a personalized experience.
+- ![screenshot](.github/public/810shots_so.png)
 - ![screenshot](.github/public/114shots_so.png)
 - ![screenshot](.github/public/715shots_so.png)
-- ![screenshot](.github/public/810shots_so.png)
 
 
 # Installation
@@ -57,19 +57,18 @@ We welcome contributions! Feel free to:
 
 To get started, please read our Contribution Guide.
 
-## Contributors:
+## Contributors
+> Made with [contributors-img](https://contrib.rocks)
 
-
-![Alt](https://repobeats.axiom.co/api/embed/fb6b527f65d5625d5ab7ea31e01349394eae71fd.svg "Repobeats analytics image")
-> Made with [Repobeats](https://repobeats.axiom.co)
----
 <a href = "https://github.com/askman-dev/askman-chrome-extension/graphs/contributors">
   <img src = "https://contrib.rocks/image?repo=askman-dev/askman-chrome-extension"/>
 </a>
 
-> Made with [contributors-img](https://contrib.rocks)
 
+---
+> Made with [Repobeats](https://repobeats.axiom.co)
 
+![Alt](https://repobeats.axiom.co/api/embed/fb6b527f65d5625d5ab7ea31e01349394eae71fd.svg "Repobeats analytics image")
 # Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=askman/askman-chrome-extension&type=Date)](https://star-history.com/#askman/askman-chrome-extension&Date)
@@ -84,7 +83,7 @@ AskMan is committed to user privacy:
 
 # License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the GPL License. 
 
 # Support
 
