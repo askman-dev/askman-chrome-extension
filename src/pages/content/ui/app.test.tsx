@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import { render } from '@testing-library/react';
-import { Chrome } from '@types/chrome';
+// import { Chrome } from '@types/chrome';
 
 // Mock storage data
 const mockStorageData = {
@@ -11,7 +11,7 @@ const mockStorageData = {
 
 beforeAll(() => {
   // 创建完整的 chrome API mock
-  (global.chrome as Chrome) = {
+  global.chrome = {
     runtime: {
       onMessage: {
         addListener: vi.fn(),
@@ -54,7 +54,7 @@ beforeAll(() => {
         },
       },
     },
-  };
+  } as unknown as typeof chrome;
 
   // 打印检查
   // console.log('Chrome storage mock setup:', {
