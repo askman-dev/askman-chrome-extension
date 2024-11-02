@@ -45,7 +45,6 @@ const TextWithLineBreaks = text => {
               {lineIndex < block.content.length - 1 && (
                 <>
                   <br />
-                  <br />
                 </>
               )}
             </React.Fragment>
