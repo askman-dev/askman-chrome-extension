@@ -1,14 +1,15 @@
-import { ComponentType, ReactElement, Suspense } from 'react';
+import React, { Suspense } from 'react';
 
-export default function withSuspense<T extends Record<string, unknown>>(
-  Component: ComponentType<T>,
-  SuspenseComponent: ReactElement,
-) {
-  return function WithSuspense(props: T) {
-    return (
-      <Suspense fallback={SuspenseComponent}>
-        <Component {...props} />
-      </Suspense>
-    );
-  };
+function withSuspense<T extends Record<string, unknown>>(
+  WrappedComponent: React.ComponentType<T>,
+  FallbackComponent: React.ReactNode,
+): React.FC<T> {
+  const WithSuspense = (props: T): JSX.Element => (
+    <Suspense fallback={FallbackComponent}>
+      <WrappedComponent {...props} />
+    </Suspense>
+  );
+  return WithSuspense;
 }
+
+export default withSuspense;

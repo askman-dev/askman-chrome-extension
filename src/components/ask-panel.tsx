@@ -255,9 +255,9 @@ function AskPanel(props: AskPanelProps) {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-    setUserTools(null);
+    // setUserTools(null);
     setUserInput('');
-    setInitQuotes([]);
+    // setInitQuotes([]);
   }
 
   // myObject.test('你是谁');

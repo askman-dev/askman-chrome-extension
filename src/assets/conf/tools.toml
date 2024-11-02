@@ -4,11 +4,7 @@ name = "Explain"
 hbs = """
 Explain
 {{page.selection}}
-{{#if chat.input}}
-
-Rules:
 {{chat.input}}
-{{/if}}
 """
 
 [summarize]
@@ -16,11 +12,7 @@ name = "Summarize"
 hbs = """
 Summarize
 {{page.selection}}
-{{#if chat.input}}
-
-Rules:
 {{chat.input}}
-{{/if}}
 """
 
 

@@ -131,6 +131,7 @@ export class ChatCoreContext implements ChatCoreInterface {
         input: userPrompt,
       },
     };
+    //TODO fix this, when there is a 'page' type, copy it's properties to context.page
     quotes.forEach(quote => {
       //TODO 只保留最后一个，有什么问题呢？
       if (quote.selection) {
