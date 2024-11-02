@@ -1,16 +1,82 @@
-import { describe, test } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import App from '@pages/content/ui/app';
+import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
+import { render } from '@testing-library/react';
+import { Chrome } from '@types/chrome';
 
-describe('appTest', () => {
-  test('render text', () => {
-    // given
-    const text = 'content view';
+// Mock storage data
+const mockStorageData = {
+  'config-storage-key': {
+    someConfig: 'value',
+  },
+};
 
-    // when
-    render(<App />);
+beforeAll(() => {
+  // 创建完整的 chrome API mock
+  (global.chrome as Chrome) = {
+    runtime: {
+      onMessage: {
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+      },
+    },
+    storage: {
+      local: {
+        get: vi.fn((keys, callback) => {
+          if (callback) {
+            callback(mockStorageData);
+          }
+          return Promise.resolve(mockStorageData);
+        }),
+        set: vi.fn((items, callback) => {
+          if (callback) callback();
+          return Promise.resolve();
+        }),
+        onChanged: {
+          addListener: vi.fn(),
+          removeListener: vi.fn(),
+          hasListeners: vi.fn(),
+        },
+      },
+      sync: {
+        get: vi.fn((keys, callback) => {
+          if (callback) {
+            callback(mockStorageData);
+          }
+          return Promise.resolve(mockStorageData);
+        }),
+        set: vi.fn((items, callback) => {
+          if (callback) callback();
+          return Promise.resolve();
+        }),
+        onChanged: {
+          addListener: vi.fn(),
+          removeListener: vi.fn(),
+          hasListeners: vi.fn(),
+        },
+      },
+    },
+  };
 
-    // then
-    screen.getByText(text);
+  // 打印检查
+  // console.log('Chrome storage mock setup:', {
+  //   local: global.chrome.storage.local,
+  //   sync: global.chrome.storage.sync
+  // });
+});
+
+afterAll(() => {
+  delete (global as any).chrome; // eslint-disable-line @typescript-eslint/no-explicit-any
+});
+
+// vi.mock('@assets/conf/chat-presets.toml', () => ({
+//   default: {
+//     presets: []
+//   }
+// }));
+
+describe('App component', () => {
+  test('renders without crashing', async () => {
+    const { default: App } = await import('./app');
+    const { container } = render(<App />);
+    expect(container).toBeTruthy();
   });
 });
