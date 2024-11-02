@@ -13,9 +13,9 @@ AskMan is an open-source browser extension that connects AI to web pages, provid
 - Data Privacy: AskMan only shares data with your chosen AI service provider, without storing or tracking any information on external servers.
 - Side Panel for Persistent Conversations: Keep your chat session fixed, even when switching pages, ensuring data is retained and your flow remains uninterrupted.
 - Custom Prompts: Easily set up common prompts that use page-specific elements, like titles and selected text, for a personalized experience.
-- ![screenshot](.github/public/810shots_so.png)
-- ![screenshot](.github/public/114shots_so.png)
-- ![screenshot](.github/public/715shots_so.png)
+
+| ![screenshot](.github/public/810shots_so.png) | ![screenshot](.github/public/114shots_so.png) | ![screenshot](.github/public/715shots_so.png) |
+|:---:|:---:|:---:|
 
 
 # Installation
