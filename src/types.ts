@@ -62,5 +62,6 @@ export interface PromptTool {
 
 export interface ToolsPromptInterface {
   name: string;
+  hbs: string;
   template?: TemplateDelegate;
 }

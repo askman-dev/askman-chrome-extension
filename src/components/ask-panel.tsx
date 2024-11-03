@@ -412,7 +412,7 @@ function AskPanel(props: AskPanelProps) {
           </div>
           <div className="flex">
             <ToolDropdown
-              displayName={userTools?.name || 'Tool'}
+              displayName={userTools?.name || 'Framework'}
               isOpen={isToolDropdownOpen}
               setIsOpen={setIsToolDropdownOpen}
               className="inline-block"
