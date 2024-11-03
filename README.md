@@ -4,7 +4,7 @@ AskMan is an open-source browser extension that connects AI to web pages, provid
 
 > Logo designed in collaboration with Claude and Ray.
 > 
->![logo](public/icon-34.png) 
+>![logo](public/icon-32.png) 
 
 # Features
 
