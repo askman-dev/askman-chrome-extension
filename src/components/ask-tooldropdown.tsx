@@ -6,6 +6,7 @@ import defaultTools from '@assets/conf/tools.toml';
 import { ToolsPromptInterface } from '../types';
 import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
 import { StorageManager } from '../utils/StorageManager';
+import { ToolPreview } from './tool-preview';
 
 interface ToolDropdownProps {
   displayName: string;
@@ -21,6 +22,7 @@ for (const k in defaultTools) {
   try {
     tools.push({
       name: defaultTools[k].name,
+      hbs: defaultTools[k].hbs,
       template: Handlebars.compileAST(defaultTools[k].hbs),
     });
   } catch (e) {
@@ -28,8 +30,39 @@ for (const k in defaultTools) {
   }
 }
 
+function useToolPreview() {
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewPos, setPreviewPos] = useState({ x: 0, y: 0 });
+  const [previewContent, setPreviewContent] = useState('');
+
+  const showToolPreview = (element: HTMLElement, content: string) => {
+    const buttonRect = element.getBoundingClientRect();
+    const parentRect = element.parentElement?.getBoundingClientRect() || { left: 0, top: 0 };
+
+    setPreviewPos({
+      x: buttonRect.left - parentRect.left + buttonRect.width,
+      y: buttonRect.top - parentRect.top,
+    });
+    setPreviewContent(content);
+    setShowPreview(true);
+  };
+
+  const hideToolPreview = () => {
+    setShowPreview(false);
+  };
+
+  return {
+    showPreview,
+    previewPos,
+    previewContent,
+    showToolPreview,
+    hideToolPreview,
+  };
+}
+
 export default function ToolDropdown({ displayName, className, onItemClick, isOpen, setIsOpen }: ToolDropdownProps) {
   const [allTools, setAllTools] = useState<ToolsPromptInterface[]>([]);
+  const { showPreview, previewPos, previewContent, showToolPreview, hideToolPreview } = useToolPreview();
 
   useEffect(() => {
     const fetchUserTools = async () => {
@@ -58,11 +91,25 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
       e.stopPropagation();
       setIsOpen(false);
     }
+
+    if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && isOpen) {
+      const button = e.target as HTMLButtonElement;
+      const index = menuItemsRef.current.indexOf(button);
+      showToolPreview(button, allTools[index].hbs);
+    }
   };
+
+  const handleBlur = (e: React.FocusEvent) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      hideToolPreview();
+    }
+  };
+
   return (
     <button
       className={classNames(`${className}`)}
       onKeyDown={handleKeyDown}
+      onBlur={handleBlur}
       aria-haspopup="true"
       aria-expanded={isOpen}
       type="button">
@@ -99,6 +146,10 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
                         onItemClick(tool);
                         setIsOpen(false);
                       }}
+                      onMouseEnter={e => {
+                        showToolPreview(e.currentTarget, tool.hbs);
+                      }}
+                      onMouseLeave={hideToolPreview}
                       className={`${
                         active ? 'bg-black text-white' : 'text-gray-900'
                       } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}>
@@ -110,6 +161,8 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
                   )}
                 </Menu.Item>
               ))}
+
+              {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
             </div>
           </Menu.Items>
         </Transition>

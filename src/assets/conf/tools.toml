@@ -1,3 +1,19 @@
+[framework]
+name = "Simple"
+hbs = """
+{{page.selection}}
+{{chat.input}}
+"""
+
+[whole-page]
+name = "Whole Page"
+hbs = """
+{{page.title}}
+{{page.url}}
+{{page.content}}
+{{page.selection}}
+{{chat.input}}
+"""
 
 [explain]
 name = "Explain"
