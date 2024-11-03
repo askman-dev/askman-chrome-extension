@@ -47,7 +47,7 @@ function AskPanel(props: AskPanelProps) {
   const handleClickOutside = useCallback((event: MouseEvent) => {
     if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
       setIsToolDropdownOpen(false);
-      setIsQuoteDropdownOpen(false);
+      // setIsQuoteDropdownOpen(false);
       setIsModelDropdownOpen(false);
     }
   }, []);
@@ -73,6 +73,7 @@ function AskPanel(props: AskPanelProps) {
   const [isQuoteDropdownOpen, setIsQuoteDropdownOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState('free'); // 添加状态来跟踪选中的模型
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ left: 0, top: 0 });
   const showToolDropdown = () => {
     setIsToolDropdownOpen(true);
     setIsQuoteDropdownOpen(false);
@@ -190,14 +191,10 @@ function AskPanel(props: AskPanelProps) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
 
-        if (!isToolDropdownOpen && !isQuoteDropdownOpen && !isModelDropdownOpen) {
+        if (!isToolDropdownOpen) {
           showToolDropdown();
         } else if (isToolDropdownOpen) {
-          showQuoteDropdown();
-        } else if (isQuoteDropdownOpen) {
           showModelDropdown();
-        } else if (isModelDropdownOpen) {
-          showToolDropdown();
         }
 
         return;
@@ -205,21 +202,17 @@ function AskPanel(props: AskPanelProps) {
 
       // 检测左右方向键
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-        if (isToolDropdownOpen || isQuoteDropdownOpen || isModelDropdownOpen) {
+        if (isToolDropdownOpen || isModelDropdownOpen) {
           e.preventDefault();
           e.stopPropagation();
           if (isToolDropdownOpen && e.key === 'ArrowRight') {
-            showQuoteDropdown();
-          } else if (isQuoteDropdownOpen && e.key === 'ArrowRight') {
             showModelDropdown();
           } else if (isModelDropdownOpen && e.key === 'ArrowRight') {
             showToolDropdown();
           } else if (isToolDropdownOpen && e.key === 'ArrowLeft') {
             showModelDropdown();
-          } else if (isQuoteDropdownOpen && e.key === 'ArrowLeft') {
-            showToolDropdown();
           } else if (isModelDropdownOpen && e.key === 'ArrowLeft') {
-            showQuoteDropdown();
+            showToolDropdown();
           }
           return;
         }
@@ -334,14 +327,14 @@ function AskPanel(props: AskPanelProps) {
               </div>
             )}
           </div>
-          <div className="flex">
+          <div className="flex relative">
             <TextareaAutosize
               ref={inputRef}
               maxRows={5}
               minRows={1}
               className="flex-grow outline-none text-gray-800 text-sm inline-block font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none 
               focus:border-black"
-              //TODO 输入在有字/无字时会发生高度变化，需要修复
+              //TODO 输入在有字/无字时会发生度变化，需要修复
               onKeyDown={e => {
                 // 检测 ESC 键
                 if (e.key === 'Escape') {
@@ -349,6 +342,10 @@ function AskPanel(props: AskPanelProps) {
                     e.preventDefault();
                     return;
                   }
+                } else if (e.key === '@' && !e.nativeEvent.isComposing) {
+                  showQuoteDropdown();
+                  e.preventDefault();
+                  return;
                 }
                 // 检测 Command+K (Mac) 或 Ctrl+K (Windows/Linux)
                 if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -381,21 +378,17 @@ function AskPanel(props: AskPanelProps) {
                 }
                 // 检测左右方向键
                 if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                  if (isToolDropdownOpen || isQuoteDropdownOpen || isModelDropdownOpen) {
+                  if (isToolDropdownOpen || isModelDropdownOpen) {
                     e.preventDefault();
                     e.stopPropagation();
                     if (isToolDropdownOpen && e.key === 'ArrowRight') {
-                      showQuoteDropdown();
-                    } else if (isQuoteDropdownOpen && e.key === 'ArrowRight') {
                       showModelDropdown();
                     } else if (isModelDropdownOpen && e.key === 'ArrowRight') {
                       showToolDropdown();
                     } else if (isToolDropdownOpen && e.key === 'ArrowLeft') {
                       showModelDropdown();
-                    } else if (isQuoteDropdownOpen && e.key === 'ArrowLeft') {
-                      showToolDropdown();
                     } else if (isModelDropdownOpen && e.key === 'ArrowLeft') {
-                      showQuoteDropdown();
+                      showToolDropdown();
                     }
                     return;
                   }
@@ -405,10 +398,66 @@ function AskPanel(props: AskPanelProps) {
               }}
               onChange={e => {
                 setUserInput(e.currentTarget.value);
+                const input = e.currentTarget;
+                const text = input.value;
+                const atIndex = text.lastIndexOf('@');
+
+                if (atIndex !== -1) {
+                  const span = document.createElement('span');
+                  span.style.cssText = `
+                    font: ${window.getComputedStyle(input).font};
+                    visibility: hidden;
+                    position: absolute;
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                    width: ${
+                      input.clientWidth -
+                      parseInt(window.getComputedStyle(input).paddingLeft) -
+                      parseInt(window.getComputedStyle(input).paddingRight)
+                    }px;
+                    padding: ${window.getComputedStyle(input).padding};
+                    box-sizing: border-box;
+                  `;
+
+                  // 将 span 添加到输入框的父元素中，这样它会继承正确的定位上下文
+                  input.parentElement.appendChild(span);
+
+                  const textBeforeAt = text.substring(0, atIndex) + '\u200B';
+                  span.textContent = textBeforeAt;
+
+                  // 获取所有需要的矩形信息
+                  const spanRect = span.getBoundingClientRect();
+                  const range = document.createRange();
+                  const textNode = span.firstChild;
+                  range.setStart(textNode, textNode.length - 1);
+                  const atRect = range.getBoundingClientRect();
+
+                  // 清理
+                  input.parentElement.removeChild(span);
+
+                  // 由于 span 是相对于父元素定位的，我们可以直接使用其坐标
+                  setDropdownPosition({
+                    left: atRect.left - spanRect.left + parseInt(window.getComputedStyle(input).paddingLeft),
+                    top: atRect.top - spanRect.top + parseInt(window.getComputedStyle(input).paddingTop),
+                  });
+                }
                 e.preventDefault();
               }}
               value={userInput}
-              placeholder="⌘ k to use presets"></TextareaAutosize>
+              placeholder="@ to insert contents"></TextareaAutosize>
+
+            <QuoteDropdown
+              isOpen={isQuoteDropdownOpen}
+              setIsOpen={setIsQuoteDropdownOpen}
+              className="absolute"
+              style={{
+                left: `${dropdownPosition.left}px`,
+                top: `${dropdownPosition.top}px`,
+              }}
+              onItemClick={item => {
+                addQuote(item);
+              }}
+            />
           </div>
           <div className="flex">
             <ToolDropdown
@@ -420,17 +469,6 @@ function AskPanel(props: AskPanelProps) {
                 setUserTools(item);
               }}
             />
-            <QuoteDropdown
-              isOpen={isQuoteDropdownOpen}
-              setIsOpen={setIsQuoteDropdownOpen}
-              className="inline-block"
-              onItemClick={item => {
-                // 假设 item 是 QuoteContext 类型
-                addQuote(item);
-                // setIsQuoteDropdownOpen(false); // 选择后关闭下拉菜单
-              }}
-            />
-
             <ModelDropdown
               displayName={selectedModel}
               isOpen={isModelDropdownOpen}

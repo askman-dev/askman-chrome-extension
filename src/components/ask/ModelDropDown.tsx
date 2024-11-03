@@ -61,7 +61,7 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
         <Menu.Button
           className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
           onClick={() => setIsOpen(!isOpen)}>
-          {displayName == 'free' ? 'Model' : displayName}
+          {displayName == 'free' ? 'Model' : displayName} ⌘ KK
           <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
         </Menu.Button>
 
