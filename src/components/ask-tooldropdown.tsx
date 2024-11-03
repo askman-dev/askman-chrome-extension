@@ -70,6 +70,7 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
       // Convert UserToolsObject to ToolsPromptInterface[]
       const userTools = Object.values(userToolSettings).map(tool => ({
         name: tool.name,
+        hbs: tool.hbs,
         template: Handlebars.compileAST(tool.hbs),
       }));
       setAllTools([...tools, ...userTools]);
