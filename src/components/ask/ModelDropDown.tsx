@@ -89,6 +89,15 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
                       onClick={() => {
                         onItemClick(model.name);
                         setIsOpen(false);
+                      }}
+                      onMouseDown={() => {
+                        onItemClick(model.name);
+                        setIsOpen(false);
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === 'Escape') {
+                          handleKeyDown(e);
+                        }
                       }}>
                       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
                         {index}

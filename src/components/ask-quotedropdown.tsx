@@ -82,6 +82,15 @@ export default function QuoteDropdown({ className, style, onItemClick, isOpen, s
                         onItemClick(quote);
                         setIsOpen(false);
                       }}
+                      onMouseDown={() => {
+                        onItemClick(quote);
+                        setIsOpen(false);
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === 'Escape') {
+                          handleKeyDown(e);
+                        }
+                      }}
                       className={`${
                         active ? 'bg-black text-white' : 'text-gray-900'
                       } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}>
