@@ -85,18 +85,21 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
       setTimeout(() => menuItemsRef.current[0]?.focus(), 0);
     }
   }, [isOpen]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape' && isOpen) {
       e.preventDefault();
       e.stopPropagation();
       setIsOpen(false);
     }
+  };
 
-    if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && isOpen) {
-      const button = e.target as HTMLButtonElement;
-      const index = menuItemsRef.current.indexOf(button);
-      showToolPreview(button, allTools[index].hbs);
-    }
+  const handleActiveItemChange = (element: HTMLElement | null, index: number) => {
+    requestAnimationFrame(() => {
+      if (element && index >= 0 && index < allTools.length) {
+        showToolPreview(element, allTools[index].hbs);
+      }
+    });
   };
 
   const handleBlur = (e: React.FocusEvent) => {
@@ -141,7 +144,12 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
                 <Menu.Item key={tool.name}>
                   {({ active }) => (
                     <button
-                      ref={el => (menuItemsRef.current[index] = el)}
+                      ref={el => {
+                        menuItemsRef.current[index] = el;
+                        if (el && active) {
+                          handleActiveItemChange(el, index);
+                        }
+                      }}
                       onClick={() => {
                         onItemClick(tool);
                         setIsOpen(false);
