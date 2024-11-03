@@ -2,7 +2,7 @@
 
 AskMan is an open-source browser extension that connects AI to web pages, providing a context-aware chat interface. Designed for seamless integration, AskMan allows users to ask questions about the current page and receive relevant answers directly within their browsing experience.
 
->![logo](public/icon-32.png) 
+>![logo](public/icon-32.png) \n
 > Logo designed in collaboration with Claude and Ray.
 > 
 
