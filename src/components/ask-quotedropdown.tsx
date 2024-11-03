@@ -6,6 +6,7 @@ import { QuoteContext } from '../agents/quote';
 
 interface QuoteDropdownProps {
   className: string;
+  style?: React.CSSProperties; // 添加 style 属性
   onItemClick: (tool: QuoteContext) => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
@@ -23,7 +24,7 @@ const getQuoteContexts = (): QuoteContext[] => [
   },
 ];
 
-export default function QuoteDropdown({ className, onItemClick, isOpen, setIsOpen }: QuoteDropdownProps) {
+export default function QuoteDropdown({ className, style, onItemClick, isOpen, setIsOpen }: QuoteDropdownProps) {
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
   const quoteContexts = getQuoteContexts();
   useEffect(() => {
@@ -42,20 +43,21 @@ export default function QuoteDropdown({ className, onItemClick, isOpen, setIsOpe
 
   return (
     <button
-      className={classNames(`${className}`)}
+      className={classNames(`${className} h-0`)}
       onKeyDown={handleKeyDown}
       aria-haspopup="true"
       aria-expanded={isOpen}
-      type="button">
+      type="button"
+      style={style}>
       <Menu as="div" className="relative">
         <Menu.Button
-          className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
-          title="Content ⌘ ⏎"
+          className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none h-0 invisible pointer-events-none"
+          title="Content"
           onClick={e => {
             setIsOpen(!isOpen);
             e.stopPropagation();
           }}>
-          Content ⌘ KK
+          Content
           <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
         </Menu.Button>
         <Transition
@@ -69,7 +71,7 @@ export default function QuoteDropdown({ className, onItemClick, isOpen, setIsOpe
           leaveTo="transform opacity-0 scale-95">
           <Menu.Items
             static
-            className="absolute right-0 mt-2 w-36 origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10">
+            className="absolute right-0 w-36 origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10">
             <div className="px-1 py-1">
               {quoteContexts.map((quote, index) => (
                 <Menu.Item key={quote.name}>
