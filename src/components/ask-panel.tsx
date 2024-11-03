@@ -428,7 +428,7 @@ function AskPanel(props: AskPanelProps) {
                   // 获取所有需要的矩形信息
                   const spanRect = span.getBoundingClientRect();
                   const range = document.createRange();
-                  const textNode = span.firstChild;
+                  const textNode = span.firstChild as Text;
                   range.setStart(textNode, textNode.length - 1);
                   const atRect = range.getBoundingClientRect();
 
