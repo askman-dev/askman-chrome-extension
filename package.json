@@ -91,7 +91,7 @@
     "vite-plugin-static-copy": "^1.0.6",
     "vite-plugin-toml": "^0.7.0",
     "vitest": "^0.34.6",
-    "ws": "8.14.2"
+    "ws": "8.17.1"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
