@@ -120,7 +120,7 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
       <Menu as="div" className="relative">
         <Menu.Button
           className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium hover:bg-black/10 focus:outline-none"
-          title="Tools ⌘ ⏎"
+          title="Use framework"
           onClick={e => {
             setIsOpen(!isOpen);
             e.stopPropagation();
@@ -155,10 +155,19 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
                         onItemClick(tool);
                         setIsOpen(false);
                       }}
+                      onMouseDown={() => {
+                        onItemClick(tool);
+                        setIsOpen(false);
+                      }}
                       onMouseEnter={e => {
                         showToolPreview(e.currentTarget, tool.hbs);
                       }}
                       onMouseLeave={hideToolPreview}
+                      onKeyDown={e => {
+                        if (e.key === 'Escape') {
+                          handleKeyDown(e);
+                        }
+                      }}
                       className={`${
                         active ? 'bg-black text-white' : 'text-gray-900'
                       } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}>
