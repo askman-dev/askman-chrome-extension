@@ -21,7 +21,7 @@ export default function PageGithubReadmeToolDropdown({ className, onItemClick }:
             text: document.getElementsByTagName('article')[0].innerText,
           });
         }}>
-        AskMan
+        Askman
       </button>
     </div>
   );

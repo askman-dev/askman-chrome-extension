@@ -85,7 +85,7 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
           leaveTo="transform opacity-0 scale-95">
           <Menu.Items
             static
-            className="absolute right-0 z-10 mt-2 min-w-[10rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+            className="absolute left-0 z-10 mt-2 min-w-[10rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="py-1">
               {models.map((model, index) => (
                 <Menu.Item key={model.id}>

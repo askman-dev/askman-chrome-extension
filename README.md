@@ -1,6 +1,6 @@
-# AskMan 
+# Askman 
 
-AskMan is an open-source browser extension that connects AI to web pages, providing a context-aware chat interface. Designed for seamless integration, AskMan allows users to ask questions about the current page and receive relevant answers directly within their browsing experience.
+Askman is an open-source browser extension that connects AI to web pages, providing a context-aware chat interface. Designed for seamless integration, Askman allows users to ask questions about the current page and receive relevant answers directly within their browsing experience.
 
 > <img src="public/icon@2x.svg" width="32px" alt="logo" />
 > 
@@ -12,7 +12,7 @@ AskMan is an open-source browser extension that connects AI to web pages, provid
 
 - In-Page Chat Popup: Quickly access AskMan’s chat interface with the Command + I shortcut or by right-clicking to open the dialog on any page.
 - Contextual Awareness: Automatically reads page titles and content to add context to your questions, allowing for more relevant AI responses.
-- Data Privacy: AskMan only shares data with your chosen AI service provider, without storing or tracking any information on external servers.
+- Data Privacy: Askman only shares data with your chosen AI service provider, without storing or tracking any information on external servers.
 - Side Panel for Persistent Conversations: Keep your chat session fixed, even when switching pages, ensuring data is retained and your flow remains uninterrupted.
 - Custom Prompts: Easily set up common prompts that use page-specific elements, like titles and selected text, for a personalized experience.
 
@@ -46,9 +46,9 @@ npm run dev
 
 # Usage
 
-1. Open a page (e.g., GitHub) and activate AskMan:
+1. Open a page (e.g., GitHub) and activate Askman:
     - Press Command + I.
-    - Or, right-click and choose AskMan from the menu.
+    - Or, right-click and choose Askman from the menu.
 2. Use the chat popup to ask questions based on page content or context.
 3. Customize prompts by referencing page-specific variables like the title, content, and selected text.
 
@@ -82,7 +82,7 @@ To get started, please read our Contribution Guide.
 
 # Privacy Policy
 
-AskMan is committed to user privacy:
+Askman is committed to user privacy:
 - No data is collected or stored on external servers.
 - All interactions are contained within the session and only shared with the AI service provider of your choice.
 

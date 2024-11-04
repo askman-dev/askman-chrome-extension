@@ -18,7 +18,7 @@ const Popup = () => {
       <header className="App-header" style={{ color: theme === 'light' ? '#000' : '#fff' }}>
         <div className="logo-container">
           <img src={logo} className="logo" alt="logo" />
-          <span className="app-title">AskMan</span>
+          <span className="app-title">Askman</span>
         </div>
         <div className="instructions">
           <p>After installation, please refresh your tag page first. Then click the action button to start chatting.</p>

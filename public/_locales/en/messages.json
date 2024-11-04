@@ -5,7 +5,7 @@
   },
   "extensionName": {
     "description": "Extension name",
-    "message": "AskMan - Connect AI to pages"
+    "message": "Askman - Connect AI to pages"
   },
   "extensionCommandChatPopupDisplay": {
     "description": "Command to display the popup",

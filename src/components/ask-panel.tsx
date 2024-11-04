@@ -297,7 +297,7 @@ function AskPanel(props: AskPanelProps) {
       {...rest}>
       <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between">
         <span>
-          AskMan <KeyBinding text="⌘ I"></KeyBinding>
+          Askman <KeyBinding text="⌘ I"></KeyBinding>
         </span>
 
         <div className="grow"></div>
@@ -509,6 +509,7 @@ function AskPanel(props: AskPanelProps) {
               className="ml-2"
               onItemClick={handleModelSelect}
             />
+            <div className="grow"></div>
             <AskButton
               primary
               disabled={!(userInput || initQuotes.length)}
@@ -522,9 +523,6 @@ function AskPanel(props: AskPanelProps) {
               ➔
             </AskButton>
           </div>
-        </div>
-        <div className="w-full h-34 flex">
-          <div className="grow"></div>
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@
   },
   "extensionName": {
     "description": "扩展名称",
-    "message": "AskMan - 连接 AI 到网页"
+    "message": "Askman - 连接 AI 到网页"
   },
   "extensionCommandChatPopupDisplay": {
     "description": "显示弹出窗口的命令",

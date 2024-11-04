@@ -54,7 +54,7 @@ function onMessageListener(command) {
 }
 function initExtension() {
   chrome.contextMenus.create({
-    title: 'AskMan',
+    title: 'Askman',
     contexts: ['page', 'selection'],
     id: 'id-context-menu',
   });
