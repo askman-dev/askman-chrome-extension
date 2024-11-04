@@ -554,7 +554,9 @@ function AskPanel(props: AskPanelProps) {
             <AskButton
               primary
               disabled={!(userInput || initQuotes.length)}
-              onClick={onSend}
+              onClick={() => {
+                onSend();
+              }}
               onKeyDown={e => {
                 if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
                   e.preventDefault();
