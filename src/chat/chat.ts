@@ -152,7 +152,7 @@ export class ChatCoreContext implements ChatCoreInterface {
     if (this._onDataListener == null) {
       console.warn('no this._onDataListener');
     }
-    const pendingResponse = new AIMessage({ content: '正在思考...', name: 'ai' });
+    const pendingResponse = new AIMessage({ content: 'Just Guessing ...', name: 'ai' });
     let hasResponse = false;
     setTimeout(() => this.history.push(pendingResponse));
     this._onDataListener && setTimeout(() => this._onDataListener(this.history));
@@ -172,7 +172,7 @@ export class ChatCoreContext implements ChatCoreInterface {
       this._onDataListener && setTimeout(() => this._onDataListener(this.history));
     }
     if (!hasResponse) {
-      pendingResponse.content = '(无返回内容或返回空格)';
+      pendingResponse.content = '(Nothing to Show)';
       this._onDataListener && setTimeout(() => this._onDataListener(this.history));
     }
   }
