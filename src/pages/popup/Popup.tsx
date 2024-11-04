@@ -16,25 +16,23 @@ const Popup = () => {
         backgroundColor: theme === 'light' ? '#fff' : '#000',
       }}>
       <header className="App-header" style={{ color: theme === 'light' ? '#000' : '#fff' }}>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Please first open a page, such as
-          <a href="https://github.com/askman-dev/askman-chrome-extension" target="_blank" rel="noreferrer">
-            github.com
-          </a>
-          <br />
-          1. Use Command + I to activate Ask Man. <br />
-          2. Or select <span>AskMan</span> from the right-click menu.
-        </p>
+        <div className="logo-container">
+          <img src={logo} className="logo" alt="logo" />
+          <span className="app-title">AskMan</span>
+        </div>
+        <div className="instructions">
+          <p>After installation, please refresh your tag page first. Then click the action button to start chatting.</p>
+          <p className="note">Note: Chat is not available on new tabs, settings pages, or browser system pages.</p>
+        </div>
         <button
+          className="action-button"
           style={{
             backgroundColor: theme === 'light' ? '#fff' : '#000',
             color: theme === 'light' ? '#000' : '#fff',
             border: '1px solid #000',
-            borderRadius: '4px',
           }}
-          onClick={exampleThemeStorage.toggle}>
-          Let&apos;s try
+          onClick={() => window.open('https://github.com/askman-dev/askman-chrome-extension/discussions', '_blank')}>
+          Feedback
         </button>
       </header>
     </div>
