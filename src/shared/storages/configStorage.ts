@@ -7,6 +7,22 @@ interface Config {
   model: string;
   temperature: number;
 }
+interface TomlModelConfig {
+  provider: string;
+  config: {
+    temperature?: number;
+    topP?: number;
+    frequencyPenalty?: number;
+    presencePenalty?: number;
+    api_key?: string;
+    base_url?: string;
+    models: Array<{
+      name: string;
+      id?: string;
+      max_tokens: number;
+    }>;
+  };
+}
 
 const defaultConfig: Config = {
   apiKey: '',
@@ -18,7 +34,7 @@ type ConfigStorage = BaseStorage<Config> & {
   setApiKey: (apiKey: string) => Promise<void>;
   setModel: (model: string) => Promise<void>;
   setTemperature: (temperature: number) => Promise<void>;
-  getModelConfig: () => Promise<{ provider: string; config: any }[]>;
+  getModelConfig: () => Promise<TomlModelConfig[]>;
 };
 
 const storage = createStorage<Config>('config-storage-key', defaultConfig, {
@@ -44,11 +60,14 @@ const configStorage: ConfigStorage = {
     // const userConfigObj = TOML.parse(userConfigStr);
     const userConfigObj = await StorageManager.getUserModels();
     const systemConfigObj = TOML.parse(systemConfigStr);
-    const mergedConfigObj = { ...systemConfigObj, ...userConfigObj };
-    return Object.entries(mergedConfigObj).map(([provider, model]) => ({
+    const mergedConfigObj = {
+      ...systemConfigObj,
+      ...(Array.isArray(userConfigObj) ? {} : userConfigObj), // 如果 userConfigObj 是数组，则不合并
+    } as Record<string, TomlModelConfig['config']>;
+    return Object.entries(mergedConfigObj).map(([provider, config]) => ({
       provider,
-      config: model,
-    }));
+      config,
+    })) as TomlModelConfig[];
   },
 };
 

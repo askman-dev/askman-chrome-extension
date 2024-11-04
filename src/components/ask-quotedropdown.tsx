@@ -53,7 +53,7 @@ export default function QuoteDropdown({ className, style, onItemClick, isOpen, s
       aria-expanded={isOpen}
       type="button"
       style={style}>
-      <Menu as="div" className="relative">
+      <Menu as="div" className="relative h-0">
         <Menu.Button
           className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none h-0 invisible pointer-events-none"
           title="Content"
