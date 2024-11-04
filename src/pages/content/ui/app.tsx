@@ -81,8 +81,6 @@ export default function App() {
     let quote = null;
     if (quoteText) {
       quote = QuoteAgent.getQuoteBySelection(window.location.href, quoteText);
-    } else {
-      quote = QuoteAgent.getQuoteByDocument(window.location.href, document);
     }
     if (quote) {
       setAskPanelQuotes([quote]);
