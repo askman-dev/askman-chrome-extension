@@ -254,20 +254,21 @@ function AskPanel(props: AskPanelProps) {
     setInitQuotes(prevQuotes => [...prevQuotes, newQuote]);
   };
 
-  async function onSend() {
+  async function onSend(overrideTool?: ToolsPromptInterface) {
     await chatContext.updateModelByName(selectedModel);
-    // split auto context and user context
-    if (userTools) {
-      chatContext.askWithTool(userTools, pageContext, initQuotes, userInput.trim());
+    // Use overrideTool if provided, otherwise fall back to userTools state
+    const toolToUse = overrideTool || userTools;
+
+    if (toolToUse) {
+      chatContext.askWithTool(toolToUse, pageContext, initQuotes, userInput.trim());
     } else {
       chatContext.askWithQuotes(initQuotes!, userInput.trim());
     }
+
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-    // setUserTools(null);
     setUserInput('');
-    // setInitQuotes([]);
   }
 
   function updateDropdownPosition(input: HTMLTextAreaElement, cursorPosition: number) {
@@ -535,8 +536,11 @@ function AskPanel(props: AskPanelProps) {
               isOpen={isToolDropdownOpen}
               setIsOpen={setIsToolDropdownOpen}
               className="inline-block"
-              onItemClick={item => {
+              onItemClick={(item, withCommand) => {
                 setUserTools(item);
+                if (withCommand) {
+                  onSend(item);
+                }
               }}
             />
             <ModelDropdown

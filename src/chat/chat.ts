@@ -142,7 +142,10 @@ export class ChatCoreContext implements ChatCoreInterface {
     if (userPrompt) {
       prompt += userPrompt;
     }
-
+    if (prompt.trim() == '') {
+      console.warn('[Askman] prompt is empty, skip sending');
+      return;
+    }
     this.history.push(new HumanMessage({ content: prompt, name: 'human' }));
     this._onDataListener && setTimeout(() => this._onDataListener(this.history));
     return this.stream(this.history);

@@ -11,7 +11,7 @@ import { ToolPreview } from './tool-preview';
 interface ToolDropdownProps {
   displayName: string;
   className: string;
-  onItemClick: (tool: ToolsPromptInterface) => void;
+  onItemClick: (tool: ToolsPromptInterface, withCommand?: boolean) => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }
@@ -112,7 +112,7 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
       hideToolPreview();
     }
   };
-
+  let isCommandPressed = false;
   return (
     <button
       className={classNames(`${className}`)}
@@ -121,7 +121,7 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
       aria-haspopup="true"
       aria-expanded={isOpen}
       type="button">
-      <Menu as="div" className="relative">
+      <Menu as="div" className="relative" onKeyDown={handleKeyDown}>
         <Menu.Button
           className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium hover:bg-black/10 focus:outline-none"
           title="Use framework"
@@ -156,11 +156,11 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
                         }
                       }}
                       onClick={() => {
-                        onItemClick(tool);
+                        onItemClick(tool, isCommandPressed);
                         setIsOpen(false);
                       }}
                       onMouseDown={() => {
-                        onItemClick(tool);
+                        onItemClick(tool, isCommandPressed);
                         setIsOpen(false);
                       }}
                       onMouseEnter={e => {
@@ -168,8 +168,8 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
                       }}
                       onMouseLeave={hideToolPreview}
                       onKeyDown={e => {
-                        if (e.key === 'Escape') {
-                          handleKeyDown(e);
+                        if (e.key === 'Enter') {
+                          isCommandPressed = e.metaKey || e.ctrlKey;
                         }
                       }}
                       className={`${
@@ -179,6 +179,16 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
                         {index}
                       </span>
                       {tool.name}
+                      {active ? (
+                        <>
+                          <div className="grow"></div>
+                          <span
+                            className="inline-flex items-center justify-center w-[2rem] h-5 text-xs font-semibold border border-gray-300 rounded"
+                            title="Quick Send">
+                            {navigator.platform.includes('Mac') ? '⌘ ↩︎' : 'Ctrl ↩︎'}
+                          </span>
+                        </>
+                      ) : null}
                     </button>
                   )}
                 </Menu.Item>
