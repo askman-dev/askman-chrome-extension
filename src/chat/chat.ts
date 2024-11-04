@@ -1,4 +1,6 @@
 import { ChatOpenAI } from '@langchain/openai';
+import type { ClientOptions, OpenAIChatInput } from '@langchain/openai';
+
 import { QuoteAgent, QuoteContext } from '../agents/quote';
 import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
 import configStorage from '@src/shared/storages/configStorage';
@@ -57,6 +59,11 @@ export class ChatCoreContext implements ChatCoreInterface {
     });
     return this;
   }
+  /**
+   * 根据模型名称更新模型
+   * @param modelName 模型名称 {provider}/{model} 如：openai/gpt-3.5-turbo
+   * @returns
+   */
   async updateModelByName(modelName: string) {
     // split by '/'
     const [provider, model] = modelName.split('/');
@@ -65,9 +72,25 @@ export class ChatCoreContext implements ChatCoreInterface {
       return this;
     }
     const modelConfigs = await configStorage.getModelConfig();
-    const modelConfig = modelConfigs.find(m => m.provider == provider && m.config.name == model);
+    const modelConfig = modelConfigs.find(m => m.provider == provider);
+    const chatInput: Partial<OpenAIChatInput> & { configuration?: ClientOptions } = {};
     if (modelConfig) {
-      this.model = new ChatOpenAI(modelConfig.config);
+      chatInput.temperature = modelConfig.config.temperature || 0.2;
+      chatInput.topP = modelConfig.config.topP || 0.95;
+      chatInput.frequencyPenalty = modelConfig.config.frequencyPenalty || 0;
+      chatInput.presencePenalty = modelConfig.config.presencePenalty || 0;
+      chatInput.openAIApiKey = modelConfig.config.api_key;
+      chatInput.configuration = {
+        baseURL: modelConfig.config.base_url,
+      };
+      modelConfig.config.models.some((m: { name: string; max_tokens: number }) => {
+        if (m.name == model) {
+          chatInput.modelName = m.name;
+          return true;
+        }
+        return false;
+      });
+      this.model = new ChatOpenAI(chatInput);
     }
     return this;
   }

@@ -26,6 +26,10 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
       e.preventDefault();
       e.stopPropagation();
       setIsOpen(false);
+    } else if (e.key === 'Backspace' && isOpen) {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsOpen(false);
     }
   };
 
@@ -59,10 +63,15 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
       type="button">
       <Menu as="div" className={classNames('relative inline-block text-left', className)}>
         <Menu.Button
-          className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
+          className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none min-w-0"
           onClick={() => setIsOpen(!isOpen)}>
-          {displayName == 'free' ? 'Model' : displayName} ⌘ KK
-          <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
+          <span className="inline-block truncate max-w-[10rem] text-right" dir="rtl">
+            {displayName == 'free' ? 'Model' : displayName} ⌘ KK
+          </span>
+          <ChevronDownIcon
+            className="-mr-1 h-5 w-5 text-violet-200 hover:text-violet-100 flex-shrink-0"
+            aria-hidden="true"
+          />
         </Menu.Button>
 
         <Transition
@@ -76,7 +85,7 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
           leaveTo="transform opacity-0 scale-95">
           <Menu.Items
             static
-            className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+            className="absolute right-0 z-10 mt-2 min-w-[10rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="py-1">
               {models.map((model, index) => (
                 <Menu.Item key={model.id}>
@@ -102,7 +111,7 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
                       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
                         {index}
                       </span>
-                      {model.name}
+                      <span className="whitespace-nowrap">{model.name}</span>
                     </button>
                   )}
                 </Menu.Item>
