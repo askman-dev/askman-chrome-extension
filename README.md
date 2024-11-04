@@ -48,7 +48,7 @@ npm run dev
 
 1. Open a page (e.g., GitHub) and activate AskMan:
     - Press Command + I.
-    - Or, right-click and choose Ask That Man from the menu.
+    - Or, right-click and choose AskMan from the menu.
 2. Use the chat popup to ask questions based on page content or context.
 3. Customize prompts by referencing page-specific variables like the title, content, and selected text.
 

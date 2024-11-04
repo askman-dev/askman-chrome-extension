@@ -190,7 +190,7 @@ function AskPanel(props: AskPanelProps) {
       // 检测 Command+K (Mac) 或 Ctrl+K (Windows/Linux)
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-
+        e.stopPropagation();
         if (!isToolDropdownOpen) {
           showToolDropdown();
         } else if (isToolDropdownOpen) {
@@ -265,7 +265,7 @@ function AskPanel(props: AskPanelProps) {
       {...rest}>
       <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between">
         <span>
-          Ask That Man <KeyBinding text="⌘ I"></KeyBinding>
+          AskMan <KeyBinding text="⌘ I"></KeyBinding>
         </span>
 
         <div className="grow"></div>
