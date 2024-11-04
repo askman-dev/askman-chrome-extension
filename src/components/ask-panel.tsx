@@ -330,7 +330,7 @@ function AskPanel(props: AskPanelProps) {
     <div
       ref={panelRef}
       className={classNames(
-        'bg-white text-black text-left fixed border-1 border-solid border-gray-200 drop-shadow-lg text-sm rounded-lg w-[473px] min-w-80 max-w-lg min-h-[155px] p-4',
+        'antialiased bg-white text-black text-left fixed border-1 border-solid border-gray-200 drop-shadow-lg text-sm rounded-lg w-[473px] min-w-80 max-w-lg min-h-[155px] p-4',
         `${askPanelVisible ? 'visible' : 'invisible'}`,
       )}
       {...rest}>
@@ -475,40 +475,40 @@ function AskPanel(props: AskPanelProps) {
                 // const text = input.value;
                 // const atIndex = text.lastIndexOf('@');
 
-                if (atIndex !== -1) {
-                  // const span = document.createElement('span');
-                  // span.style.cssText = `
-                  //   font: ${window.getComputedStyle(input).font};
-                  //   visibility: hidden;
-                  //   position: absolute;
-                  //   white-space: pre-wrap;
-                  //   word-wrap: break-word;
-                  //   width: ${
-                  //     input.clientWidth -
-                  //     parseInt(window.getComputedStyle(input).paddingLeft) -
-                  //     parseInt(window.getComputedStyle(input).paddingRight)
-                  //   }px;
-                  //   padding: ${window.getComputedStyle(input).padding};
-                  //   box-sizing: border-box;
-                  // `;
-                  // // 将 span 添加到输入框的父元素中，这样它会继承正确的定位上下文
-                  // input.parentElement.appendChild(span);
-                  // const textBeforeAt = text.substring(0, atIndex) + '\u200B';
-                  // span.textContent = textBeforeAt;
-                  // // 获取所有需要的矩形信息
-                  // const spanRect = span.getBoundingClientRect();
-                  // const range = document.createRange();
-                  // const textNode = span.firstChild as Text;
-                  // range.setStart(textNode, textNode.length - 1);
-                  // const atRect = range.getBoundingClientRect();
-                  // // 清理
-                  // input.parentElement.removeChild(span);
-                  // // 由于 span 是相对于父元素定位的，我们可以直接使用其坐标
-                  // setDropdownPosition({
-                  //   left: atRect.left - spanRect.left + parseInt(window.getComputedStyle(input).paddingLeft),
-                  //   top: atRect.top - spanRect.top + parseInt(window.getComputedStyle(input).paddingTop),
-                  // });
-                }
+                // if (atIndex !== -1) {
+                // const span = document.createElement('span');
+                // span.style.cssText = `
+                //   font: ${window.getComputedStyle(input).font};
+                //   visibility: hidden;
+                //   position: absolute;
+                //   white-space: pre-wrap;
+                //   word-wrap: break-word;
+                //   width: ${
+                //     input.clientWidth -
+                //     parseInt(window.getComputedStyle(input).paddingLeft) -
+                //     parseInt(window.getComputedStyle(input).paddingRight)
+                //   }px;
+                //   padding: ${window.getComputedStyle(input).padding};
+                //   box-sizing: border-box;
+                // `;
+                // // 将 span 添加到输入框的父元素中，这样它会继承正确的定位上下文
+                // input.parentElement.appendChild(span);
+                // const textBeforeAt = text.substring(0, atIndex) + '\u200B';
+                // span.textContent = textBeforeAt;
+                // // 获取所有需要的矩形信息
+                // const spanRect = span.getBoundingClientRect();
+                // const range = document.createRange();
+                // const textNode = span.firstChild as Text;
+                // range.setStart(textNode, textNode.length - 1);
+                // const atRect = range.getBoundingClientRect();
+                // // 清理
+                // input.parentElement.removeChild(span);
+                // // 由于 span 是相对于父元素定位的，我们可以直接使用其坐标
+                // setDropdownPosition({
+                //   left: atRect.left - spanRect.left + parseInt(window.getComputedStyle(input).paddingLeft),
+                //   top: atRect.top - spanRect.top + parseInt(window.getComputedStyle(input).paddingTop),
+                // });
+                // }
                 e.preventDefault();
               }}
               value={userInput}
@@ -529,7 +529,7 @@ function AskPanel(props: AskPanelProps) {
           </div>
           <div className="flex">
             <ToolDropdown
-              displayName={userTools?.name || 'Framework'}
+              displayName={userTools?.name || 'Frame'}
               isOpen={isToolDropdownOpen}
               setIsOpen={setIsToolDropdownOpen}
               className="inline-block"

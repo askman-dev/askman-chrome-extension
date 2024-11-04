@@ -20,6 +20,9 @@ const defaultConfig = defineConfig({
   hash: false,
   presets: [presetAutoprefix(), presetTailwind()],
   theme: {
+    fontSmoothing: {
+      antialiased: true,
+    },
     maxWidth: {
       60: '15rem',
       lg: '32rem',
