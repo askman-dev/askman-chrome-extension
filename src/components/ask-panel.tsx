@@ -290,23 +290,25 @@ function AskPanel(props: AskPanelProps) {
     // 将 span 添加到文档中进行测量
     input.parentElement.appendChild(span);
 
-    span.textContent = textBeforeCursor;
+    // 添加安全检查
+    let left = 0;
+    let top = 14; //TODO needs to update calculated height
 
-    // 获取所有需要的矩形信息
-    const spanRect = span.getBoundingClientRect();
-    const range = document.createRange();
-    const textNode = span.firstChild as Text;
-    range.setStart(textNode, textNode.length - 1);
-    const atRect = range.getBoundingClientRect();
+    if (span.firstChild) {
+      const range = document.createRange();
+      const textNode = span.firstChild as Text;
+      range.setStart(textNode, Math.max(0, textNode.length - 1));
+      const atRect = range.getBoundingClientRect();
+      const spanRect = span.getBoundingClientRect();
+      left = atRect.left - spanRect.left + parseInt(window.getComputedStyle(input).paddingLeft);
+      top = atRect.top - spanRect.top + parseInt(window.getComputedStyle(input).paddingTop);
+    }
 
     // 清理
     input.parentElement.removeChild(span);
 
-    // 由于 span 是相对于父元素定位的，我们可以直接使用其坐标
-    setDropdownPosition({
-      left: atRect.left - spanRect.left + parseInt(window.getComputedStyle(input).paddingLeft),
-      top: atRect.top - spanRect.top + parseInt(window.getComputedStyle(input).paddingTop),
-    });
+    // 设置下拉菜单位置
+    setDropdownPosition({ left, top });
   }
 
   // 在组件加载时读取存储的模型
