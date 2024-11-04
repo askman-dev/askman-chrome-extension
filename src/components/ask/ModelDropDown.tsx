@@ -48,7 +48,7 @@ export default function ModelDropdown({ displayName, isOpen, setIsOpen, classNam
         }
       });
       setModels(modelArray);
-      modelArray.length && onItemClick(modelArray[0].name);
+      // modelArray.length && onItemClick(modelArray[0].name);
     };
 
     fetchModels();

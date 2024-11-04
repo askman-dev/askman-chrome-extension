@@ -6,6 +6,7 @@ interface Config {
   apiKey: string;
   model: string;
   temperature: number;
+  selectedModel?: string;
 }
 interface TomlModelConfig {
   provider: string;
@@ -26,8 +27,8 @@ interface TomlModelConfig {
 
 const defaultConfig: Config = {
   apiKey: '',
-  model: 'gpt-3.5-turbo',
-  temperature: 0.7,
+  model: 'free', // 'openai/gpt-4o'
+  temperature: 0.2,
 };
 
 type ConfigStorage = BaseStorage<Config> & {
@@ -35,6 +36,7 @@ type ConfigStorage = BaseStorage<Config> & {
   setModel: (model: string) => Promise<void>;
   setTemperature: (temperature: number) => Promise<void>;
   getModelConfig: () => Promise<TomlModelConfig[]>;
+  getSelectedModel: () => Promise<string>;
 };
 
 const storage = createStorage<Config>('config-storage-key', defaultConfig, {
@@ -68,6 +70,10 @@ const configStorage: ConfigStorage = {
       provider,
       config,
     })) as TomlModelConfig[];
+  },
+  getSelectedModel: async () => {
+    const config = await storage.get();
+    return config.model || 'free'; // 默认值为 'free'
   },
 };
 

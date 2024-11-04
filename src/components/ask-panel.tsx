@@ -18,6 +18,7 @@ import {
 } from '../types';
 import QuoteDropdown from './ask-quotedropdown';
 import KeyBinding from './icons';
+import configStorage from '../shared/storages/configStorage';
 
 interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -160,7 +161,7 @@ function AskPanel(props: AskPanelProps) {
       );
     }
 
-    console.log('注册消息回调');
+    // console.log('注册消息回调');
     chatContext.setOnDataListener(() => {
       // console.log(data);
       rerenderHistory();
@@ -169,12 +170,12 @@ function AskPanel(props: AskPanelProps) {
 
     askPanelVisible &&
       setTimeout(() => {
-        console.log('获取焦点');
+        // console.log('获取焦点');
         inputRef.current.focus();
       }, 200);
 
     return () => {
-      console.log('移除消息回调');
+      // console.log('移除消息回调');
       chatContext.removeOnDataListener();
     };
   }, []);
@@ -268,6 +269,21 @@ function AskPanel(props: AskPanelProps) {
     setUserInput('');
     // setInitQuotes([]);
   }
+
+  // 在组件加载时读取存储的模型
+  useEffect(() => {
+    const loadSelectedModel = async () => {
+      const savedModel = await configStorage.getSelectedModel();
+      setSelectedModel(savedModel);
+    };
+    loadSelectedModel();
+  }, []);
+
+  // 修改模型选择的处理函数
+  const handleModelSelect = async (model: string) => {
+    setSelectedModel(model);
+    await configStorage.setModel(model);
+  };
 
   // myObject.test('你是谁');
   // console.log('history = ' + JSON.stringify(history));
@@ -490,11 +506,8 @@ function AskPanel(props: AskPanelProps) {
               displayName={selectedModel}
               isOpen={isModelDropdownOpen}
               setIsOpen={setIsModelDropdownOpen}
-              className="inline-block ml-auto" // 调整位置以适应布局
-              onItemClick={item => {
-                setSelectedModel(item);
-                // 这里可以添加更多逻辑，例如通知 chatContext 模型已更改
-              }}
+              className="ml-2"
+              onItemClick={handleModelSelect}
             />
             <AskButton
               primary
