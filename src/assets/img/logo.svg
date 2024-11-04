@@ -1,93 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <!-- 外环 -->
-  <circle cx="64" cy="64" r="60" 
-          stroke="#00E5FF" 
-          stroke-width="1.5" 
-          stroke-dasharray="4,4"
-          fill="none"/>
-  
-  <!-- 放大的正三角形棱镜主体 -->
-  <path d="M24 94 L104 94 L64 26 Z" 
-        fill="none" 
-        stroke="#00E5FF" 
-        stroke-width="3"/>
-  
-  <!-- 入射光线 -->
-  <g>
-    <line x1="10" y1="64" x2="44" y2="64" 
-          stroke="#00E5FF" 
-          stroke-width="2.5"
-          stroke-dasharray="4,4">
-      <animate attributeName="stroke-dashoffset"
-               values="8;0"
-               dur="2s"
-               repeatCount="indefinite"/>
-    </line>
-    <circle cx="10" cy="64" r="3" fill="#00E5FF">
-      <animate attributeName="opacity"
-               values="0.4;1;0.4"
-               dur="2s"
-               repeatCount="indefinite"/>
-    </circle>
-  </g>
-  
-  <!-- 折射光线 -->
-  <g>
-    <!-- 上折射光线 -->
-    <line x1="84" y1="64" x2="118" y2="50" 
-          stroke="#00E5FF" 
-          stroke-width="2.5"
-          stroke-dasharray="4,4">
-      <animate attributeName="stroke-dashoffset"
-               values="0;-8"
-               dur="2s"
-               repeatCount="indefinite"/>
-    </line>
-    <circle cx="118" cy="50" r="3" fill="#00E5FF">
-      <animate attributeName="opacity"
-               values="0.4;1;0.4"
-               dur="2s"
-               repeatCount="indefinite"/>
-    </circle>
-
-    <!-- 中折射光线 -->
-    <line x1="84" y1="64" x2="118" y2="64" 
-          stroke="#00E5FF" 
-          stroke-width="2.5"
-          stroke-dasharray="4,4">
-      <animate attributeName="stroke-dashoffset"
-               values="0;-8"
-               dur="2s"
-               repeatCount="indefinite"/>
-    </line>
-    <circle cx="118" cy="64" r="3" fill="#00E5FF">
-      <animate attributeName="opacity"
-               values="0.4;1;0.4"
-               dur="2s"
-               repeatCount="indefinite"/>
-    </circle>
-
-    <!-- 下折射光线 -->
-    <line x1="84" y1="64" x2="118" y2="78" 
-          stroke="#00E5FF" 
-          stroke-width="2.5"
-          stroke-dasharray="4,4">
-      <animate attributeName="stroke-dashoffset"
-               values="0;-8"
-               dur="2s"
-               repeatCount="indefinite"/>
-    </line>
-    <circle cx="118" cy="78" r="3" fill="#00E5FF">
-      <animate attributeName="opacity"
-               values="0.4;1;0.4"
-               dur="2s"
-               repeatCount="indefinite"/>
-    </circle>
-  </g>
-  
-  <!-- 内部结构线 -->
-  <g stroke="#00E5FF" stroke-width="1.5" opacity="0.5">
-    <line x1="64" y1="26" x2="64" y2="94"/>
-    <line x1="44" y1="60" x2="84" y2="60"/>
-  </g>
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_4070_276)">
+<rect x="1" width="127" height="127" rx="6" fill="black"/>
+<path d="M24 94H104L64 26L24 94Z" fill="white" stroke="white" stroke-width="10"/>
+<path d="M0 65L44 65" stroke="white" stroke-width="10"/>
+<path d="M84.5 61.7224L128.251 70.8166" stroke="white" stroke-width="6"/>
+<path d="M88 62L132 97" stroke="white" stroke-width="6"/>
+</g>
+<defs>
+<clipPath id="clip0_4070_276">
+<rect width="128" height="128" fill="white"/>
+</clipPath>
+</defs>
 </svg>

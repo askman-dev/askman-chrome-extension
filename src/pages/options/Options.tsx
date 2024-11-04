@@ -42,7 +42,7 @@ const Options: React.FC = () => {
         <h1 className="text-xl font-bold flex items-center">
           Askman<span className="font-normal text-gray-500">(v0.0.7)</span>
           <a
-            href="https://support.qq.com/product/667701"
+            href="https://github.com/askman-dev/askman-chrome-extension/discussions"
             className="ml-2 bg-black font-normal text-white px-2 py-1 text-sm rounded"
             target="_blank"
             rel="noopener noreferrer">
