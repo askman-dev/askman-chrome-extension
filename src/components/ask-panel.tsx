@@ -270,6 +270,45 @@ function AskPanel(props: AskPanelProps) {
     // setInitQuotes([]);
   }
 
+  function updateDropdownPosition(input: HTMLTextAreaElement, cursorPosition: number) {
+    // 创建一个临时 span 来测量文本位置
+    const span = document.createElement('span');
+    span.style.cssText = `
+      font: ${window.getComputedStyle(input).font};
+      visibility: hidden;
+      position: absolute;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      width: ${input.clientWidth}px;
+      padding: ${window.getComputedStyle(input).padding};
+    `;
+
+    // 获取光标之前的文本
+    const textBeforeCursor = input.value.substring(0, cursorPosition);
+    span.textContent = textBeforeCursor;
+
+    // 将 span 添加到文档中进行测量
+    input.parentElement.appendChild(span);
+
+    span.textContent = textBeforeCursor;
+
+    // 获取所有需要的矩形信息
+    const spanRect = span.getBoundingClientRect();
+    const range = document.createRange();
+    const textNode = span.firstChild as Text;
+    range.setStart(textNode, textNode.length - 1);
+    const atRect = range.getBoundingClientRect();
+
+    // 清理
+    input.parentElement.removeChild(span);
+
+    // 由于 span 是相对于父元素定位的，我们可以直接使用其坐标
+    setDropdownPosition({
+      left: atRect.left - spanRect.left + parseInt(window.getComputedStyle(input).paddingLeft),
+      top: atRect.top - spanRect.top + parseInt(window.getComputedStyle(input).paddingTop),
+    });
+  }
+
   // 在组件加载时读取存储的模型
   useEffect(() => {
     const loadSelectedModel = async () => {
@@ -376,6 +415,7 @@ function AskPanel(props: AskPanelProps) {
                     return;
                   }
                 } else if (e.key === '@' && !e.nativeEvent.isComposing) {
+                  updateDropdownPosition(inputRef.current, inputRef.current.selectionStart);
                   showQuoteDropdown();
                   e.preventDefault();
                   return;
@@ -431,48 +471,43 @@ function AskPanel(props: AskPanelProps) {
               }}
               onChange={e => {
                 setUserInput(e.currentTarget.value);
-                const input = e.currentTarget;
-                const text = input.value;
-                const atIndex = text.lastIndexOf('@');
+                // const input = e.currentTarget;
+                // const text = input.value;
+                // const atIndex = text.lastIndexOf('@');
 
                 if (atIndex !== -1) {
-                  const span = document.createElement('span');
-                  span.style.cssText = `
-                    font: ${window.getComputedStyle(input).font};
-                    visibility: hidden;
-                    position: absolute;
-                    white-space: pre-wrap;
-                    word-wrap: break-word;
-                    width: ${
-                      input.clientWidth -
-                      parseInt(window.getComputedStyle(input).paddingLeft) -
-                      parseInt(window.getComputedStyle(input).paddingRight)
-                    }px;
-                    padding: ${window.getComputedStyle(input).padding};
-                    box-sizing: border-box;
-                  `;
-
-                  // 将 span 添加到输入框的父元素中，这样它会继承正确的定位上下文
-                  input.parentElement.appendChild(span);
-
-                  const textBeforeAt = text.substring(0, atIndex) + '\u200B';
-                  span.textContent = textBeforeAt;
-
-                  // 获取所有需要的矩形信息
-                  const spanRect = span.getBoundingClientRect();
-                  const range = document.createRange();
-                  const textNode = span.firstChild as Text;
-                  range.setStart(textNode, textNode.length - 1);
-                  const atRect = range.getBoundingClientRect();
-
-                  // 清理
-                  input.parentElement.removeChild(span);
-
-                  // 由于 span 是相对于父元素定位的，我们可以直接使用其坐标
-                  setDropdownPosition({
-                    left: atRect.left - spanRect.left + parseInt(window.getComputedStyle(input).paddingLeft),
-                    top: atRect.top - spanRect.top + parseInt(window.getComputedStyle(input).paddingTop),
-                  });
+                  // const span = document.createElement('span');
+                  // span.style.cssText = `
+                  //   font: ${window.getComputedStyle(input).font};
+                  //   visibility: hidden;
+                  //   position: absolute;
+                  //   white-space: pre-wrap;
+                  //   word-wrap: break-word;
+                  //   width: ${
+                  //     input.clientWidth -
+                  //     parseInt(window.getComputedStyle(input).paddingLeft) -
+                  //     parseInt(window.getComputedStyle(input).paddingRight)
+                  //   }px;
+                  //   padding: ${window.getComputedStyle(input).padding};
+                  //   box-sizing: border-box;
+                  // `;
+                  // // 将 span 添加到输入框的父元素中，这样它会继承正确的定位上下文
+                  // input.parentElement.appendChild(span);
+                  // const textBeforeAt = text.substring(0, atIndex) + '\u200B';
+                  // span.textContent = textBeforeAt;
+                  // // 获取所有需要的矩形信息
+                  // const spanRect = span.getBoundingClientRect();
+                  // const range = document.createRange();
+                  // const textNode = span.firstChild as Text;
+                  // range.setStart(textNode, textNode.length - 1);
+                  // const atRect = range.getBoundingClientRect();
+                  // // 清理
+                  // input.parentElement.removeChild(span);
+                  // // 由于 span 是相对于父元素定位的，我们可以直接使用其坐标
+                  // setDropdownPosition({
+                  //   left: atRect.left - spanRect.left + parseInt(window.getComputedStyle(input).paddingLeft),
+                  //   top: atRect.top - spanRect.top + parseInt(window.getComputedStyle(input).paddingTop),
+                  // });
                 }
                 e.preventDefault();
               }}
@@ -506,7 +541,7 @@ function AskPanel(props: AskPanelProps) {
               displayName={selectedModel}
               isOpen={isModelDropdownOpen}
               setIsOpen={setIsModelDropdownOpen}
-              className="ml-2"
+              className=""
               onItemClick={handleModelSelect}
             />
             <div className="grow"></div>

@@ -55,7 +55,7 @@ export default function QuoteDropdown({ className, style, onItemClick, isOpen, s
       style={style}>
       <Menu as="div" className="relative h-0">
         <Menu.Button
-          className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none h-0 invisible pointer-events-none"
+          className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white text-sm font-medium text-black hover:bg-black/10 focus:outline-none h-0 invisible pointer-events-none"
           title="Content"
           onClick={e => {
             setIsOpen(!isOpen);
@@ -75,7 +75,7 @@ export default function QuoteDropdown({ className, style, onItemClick, isOpen, s
           leaveTo="transform opacity-0 scale-95">
           <Menu.Items
             static
-            className="absolute right-0 w-36 origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10">
+            className="absolute left-0 w-36 mt-[-0.5rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10">
             <div className="px-1 py-1">
               {quoteContexts.map((quote, index) => (
                 <Menu.Item key={quote.name}>
