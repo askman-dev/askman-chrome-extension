@@ -13,7 +13,7 @@ export interface ChatCoreInterface {
   history: BaseMessage[];
   init();
   askWithQuotes(quotes: QuoteContext[], userPrompt: null | string);
-  askWithTool(tool: ToolsPromptInterface, quotes: QuoteContext[], userPrompt: null | string);
+  askWithTool(tool: ToolsPromptInterface, pageContext: QuoteContext, quotes: QuoteContext[], userPrompt: null | string);
   setOnDataListener(callback: (data: BaseMessage[]) => void);
   removeOnDataListener();
 }
@@ -95,26 +95,7 @@ export class ChatCoreContext implements ChatCoreInterface {
     return this;
   }
   async askWithQuotes(quotes: QuoteContext[], userPrompt: null | string) {
-    //TODO 需要替换成从模版中读取，以方便用户自定义
-    let prompt = '';
-    let rendered = '';
-    const quotesPrompts = quotes
-      .map(quote => {
-        return QuoteAgent.promptQuote(quote);
-      })
-      .filter(p => p);
-    if (quotesPrompts.length) {
-      prompt = '' + quotesPrompts.join('\n') + '\n';
-      rendered = QuoteAgent.formatQuotes(quotesPrompts) + '\n';
-    }
-    if (userPrompt) {
-      prompt += userPrompt;
-      rendered += userPrompt;
-    }
-
-    this.history.push(new HumanAskMessage({ content: prompt, rendered: rendered, name: 'human' }));
-    this._onDataListener && setTimeout(() => this._onDataListener(this.history));
-    return this.stream(this.history);
+    return this.askWithTool(null, null, quotes, userPrompt);
   }
 
   /**
@@ -125,46 +106,42 @@ export class ChatCoreContext implements ChatCoreInterface {
    * @param {null | string} userPrompt - an optional prompt for the user
    * @return {Promise<void>} a Promise that resolves when the user has responded
    */
-  async askWithTool(tool: ToolsPromptInterface, quotes: QuoteContext[], userPrompt: null | string) {
-    // 先把 quotes 与 user prompt 合并，然后再用 tool 包装
-    let prompt = '';
-    const quotesPrompts = quotes
-      .map(quote => {
-        if (quote.type == 'selection') return null;
-        return QuoteAgent.promptQuote(quote);
-      })
-      .filter(p => p);
-    // if (quotesPrompts.length) {
-    //   prompt = quotesPrompts.join('\n') + '\n';
-    // }
-    // if (userPrompt) {
-    //   prompt += userPrompt;
-    // }
-
+  async askWithTool(
+    framework: ToolsPromptInterface,
+    pageContext: QuoteContext,
+    quotes: QuoteContext[],
+    userPrompt: null | string,
+  ) {
     const context = {
-      //TODO 这里 quote 和 selection 有重复定义的问题，需要解决
-      quotes: quotesPrompts,
+      browser: {
+        language: pageContext?.browserLanguage,
+      },
       page: {
-        pageUrl: '',
-        pageTitle: '',
-        selection: '',
+        url: pageContext?.pageUrl,
+        title: pageContext?.pageTitle,
+        content: pageContext?.pageContent,
+        selection: pageContext?.selection,
       },
       chat: {
-        language: 'zh',
+        language: pageContext?.browserLanguage,
         input: userPrompt,
       },
     };
-    //TODO fix this, when there is a 'page' type, copy it's properties to context.page
-    quotes.forEach(quote => {
-      //TODO 只保留最后一个，有什么问题呢？
-      if (quote.selection) {
-        context.page.selection = quote.selection;
-      }
-    });
 
-    prompt = tool.template(context);
+    let prompt = framework?.template(context) || '';
     prompt = prompt.trim();
-    // prompt = nunjucks.renderString(tool.template, context);
+    // concat framework prompt with user prompt
+    const quotesPrompts = quotes
+      .map(quote => {
+        return QuoteAgent.promptQuote(quote);
+      })
+      .filter(p => p);
+    if (quotesPrompts.length) {
+      prompt = quotesPrompts.join('\n') + '\n';
+    }
+    if (userPrompt) {
+      prompt += userPrompt;
+    }
 
     this.history.push(new HumanMessage({ content: prompt, name: 'human' }));
     this._onDataListener && setTimeout(() => this._onDataListener(this.history));

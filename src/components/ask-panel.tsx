@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import 'highlight.js/styles/default.min.css';
-import { QuoteContext } from '../agents/quote';
+import { QuoteAgent, QuoteContext } from '../agents/quote';
 import React, { useState, useContext, useEffect, useRef, useCallback } from 'react';
 import { ChatPopupContext } from '../chat/chat';
 import ToolDropdown from './ask-tooldropdown';
@@ -65,6 +65,7 @@ function AskPanel(props: AskPanelProps) {
   //TODO 需要定义一个可渲染、可序列号的类型，疑似是 StoredMessage
   const [history, setHistory] = useState<{ id: string; name: string; type: string; text: string }[]>([]);
   const [initQuotes, setInitQuotes] = useState<Array<QuoteContext>>([]);
+  const [pageContext, setPageContext] = useState<QuoteContext>(new QuoteContext());
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null); // Add this line
 
@@ -106,6 +107,20 @@ function AskPanel(props: AskPanelProps) {
       setInitQuotes([]);
     };
   }, [quotes]);
+
+  const updatePageContext = (quoteContext: QuoteContext) => {
+    setPageContext({
+      ...pageContext,
+      ...quoteContext,
+      type: 'page',
+    });
+  };
+
+  useEffect(() => {
+    QuoteAgent.getQuoteByDocument(window.location.href, document).then(quoteContext => {
+      updatePageContext(quoteContext);
+    });
+  }, [pageContext]);
 
   useEffect(() => {
     // console.log('chatContext.history = ' + JSON.stringify(chatContext.history));
@@ -240,8 +255,9 @@ function AskPanel(props: AskPanelProps) {
 
   async function onSend() {
     await chatContext.updateModelByName(selectedModel);
+    // split auto context and user context
     if (userTools) {
-      chatContext.askWithTool(userTools, initQuotes, userInput.trim());
+      chatContext.askWithTool(userTools, pageContext, initQuotes, userInput.trim());
     } else {
       chatContext.askWithQuotes(initQuotes!, userInput.trim());
     }

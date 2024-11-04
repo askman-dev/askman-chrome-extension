@@ -5,14 +5,28 @@ hbs = """
 {{chat.input}}
 """
 
-[whole-page]
-name = "Whole Page"
+[page]
+name = "Page"
 hbs = """
-{{page.title}}
-{{page.url}}
+<page_info>
+{{#if page.title}}
+<title>{{page.title}}</title>
+{{/if}}
+{{#if page.url}}
+<url>{{page.url}}</url>
+{{/if}}
+{{#if page.content}}
+<content>
 {{page.content}}
-{{page.selection}}
+</content>
+{{/if}}
+{{#if page.selection}}
+<selection>{{page.selection}}</selection>
+{{/if}}
+</page_info>
+<user_input>
 {{chat.input}}
+</user_input>
 """
 
 [explain]
@@ -26,8 +40,12 @@ Explain
 [summarize]
 name = "Summarize"
 hbs = """
+{{#if page.content}}
+<content>
+{{page.content}}
+</content>
+{{/if}}
 Summarize
-{{page.selection}}
 {{chat.input}}
 """
 

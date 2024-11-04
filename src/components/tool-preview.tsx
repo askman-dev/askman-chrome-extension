@@ -36,7 +36,7 @@ export const ToolPreview: React.FC<ToolPreviewProps> = ({ content, x, y }) => {
     <div
       ref={tooltipRef}
       className="absolute z-50 p-2 bg-black text-white text-sm text-left rounded shadow-lg max-w-md whitespace-pre-wrap">
-      {content}
+      <pre>{content}</pre>
     </div>
   );
 };
