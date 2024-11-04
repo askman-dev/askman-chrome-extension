@@ -38,6 +38,10 @@ export default function QuoteDropdown({ className, style, onItemClick, isOpen, s
       e.preventDefault();
       e.stopPropagation();
       setIsOpen(false);
+    } else if (e.key === 'Backspace' && isOpen) {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsOpen(false);
     }
   };
 
