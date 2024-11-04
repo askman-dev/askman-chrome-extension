@@ -24,7 +24,7 @@ const Popup = () => {
           </a>
           <br />
           1. Use Command + I to activate Ask Man. <br />
-          2. Or select <span>Ask That Man</span> from the right-click menu.
+          2. Or select <span>AskMan</span> from the right-click menu.
         </p>
         <button
           style={{
