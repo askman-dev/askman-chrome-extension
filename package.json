@@ -28,7 +28,7 @@
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.1.1",
     "@iarna/toml": "^2.2.5",
-    "@langchain/community": "^0.0.32",
+    "@langchain/community": "^0.3.11",
     "@langchain/core": "^0.1.40",
     "@langchain/openai": "^0.0.14",
     "@monaco-editor/react": "^4.6.0",
