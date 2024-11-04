@@ -7,9 +7,11 @@ export class QuoteContext implements AgentContext {
   public selection?: string;
   public pageUrl?: string;
   public pageTitle?: string;
+  public pageContent?: string;
   public linkText?: string;
   public linkUrl?: string;
   public text?: string;
+  public browserLanguage?: string;
 }
 export class QuoteAgent implements BaseAgent {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -22,8 +24,10 @@ export class QuoteAgent implements BaseAgent {
     quote.type = 'page';
     quote.pageUrl = pageUrl;
     quote.pageTitle = document.title;
+    quote.pageContent = document.body.innerText;
     quote.selection = document.getSelection()?.toString();
-    console.log('getQuoteByDocument:', quote);
+    quote.browserLanguage = navigator?.language;
+    // console.log('getQuoteByDocument:', quote);
     return Promise.resolve(quote);
   }
   public static getQuoteBySelection(pageUrl: string, selection: string): Promise<QuoteContext> {
@@ -31,6 +35,7 @@ export class QuoteAgent implements BaseAgent {
     quote.type = 'selection';
     quote.pageUrl = pageUrl;
     quote.selection = selection;
+    quote.browserLanguage = navigator.language;
     return Promise.resolve(quote);
   }
 
@@ -53,7 +58,7 @@ export class QuoteAgent implements BaseAgent {
     }
 
     // 如果引用类型未知，输出警告并返回空字符串
-    console.warn('未知的引用类型', quotes);
+    console.warn('Unknown quote type:', quotes);
     return '';
   }
 
