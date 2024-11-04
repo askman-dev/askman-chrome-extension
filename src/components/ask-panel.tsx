@@ -319,6 +319,7 @@ function AskPanel(props: AskPanelProps) {
                       className="ml-2 text-gray-600 hover:text-black"
                       onClick={() => {
                         setInitQuotes(quotes => quotes.filter((_, i) => i !== index));
+                        inputRef.current?.focus();
                       }}>
                       <XMarkIcon className="w-3 h-3 cursor-pointer" />
                     </button>
