@@ -20,3 +20,4 @@ utils/reload/injections/*.js
 public/manifest.json
 .aider*
 *.code-workspace
+.shire

@@ -92,6 +92,10 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
       e.preventDefault();
       e.stopPropagation();
       setIsOpen(false);
+    } else if (e.key === 'Backspace' && isOpen) {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsOpen(false);
     }
   };
 
@@ -139,7 +143,7 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
           leaveTo="transform opacity-0 scale-95">
           <Menu.Items
             static
-            className="absolute right-0 mt-2 w-36 origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10">
+            className="absolute right-0 mt-2 min-w-[10rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10">
             <div className="px-1 py-1">
               {allTools.map((tool, index) => (
                 <Menu.Item key={tool.name}>

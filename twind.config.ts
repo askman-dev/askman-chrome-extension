@@ -21,6 +21,7 @@ const defaultConfig = defineConfig({
   presets: [presetAutoprefix(), presetTailwind()],
   theme: {
     maxWidth: {
+      60: '15rem',
       lg: '32rem',
     },
   },
