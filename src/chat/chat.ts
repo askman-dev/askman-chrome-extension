@@ -66,7 +66,9 @@ export class ChatCoreContext implements ChatCoreInterface {
    */
   async updateModelByName(modelName: string) {
     // split by '/'
-    const [provider, model] = modelName.split('/');
+    const [provider, ...rest] = modelName.split('/');
+    const model = rest.join('/');
+
     if (!provider || !model) {
       console.warn('Invalid model name, cant find provider or model.', modelName);
       return this;

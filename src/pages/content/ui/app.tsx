@@ -196,6 +196,7 @@ export default function App() {
               // top: parentRect.top,
               right: 10,
               top: 10,
+              cursor: 'auto',
             }}
           />
         ) : null}
