@@ -2,7 +2,7 @@ import { AgentContext } from '../types';
 import { BaseAgent } from './base';
 
 export class QuoteContext implements AgentContext {
-  public type: 'selection' | 'page' | 'link' | 'text';
+  public type: 'selection' | 'page' | 'link' | 'text' | 'title' | 'url' | 'content';
   public name?: string;
   public selection?: string;
   public pageUrl?: string;
@@ -66,21 +66,23 @@ export class QuoteAgent implements BaseAgent {
     // 初始化一个空数组，用于存储格式化的引用文本行
     const quotes: string[] = [];
 
-    // 根据引用类型添加页面标题和URL
-    if (quote.type == 'page') {
-      quotes.push(`Title: ${quote.pageTitle}`);
-      quotes.push(`URL: ${quote.pageUrl}`);
+    // 如果是选文引用类型，添加选文内容
+    if (quote.type == 'selection' || quote.type == 'page') {
+      quotes.push(`<selection>${quote.selection}</selection>`);
     }
 
-    // 如果是选文引用类型，添加选文内容
-    if (quote.type == 'selection') {
-      quotes.push(`Selection: ${quote.selection}`);
+    if (quote.type == 'title' || quote.type == 'page') {
+      quotes.push(`<title>${quote.pageTitle}</title>`);
     }
 
-    // 如果是选文引用类型，添加选文内容
-    if (quote.type == 'text') {
-      quotes.push(`Text: ${quote.text}`);
+    if (quote.type == 'url' || quote.type == 'page') {
+      quotes.push(`<url>${quote.pageUrl}</url>`);
     }
+
+    if (quote.type == 'content' || quote.type == 'page') {
+      quotes.push(`<content>${quote.pageContent}</content>`);
+    }
+
     return quotes.join('\n');
   }
 

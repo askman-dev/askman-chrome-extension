@@ -13,14 +13,17 @@ interface QuoteDropdownProps {
 }
 
 const getQuoteContexts = (): QuoteContext[] => [
-  { type: 'page', pageTitle: document.title, pageUrl: window.location.href, name: 'pageMeta' },
+  { type: 'title', pageTitle: document.title, name: 'title' },
+  { type: 'url', pageUrl: window.location.href, name: 'url' },
+  { type: 'content', pageContent: document.body.innerText, name: 'content' },
   { type: 'selection', selection: window.getSelection()?.toString() || '', name: 'selection' },
   {
-    type: 'text',
+    type: 'page',
     pageTitle: document.title,
     pageUrl: window.location.href,
-    selection: document.body.innerText,
-    name: 'pageContent',
+    pageContent: document.body.innerText,
+    selection: window.getSelection()?.toString() || '',
+    name: 'page',
   },
 ];
 
