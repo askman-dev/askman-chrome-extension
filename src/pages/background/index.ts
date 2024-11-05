@@ -67,7 +67,12 @@ chrome.runtime.onInstalled.addListener(function () {});
 function isUrlSupported(url: string): boolean {
   if (!url) return false;
   // Chrome URLs and extension pages are not supported
-  if (url.startsWith('chrome://') || url.startsWith('chrome-extension://')) {
+  if (
+    url.startsWith('chrome://') ||
+    url.startsWith('chrome-extension://') ||
+    url.startsWith('https://chrome.google.com') ||
+    url.startsWith('https://chromewebstore.google.com')
+  ) {
     return false;
   }
   // New tab page is not supported
