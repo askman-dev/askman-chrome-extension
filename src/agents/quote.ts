@@ -25,7 +25,7 @@ export class QuoteAgent implements BaseAgent {
     quote.pageUrl = pageUrl;
     quote.pageTitle = document.title;
     quote.pageContent = document.body.innerText;
-    quote.selection = document.getSelection()?.toString();
+    quote.selection = document.getSelection()?.toString().trim();
     quote.browserLanguage = navigator?.language;
     // console.log('getQuoteByDocument:', quote);
     return Promise.resolve(quote);
@@ -63,23 +63,21 @@ export class QuoteAgent implements BaseAgent {
   }
 
   public static promptQuote(quote: QuoteContext): string {
-    // 初始化一个空数组，用于存储格式化的引用文本行
     const quotes: string[] = [];
 
-    // 如果是选文引用类型，添加选文内容
-    if (quote.type == 'selection' || quote.type == 'page') {
+    if ((quote.type == 'selection' || quote.type == 'page') && quote.selection) {
       quotes.push(`<selection>${quote.selection}</selection>`);
     }
 
-    if (quote.type == 'title' || quote.type == 'page') {
+    if ((quote.type == 'title' || quote.type == 'page') && quote.pageTitle) {
       quotes.push(`<title>${quote.pageTitle}</title>`);
     }
 
-    if (quote.type == 'url' || quote.type == 'page') {
+    if ((quote.type == 'url' || quote.type == 'page') && quote.pageUrl) {
       quotes.push(`<url>${quote.pageUrl}</url>`);
     }
 
-    if (quote.type == 'content' || quote.type == 'page') {
+    if ((quote.type == 'content' || quote.type == 'page') && quote.pageContent) {
       quotes.push(`<content>${quote.pageContent}</content>`);
     }
 

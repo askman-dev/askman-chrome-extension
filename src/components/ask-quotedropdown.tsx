@@ -16,13 +16,13 @@ const getQuoteContexts = (): QuoteContext[] => [
   { type: 'title', pageTitle: document.title, name: 'title' },
   { type: 'url', pageUrl: window.location.href, name: 'url' },
   { type: 'content', pageContent: document.body.innerText, name: 'content' },
-  { type: 'selection', selection: window.getSelection()?.toString() || '', name: 'selection' },
+  { type: 'selection', selection: window.getSelection()?.toString().trim() || '', name: 'selection' },
   {
     type: 'page',
     pageTitle: document.title,
     pageUrl: window.location.href,
     pageContent: document.body.innerText,
-    selection: window.getSelection()?.toString() || '',
+    selection: window.getSelection()?.toString().trim() || '',
     name: 'page',
   },
 ];
