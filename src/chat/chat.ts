@@ -114,6 +114,19 @@ export class ChatCoreContext implements ChatCoreInterface {
     quotes: QuoteContext[],
     userPrompt: null | string,
   ) {
+    if (!userPrompt) {
+      userPrompt = '';
+    }
+    // concat framework prompt with user prompt
+    const quotesPrompts = quotes
+      .map(quote => {
+        return QuoteAgent.promptQuote(quote);
+      })
+      .filter(p => p);
+    if (quotesPrompts.length) {
+      userPrompt = quotesPrompts.join('\n') + '\n' + userPrompt;
+    }
+
     const context = {
       browser: {
         language: pageContext?.browserLanguage,
@@ -126,23 +139,15 @@ export class ChatCoreContext implements ChatCoreInterface {
       },
       chat: {
         language: pageContext?.browserLanguage,
-        input: userPrompt,
+        input: userPrompt, // user mentions and user inputs
       },
     };
-
     let prompt = framework?.template(context) || '';
     prompt = prompt.trim();
-    // concat framework prompt with user prompt
-    const quotesPrompts = quotes
-      .map(quote => {
-        return QuoteAgent.promptQuote(quote);
-      })
-      .filter(p => p);
-    if (quotesPrompts.length) {
-      prompt = quotesPrompts.join('\n') + '\n';
-    }
-    if (userPrompt) {
-      prompt += userPrompt;
+
+    // Prevent users from forgetting to fill in chat.input in the framework.
+    if (userPrompt && !(framework?.hbs.indexOf('{{chat.input}}') > -1)) {
+      prompt += '\n' + userPrompt;
     }
     if (prompt.trim() == '') {
       console.warn('[Askman] prompt is empty, skip sending');
