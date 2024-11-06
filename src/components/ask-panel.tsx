@@ -121,9 +121,6 @@ function AskPanel(props: AskPanelProps) {
     QuoteAgent.getQuoteByDocument(window.location.href, document).then(quoteContext => {
       updatePageContext(quoteContext);
     });
-  }, [pageContext]);
-
-  useEffect(() => {
     // console.log('chatContext.history = ' + JSON.stringify(chatContext.history));
     function rerenderHistory() {
       setHistory(
