@@ -11,17 +11,22 @@ import { ToolsPromptInterface, SystemInvisibleMessage, HumanAskMessage } from '.
 export interface ChatCoreInterface {
   model: ChatOpenAI;
   history: BaseMessage[];
-  init();
-  askWithQuotes(quotes: QuoteContext[], userPrompt: null | string);
-  askWithTool(tool: ToolsPromptInterface, pageContext: QuoteContext, quotes: QuoteContext[], userPrompt: null | string);
-  setOnDataListener(callback: (data: BaseMessage[]) => void);
-  removeOnDataListener();
+  init(): void;
+  askWithQuotes(_quotes: QuoteContext[], _userPrompt: null | string): Promise<void>;
+  askWithTool(
+    _tool: ToolsPromptInterface,
+    _pageContext: QuoteContext,
+    _quotes: QuoteContext[],
+    _userPrompt: null | string,
+  ): Promise<void>;
+  setOnDataListener(_callback: (_data: BaseMessage[]) => void): void;
+  removeOnDataListener(): void;
 }
 
 export class ChatCoreContext implements ChatCoreInterface {
   model: ChatOpenAI;
   history: BaseMessage[] | HumanAskMessage[];
-  _onDataListener: (data: BaseMessage[]) => void;
+  _onDataListener: (_data: BaseMessage[]) => void;
   constructor() {
     this.history = [];
     this.history.length = 0;
@@ -166,27 +171,34 @@ export class ChatCoreContext implements ChatCoreInterface {
     let hasResponse = false;
     setTimeout(() => this.history.push(pendingResponse));
     this._onDataListener && setTimeout(() => this._onDataListener(this.history));
-    const stream = await this.model.stream(history);
-    // 这里会等一小会
-    // console.log('start stream 2 ', new Date());
-    const chunks = [];
-    for await (const chunk of stream) {
-      chunks.push(chunk);
-      // console.log(`${chunk.content}|`, new Date());
-      const content = chunks.reduce((acc, cur) => {
-        return acc + cur.content;
-      }, '');
-      if (content.trim() == '') continue;
-      pendingResponse.content = content;
-      hasResponse = true;
-      this._onDataListener && setTimeout(() => this._onDataListener(this.history));
+    let lastError = null;
+    try {
+      const stream = await this.model.stream(history);
+      // 这里会等一小会
+      const chunks = [];
+      for await (const chunk of stream) {
+        chunks.push(chunk);
+        // console.log(`${chunk.content}|`, new Date());
+        const content = chunks.reduce((acc, cur) => {
+          return acc + cur.content;
+        }, '');
+        if (content.trim() == '') continue;
+        pendingResponse.content = content;
+        hasResponse = true;
+        this._onDataListener && setTimeout(() => this._onDataListener(this.history));
+      }
+    } catch (error) {
+      lastError = error;
     }
     if (!hasResponse) {
       pendingResponse.content = '(Nothing to Show)';
+      if (lastError) {
+        pendingResponse.content += '\n' + lastError.message;
+      }
       this._onDataListener && setTimeout(() => this._onDataListener(this.history));
     }
   }
-  setOnDataListener(callback: (data: BaseMessage[]) => void) {
+  setOnDataListener(callback: (_data: BaseMessage[]) => void) {
     this._onDataListener = callback;
   }
   removeOnDataListener() {
