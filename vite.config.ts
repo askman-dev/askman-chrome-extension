@@ -1,5 +1,7 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite';
+import { defineConfig, UserConfig } from 'vite';
+import type { UserConfig as VitestUserConfig } from 'vitest/config';
+import zipPack from 'vite-plugin-zip-pack'; // 添加这行
 import { ViteToml } from 'vite-plugin-toml';
 import react from '@vitejs/plugin-react';
 import path, { resolve } from 'path';
@@ -52,6 +54,11 @@ export default defineConfig({
         },
       ],
     }),
+    isProduction &&
+      zipPack({
+        outDir,
+        outFileName: `extension-v${process.env.npm_package_version || '1.0.0'}.zip`,
+      }),
   ],
   publicDir,
   build: {
@@ -99,7 +106,7 @@ export default defineConfig({
   optimizeDeps: {
     include: ['monaco-editor'],
   },
-});
+} as UserConfig & VitestUserConfig);
 function getCacheInvalidationKey() {
   return cacheInvalidationKeyRef.current;
 }
