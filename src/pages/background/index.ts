@@ -25,6 +25,9 @@ function onContextMenuClicked(info: chrome.contextMenus.OnClickData, tab: chrome
       //TODO 在 content 中接受消息，并查找 selected element
       chrome.tabs.sendMessage<TabMessage>(tab.id, { cmd: CommandType.ChatPopupDisplay, selectionText, pageUrl });
       break;
+    case 'id-browser-action-context-menu':
+      chrome.runtime.openOptionsPage();
+      break;
   }
 }
 function onMessageListener(command) {
@@ -58,6 +61,11 @@ function initExtension() {
     contexts: ['page', 'selection'],
     id: 'id-context-menu',
   });
+  // chrome.contextMenus.create({
+  //   title: 'Options for models, prompts, etc.',
+  //   contexts: ['browser_action'],
+  //   id: 'id-browser-action-context-menu',
+  // });
   chrome.contextMenus.onClicked.addListener(onContextMenuClicked);
   chrome.commands.onCommand.addListener(onMessageListener);
 }
