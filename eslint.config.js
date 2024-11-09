@@ -16,6 +16,7 @@ export default [
         console: 'readonly',
         setTimeout: 'readonly',
         process: 'readonly',
+        chrome: 'readonly',
         __dirname: 'readonly',
       },
     },
