@@ -42,10 +42,11 @@ export interface ChatMessageContext {
   pageTitle: string;
 }
 
-export enum CommandType {}
-// ChatPopupDisplay,
-// ChatToolbarDisplay,
-
+/* eslint-disable no-unused-vars */
+export enum CommandType {
+  ChatPopupDisplay,
+  ChatToolbarDisplay,
+}
 export interface TabMessage {
   cmd: CommandType;
   selectionText?: string; // tab 内选择的文字

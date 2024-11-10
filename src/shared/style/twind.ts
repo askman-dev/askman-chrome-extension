@@ -1,7 +1,7 @@
 import { twind, cssom, observe } from '@twind/core';
 import 'construct-style-sheets-polyfill';
 import config from '@root/twind.config';
-import type { Element } from 'dom-types';
+type Element = globalThis.Element;
 
 export function attachTwindStyle<T extends { adoptedStyleSheets: unknown }>(
   observedElement: Element,
