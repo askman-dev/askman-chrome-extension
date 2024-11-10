@@ -26,18 +26,18 @@ export default function ModelDropdown({
   let isCommandPressed = false;
 
   useEffect(() => {
-    console.log('[ModelDropdown] initOpen = ' + initOpen, 'isOpened = ' + isOpened);
+    // console.log('[ModelDropdown] initOpen = ' + initOpen, 'isOpened = ' + isOpened);
     if (initOpen && !isOpened) {
-      console.log('[ModelDropdown] click menu button to open');
+      // console.log('[ModelDropdown] click menu button to open');
       buttonRef.current?.click();
     } else if (!initOpen && isOpened) {
-      console.log('[ModelDropdown] click menu button to close');
+      // console.log('[ModelDropdown] click menu button to close');
       buttonRef.current?.click();
     }
   }, [initOpen]);
 
   useEffect(() => {
-    console.log('[ModelDropdown] isOpened = ' + isOpened);
+    // console.log('[ModelDropdown] isOpened = ' + isOpened);
     statusListener(isOpened);
     if (isOpened) {
       setTimeout(() => menuItemsRef.current[0]?.focus(), 0);
