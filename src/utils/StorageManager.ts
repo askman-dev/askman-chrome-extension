@@ -27,7 +27,6 @@ export interface UserChatPresetsObject {
 
 export const StorageManager = {
   save: (key: string, value: string | number | boolean | object) => {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
     return chrome.storage.local.set({ [key]: value }).then(() => {
       console.log(`Value for ${key} is set to ${value}`);
     });

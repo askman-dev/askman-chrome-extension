@@ -7,9 +7,9 @@ import { QuoteContext } from '../agents/quote';
 interface QuoteDropdownProps {
   className: string;
   style?: React.CSSProperties; // 添加 style 属性
-  onItemClick: (tool: QuoteContext) => void;
+  onItemClick: (_tool: QuoteContext) => void;
   isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
+  setIsOpen: (_isOpen: boolean) => void;
 }
 
 const getQuoteContexts = (): QuoteContext[] => [

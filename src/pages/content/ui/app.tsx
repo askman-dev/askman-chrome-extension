@@ -20,8 +20,8 @@ export default function App() {
   const [askPanelVisible, setAskPanelVisible] = useState<boolean>(false);
   const targetDom = useRef<HTMLElement>(null);
   const [pageActionButton, setPageActionButton] = useState<HTMLDivElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [currentCodeSnippnet, setCurrentCodeSnippnet] = useState<string>('');
+
+  // const [currentCodeSnippnet, setCurrentCodeSnippnet] = useState<string>('');
   const [askPanelQuotes, setAskPanelQuotes] = useState<Promise<QuoteContext>[]>([]);
   const [parentRect, setParentRect] = useState<DOMRect>();
   const { run: handleMouseOver } = useDebounceFn(
@@ -87,8 +87,7 @@ export default function App() {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onBackgroundMessage = function (message: TabMessage, sender, sendResponse) {
+  const onBackgroundMessage = function (message: TabMessage, _sender, _sendResponse) {
     if (message.cmd === CommandType.ChatPopupDisplay) {
       if (askPanelVisible) {
         setAskPanelVisible(false);
@@ -169,7 +168,7 @@ export default function App() {
       <ChatPopupContext.Provider value={tabChatContext}>
         {parentRect && (
           <AskButton
-            visible={true || askButtonVisible}
+            visible={askButtonVisible}
             className="fixed"
             style={{
               left: parentRect.left + parentRect.width - ASK_BUTTON_OFFSET_X,

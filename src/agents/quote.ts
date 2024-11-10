@@ -14,8 +14,7 @@ export class QuoteContext implements AgentContext {
   public browserLanguage?: string;
 }
 export class QuoteAgent implements BaseAgent {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public static getQuoteByPageUrl(pageUrl: string): Promise<QuoteContext> {
+  public static getQuoteByPageUrl(_pageUrl: string): Promise<QuoteContext> {
     // TODO：异步更新，可以在对话框中显示 加载中
     return Promise.resolve(new QuoteContext());
   }

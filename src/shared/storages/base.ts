@@ -2,6 +2,7 @@
  * Storage area type for persisting and exchanging data.
  * @see https://developer.chrome.com/docs/extensions/reference/storage/#overview
  */
+/* eslint-disable no-unused-vars */
 export enum StorageType {
   /**
    * Persist data locally against browser restarts. Will be deleted by uninstalling the extension.

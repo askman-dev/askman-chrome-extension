@@ -5,7 +5,7 @@ interface ConfigEditorInstanceProps {
   initialValue: string;
   readOnly: boolean;
   filename: string;
-  onSave?: (value: string) => void;
+  onSave?: (_value: string) => void;
 }
 
 const ConfigEditorInstance: React.FC<ConfigEditorInstanceProps> = ({ initialValue, readOnly, onSave, filename }) => {

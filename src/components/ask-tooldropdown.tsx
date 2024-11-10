@@ -11,8 +11,8 @@ import { ToolPreview } from './tool-preview';
 interface ToolDropdownProps {
   displayName: string;
   className: string;
-  onItemClick: (tool: ToolsPromptInterface, withCommand?: boolean) => void;
-  statusListener: (status: boolean) => void;
+  onItemClick: (_tool: ToolsPromptInterface, _withCommand?: boolean) => void;
+  statusListener: (_status: boolean) => void;
   initOpen: boolean;
 }
 
@@ -60,7 +60,13 @@ function useToolPreview() {
   };
 }
 
-export default function ToolDropdown({ displayName, className, onItemClick, initOpen, statusListener }: ToolDropdownProps) {
+export default function ToolDropdown({
+  displayName,
+  className,
+  onItemClick,
+  initOpen,
+  statusListener,
+}: ToolDropdownProps) {
   const [allTools, setAllTools] = useState<ToolsPromptInterface[]>([]);
   const [isOpened, setIsOpen] = useState(initOpen);
   const { showPreview, previewPos, previewContent, showToolPreview, hideToolPreview } = useToolPreview();
@@ -103,7 +109,7 @@ export default function ToolDropdown({ displayName, className, onItemClick, init
     }
   }, [isOpened]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (_e: React.KeyboardEvent) => {
     // if ((e.key === 'Escape' || e.key === 'Backspace') && isOpened) {
     //   console.log('[ToolDropdown] escape or backspace');
     //   e.preventDefault();
@@ -138,7 +144,7 @@ export default function ToolDropdown({ displayName, className, onItemClick, init
           ref={buttonRef}
           className="inline-flex w-full justify-center rounded-md text-sm text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none min-w-0"
           title="Use framework"
-          onClick={e => {
+          onClick={_e => {
             setIsOpen(!isOpened);
             // e.stopPropagation();
           }}>
