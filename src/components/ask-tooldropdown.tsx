@@ -12,8 +12,8 @@ interface ToolDropdownProps {
   displayName: string;
   className: string;
   onItemClick: (tool: ToolsPromptInterface, withCommand?: boolean) => void;
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
+  statusListener: (status: boolean) => void;
+  initOpen: boolean;
 }
 
 const tools: ToolsPromptInterface[] = [];
@@ -60,9 +60,12 @@ function useToolPreview() {
   };
 }
 
-export default function ToolDropdown({ displayName, className, onItemClick, isOpen, setIsOpen }: ToolDropdownProps) {
+export default function ToolDropdown({ displayName, className, onItemClick, initOpen, statusListener }: ToolDropdownProps) {
   const [allTools, setAllTools] = useState<ToolsPromptInterface[]>([]);
+  const [isOpened, setIsOpen] = useState(initOpen);
   const { showPreview, previewPos, previewContent, showToolPreview, hideToolPreview } = useToolPreview();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  console.log('create ToolDropdown, initOpen = ' + initOpen);
 
   useEffect(() => {
     const fetchUserTools = async () => {
@@ -82,21 +85,31 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
-    if (isOpen) {
+    console.log('[ToolDropdown] initOpen = ' + initOpen, 'isOpened = ' + isOpened);
+    if (initOpen && !isOpened) {
+      console.log('[ToolDropdown] click menu button to open');
+      buttonRef.current?.click();
+    } else if (!initOpen && isOpened) {
+      console.log('[ToolDropdown] click menu button to close');
+      buttonRef.current?.click();
+    }
+  }, [initOpen]);
+
+  useEffect(() => {
+    console.log('[ToolDropdown] isOpened = ' + isOpened);
+    statusListener(isOpened);
+    if (isOpened) {
       setTimeout(() => menuItemsRef.current[0]?.focus(), 0);
     }
-  }, [isOpen]);
+  }, [isOpened]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape' && isOpen) {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsOpen(false);
-    } else if (e.key === 'Backspace' && isOpen) {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsOpen(false);
-    }
+    // if ((e.key === 'Escape' || e.key === 'Backspace') && isOpened) {
+    //   console.log('[ToolDropdown] escape or backspace');
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    //   setIsOpen(false);
+    // }
   };
 
   const handleActiveItemChange = (element: HTMLElement | null, index: number) => {
@@ -114,26 +127,33 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
   };
   let isCommandPressed = false;
   return (
-    <button
+    <div
       className={classNames(`${className}`)}
       onKeyDown={handleKeyDown}
       onBlur={handleBlur}
       aria-haspopup="true"
-      aria-expanded={isOpen}
-      type="button">
+      aria-expanded={isOpened}>
       <Menu as="div" className="relative" onKeyDown={handleKeyDown}>
         <Menu.Button
-          className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium hover:bg-black/10 focus:outline-none"
+          ref={buttonRef}
+          className="inline-flex w-full justify-center rounded-md text-sm text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none min-w-0"
           title="Use framework"
           onClick={e => {
-            setIsOpen(!isOpen);
-            e.stopPropagation();
+            setIsOpen(!isOpened);
+            // e.stopPropagation();
           }}>
-          {displayName} ⌘ K
-          <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
+          {({ active }) => {
+            setIsOpen(active);
+            return (
+              <>
+                {displayName} ⌘ K
+                <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200" />
+              </>
+            );
+          }}
         </Menu.Button>
         <Transition
-          show={isOpen}
+          // show={isOpened}
           as={React.Fragment}
           enter="transition ease-out duration-100"
           enterFrom="transform opacity-0 scale-95"
@@ -199,6 +219,6 @@ export default function ToolDropdown({ displayName, className, onItemClick, isOp
           </Menu.Items>
         </Transition>
       </Menu>
-    </button>
+    </div>
   );
 }

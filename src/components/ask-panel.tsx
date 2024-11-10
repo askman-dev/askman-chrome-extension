@@ -77,6 +77,8 @@ function AskPanel(props: AskPanelProps) {
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ left: 0, top: 0 });
   const showToolDropdown = () => {
+    // toolButtonRef.current?.click();
+    console.log('isToolDropdownOpen = ' + isToolDropdownOpen, 'set to true');
     setIsToolDropdownOpen(true);
     setIsQuoteDropdownOpen(false);
     setIsModelDropdownOpen(false);
@@ -115,6 +117,13 @@ function AskPanel(props: AskPanelProps) {
       ...quoteContext,
       type: 'page',
     });
+  };
+
+  const updateToolDropdownStatus = (status: boolean) => {
+    setIsToolDropdownOpen(status);
+  };
+  const updateModelDropdownStatus = (status: boolean) => {
+    setIsModelDropdownOpen(status);
   };
 
   useEffect(() => {
@@ -179,34 +188,36 @@ function AskPanel(props: AskPanelProps) {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       // 检测 ESC 键
-      if (e.key === 'Escape') {
-        if (isQuoteDropdownOpen) {
-          setIsQuoteDropdownOpen(false);
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
-        if (isToolDropdownOpen) {
-          setIsToolDropdownOpen(false);
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
-        if (isModelDropdownOpen) {
-          setIsModelDropdownOpen(false);
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
-      }
+      // if (e.key === 'Escape') {
+      //   if (isQuoteDropdownOpen) {
+      //     setIsQuoteDropdownOpen(false);
+      //     e.preventDefault();
+      //     e.stopPropagation();
+      //     return;
+      //   }
+      //   if (isToolDropdownOpen) {
+      //     console.log("listen escape on ask-panel, st tooldropbown to false")
+      //     setIsToolDropdownOpen(false);
+      //     e.preventDefault();
+      //     e.stopPropagation();
+      //     return;
+      //   }
+      //   if (isModelDropdownOpen) {
+      //     setIsModelDropdownOpen(false);
+      //     e.preventDefault();
+      //     e.stopPropagation();
+      //     return;
+      //   }
+      // }
 
       // 检测 Command+K (Mac) 或 Ctrl+K (Windows/Linux)
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        e.stopPropagation();
+        // e.preventDefault();
+        // e.stopPropagation();
         if (!isToolDropdownOpen) {
           showToolDropdown();
-        } else if (isToolDropdownOpen) {
+        } 
+        else if (isToolDropdownOpen) {
           showModelDropdown();
         }
 
@@ -215,6 +226,7 @@ function AskPanel(props: AskPanelProps) {
 
       // 检测左右方向键
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        console.log('[ask-panel] listened key press, arrow left or right', e.target, e.currentTarget);
         if (isToolDropdownOpen || isModelDropdownOpen) {
           e.preventDefault();
           e.stopPropagation();
@@ -242,6 +254,7 @@ function AskPanel(props: AskPanelProps) {
   useEffect(() => {
     if (!isToolDropdownOpen && !isQuoteDropdownOpen && !isModelDropdownOpen && inputRef.current) {
       setTimeout(() => {
+        console.log('focus on input because menus are closed');
         inputRef.current.focus();
       }, 33);
     }
@@ -422,7 +435,7 @@ function AskPanel(props: AskPanelProps) {
                 }
                 // 检测 Command+K (Mac) 或 Ctrl+K (Windows/Linux)
                 if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                  e.preventDefault();
+                  // e.preventDefault();
                   return;
                 }
 
@@ -530,8 +543,10 @@ function AskPanel(props: AskPanelProps) {
           <div className="flex">
             <ToolDropdown
               displayName={userTools?.name || 'Frame'}
-              isOpen={isToolDropdownOpen}
-              setIsOpen={setIsToolDropdownOpen}
+              initOpen={isToolDropdownOpen}
+              // isOpen={isToolDropdownOpen}
+              // setIsOpen={setIsToolDropdownOpen}
+              statusListener={updateToolDropdownStatus}
               className="inline-block"
               onItemClick={(item, withCommand) => {
                 setUserTools(item);
@@ -542,10 +557,10 @@ function AskPanel(props: AskPanelProps) {
             />
             <ModelDropdown
               displayName={selectedModel}
-              isOpen={isModelDropdownOpen}
-              setIsOpen={setIsModelDropdownOpen}
+              initOpen={isModelDropdownOpen}
               className=""
               onItemClick={handleModelSelect}
+              statusListener={updateModelDropdownStatus}
             />
             <div className="grow"></div>
             <AskButton
