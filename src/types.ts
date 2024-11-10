@@ -42,10 +42,9 @@ export interface ChatMessageContext {
   pageTitle: string;
 }
 
-export enum CommandType {
-  ChatPopupDisplay,
-  ChatToolbarDisplay,
-}
+export enum CommandType {}
+// ChatPopupDisplay,
+// ChatToolbarDisplay,
 
 export interface TabMessage {
   cmd: CommandType;

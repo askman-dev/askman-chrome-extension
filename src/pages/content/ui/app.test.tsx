@@ -64,7 +64,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  delete (global as any).chrome; // eslint-disable-line @typescript-eslint/no-explicit-any
+  delete (global as any).chrome;
 });
 
 // vi.mock('@assets/conf/chat-presets.toml', () => ({

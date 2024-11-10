@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 interface ToolDropdownProps {
   className: string;
-  onItemClick: (tool: PageActionButtonInterface) => void;
+  onItemClick: (_tool: PageActionButtonInterface) => void;
 }
 
 export interface PageActionButtonInterface {

@@ -32,9 +32,9 @@ const defaultConfig: Config = {
 };
 
 type ConfigStorage = BaseStorage<Config> & {
-  setApiKey: (apiKey: string) => Promise<void>;
-  setModel: (model: string) => Promise<void>;
-  setTemperature: (temperature: number) => Promise<void>;
+  setApiKey: (_apiKey: string) => Promise<void>;
+  setModel: (_model: string) => Promise<void>;
+  setTemperature: (_temperature: number) => Promise<void>;
   getModelConfig: () => Promise<TomlModelConfig[]>;
   getSelectedModel: () => Promise<string>;
 };

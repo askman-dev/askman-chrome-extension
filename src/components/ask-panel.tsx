@@ -26,24 +26,18 @@ interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   quotes?: Array<Promise<QuoteContext>>;
   onHide?: () => void;
 }
-interface DomProps {
-  status?: 'ready' | 'disabled' | 'loading';
-  className?: string;
-  divClassName?: string;
-  text?: string;
-  iconChevronBottom?: string;
-  iconChevronBottomClassName?: string;
-  onClick?: () => void;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const ToolBtn = (props: DomProps) => {
-  return;
-};
+// interface DomProps {
+//   status?: 'ready' | 'disabled' | 'loading';
+//   className?: string;
+//   divClassName?: string;
+//   text?: string;
+//   iconChevronBottom?: string;
+//   iconChevronBottomClassName?: string;
+//   onClick?: () => void;
+// }
 
 function AskPanel(props: AskPanelProps) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { code, visible, quotes, onHide, ...rest } = props;
+  const { visible, quotes, onHide, ...rest } = props;
   const panelRef = useRef<HTMLDivElement>(null);
   const handleClickOutside = useCallback((event: MouseEvent) => {
     if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
@@ -216,8 +210,7 @@ function AskPanel(props: AskPanelProps) {
         // e.stopPropagation();
         if (!isToolDropdownOpen) {
           showToolDropdown();
-        } 
-        else if (isToolDropdownOpen) {
+        } else if (isToolDropdownOpen) {
           showModelDropdown();
         }
 

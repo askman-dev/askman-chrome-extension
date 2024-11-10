@@ -47,6 +47,9 @@ importers:
       construct-style-sheets-polyfill:
         specifier: 3.1.0
         version: 3.1.0
+      dom-types:
+        specifier: ^1.1.1
+        version: 1.1.1
       handlebars:
         specifier: ^4.7.8
         version: 4.7.8
@@ -1974,6 +1977,9 @@ packages:
 
   dom-accessibility-api@0.5.16:
     resolution: {integrity: sha512-X7BJ2yElsnOJ30pZF4uIIDfBEVgF4XEBxL9Bxhy6dnrm5hkzqmsWHGTiHqRiITNhMyFLyAiWndIJP7Z1NTteDg==}
+
+  dom-types@1.1.1:
+    resolution: {integrity: sha512-uf2/CJm1rXFmnvVSQ+IwKL/Ds3zfdykMFH85ORQq86kGElOmt1AGab+C5G4cwIyiwKU3ZbYK6TAb9stDG/bKOw==}
 
   domexception@4.0.0:
     resolution: {integrity: sha512-A2is4PLG+eeSfoTMA95/s4pvAoSo2mKtiM5jlHkAVewmiO8ISFTFKZjH7UAM1Atli/OT/7JHOrJRJiMKUZKYBw==}
@@ -5850,6 +5856,8 @@ snapshots:
       esutils: 2.0.3
 
   dom-accessibility-api@0.5.16: {}
+
+  dom-types@1.1.1: {}
 
   domexception@4.0.0:
     dependencies:

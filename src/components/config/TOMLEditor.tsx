@@ -6,7 +6,7 @@ import { shikiToMonaco } from '@shikijs/monaco';
 
 interface TOMLEditorProps {
   value: string;
-  onChange?: (value: string) => void;
+  onChange?: (_value: string) => void;
   readOnly?: boolean;
   onSave?: () => void;
   error?: string | null;

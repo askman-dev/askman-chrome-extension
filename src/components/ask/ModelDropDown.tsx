@@ -7,12 +7,18 @@ import configStorage from '@src/shared/storages/configStorage';
 interface ModelDropdownProps {
   displayName: string;
   className?: string;
-  onItemClick: (model: string, isCommandPressed: boolean) => void;
-  statusListener: (status: boolean) => void;
+  onItemClick: (_model: string, _isCommandPressed: boolean) => void;
+  statusListener: (_status: boolean) => void;
   initOpen: boolean;
 }
 
-export default function ModelDropdown({ displayName, initOpen, className, onItemClick, statusListener }: ModelDropdownProps) {
+export default function ModelDropdown({
+  displayName,
+  initOpen,
+  className,
+  onItemClick,
+  statusListener,
+}: ModelDropdownProps) {
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
   const [models, setModels] = useState([]);
   const [isOpened, setIsOpen] = useState(initOpen);
@@ -38,7 +44,7 @@ export default function ModelDropdown({ displayName, initOpen, className, onItem
     }
   }, [isOpened]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (_e: React.KeyboardEvent) => {
     // if ((e.key === 'Escape' || e.key === 'Backspace') && isOpened) {
     //   console.log('[ModelDropdown] escape or backspace');
     //   e.preventDefault();
