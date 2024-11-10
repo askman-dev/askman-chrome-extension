@@ -119,6 +119,9 @@ function AskPanel(props: AskPanelProps) {
   const updateModelDropdownStatus = (status: boolean) => {
     setIsModelDropdownOpen(status);
   };
+  const updateQuoteDropdownStatus = (status: boolean) => {
+    setIsQuoteDropdownOpen(status);
+  };
 
   useEffect(() => {
     QuoteAgent.getQuoteByDocument(window.location.href, document).then(quoteContext => {
@@ -522,8 +525,8 @@ function AskPanel(props: AskPanelProps) {
               placeholder="@ to insert contents"></TextareaAutosize>
 
             <QuoteDropdown
-              isOpen={isQuoteDropdownOpen}
-              setIsOpen={setIsQuoteDropdownOpen}
+              initOpen={isQuoteDropdownOpen}
+              statusListener={updateQuoteDropdownStatus}
               className="absolute"
               style={{
                 left: `${dropdownPosition.left}px`,

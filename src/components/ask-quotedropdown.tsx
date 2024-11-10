@@ -3,13 +3,14 @@ import { Fragment, useEffect, useRef } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import { QuoteContext } from '../agents/quote';
+import { useState } from 'react';
 
 interface QuoteDropdownProps {
   className: string;
   style?: React.CSSProperties; // 添加 style 属性
   onItemClick: (_tool: QuoteContext) => void;
-  isOpen: boolean;
-  setIsOpen: (_isOpen: boolean) => void;
+  statusListener: (_status: boolean) => void;
+  initOpen: boolean;
 }
 
 const getQuoteContexts = (): QuoteContext[] => [
@@ -27,25 +28,40 @@ const getQuoteContexts = (): QuoteContext[] => [
   },
 ];
 
-export default function QuoteDropdown({ className, style, onItemClick, isOpen, setIsOpen }: QuoteDropdownProps) {
+export default function QuoteDropdown({ className, style, onItemClick, initOpen, statusListener }: QuoteDropdownProps) {
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
+  const [isOpened, setIsOpen] = useState(initOpen);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
   const quoteContexts = getQuoteContexts();
   useEffect(() => {
-    if (isOpen) {
+    // console.log('[ToolDropdown] initOpen = ' + initOpen, 'isOpened = ' + isOpened);
+    if (initOpen && !isOpened) {
+      // console.log('[ToolDropdown] click menu button to open');
+      buttonRef.current?.click();
+    } else if (!initOpen && isOpened) {
+      // console.log('[ToolDropdown] click menu button to close');
+      buttonRef.current?.click();
+    }
+  }, [initOpen]);
+  useEffect(() => {
+    // console.log('[ToolDropdown] isOpened = ' + isOpened);
+    statusListener(isOpened);
+    if (isOpened) {
       setTimeout(() => menuItemsRef.current[0]?.focus(), 0);
     }
-  }, [isOpen]);
+  }, [isOpened]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape' && isOpen) {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsOpen(false);
-    } else if (e.key === 'Backspace' && isOpen) {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsOpen(false);
-    }
+  const handleKeyDown = (_e: React.KeyboardEvent) => {
+    // if (e.key === 'Escape' && isOpen) {
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    //   setIsOpen(false);
+    // } else if (e.key === 'Backspace' && isOpen) {
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    //   setIsOpen(false);
+    // }
   };
 
   return (
@@ -53,22 +69,30 @@ export default function QuoteDropdown({ className, style, onItemClick, isOpen, s
       className={classNames(`${className} h-0`)}
       onKeyDown={handleKeyDown}
       aria-haspopup="true"
-      aria-expanded={isOpen}
+      aria-expanded={isOpened}
       type="button"
       style={style}>
       <Menu as="div" className="relative h-0">
         <Menu.Button
+          ref={buttonRef}
           className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white text-sm font-medium text-black hover:bg-black/10 focus:outline-none h-0 invisible pointer-events-none"
           title="Content"
-          onClick={e => {
-            setIsOpen(!isOpen);
-            e.stopPropagation();
+          onClick={() => {
+            setIsOpen(!isOpened);
+            // e.stopPropagation();
           }}>
-          Content
-          <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
+          {({ active }) => {
+            setIsOpen(active);
+            return (
+              <>
+                Content
+                <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 hover:text-violet-100" aria-hidden="true" />
+              </>
+            );
+          }}
         </Menu.Button>
         <Transition
-          show={isOpen}
+          // show={isOpened}
           as={Fragment}
           enter="transition ease-out duration-100"
           enterFrom="transform opacity-0 scale-95"
@@ -90,13 +114,13 @@ export default function QuoteDropdown({ className, style, onItemClick, isOpen, s
                         setIsOpen(false);
                       }}
                       onMouseDown={() => {
-                        onItemClick(quote);
-                        setIsOpen(false);
+                        // onItemClick(quote);
+                        // setIsOpen(false);
                       }}
-                      onKeyDown={e => {
-                        if (e.key === 'Escape') {
-                          handleKeyDown(e);
-                        }
+                      onKeyDown={_e => {
+                        // if (e.key === 'Escape') {
+                        //   handleKeyDown(e);
+                        // }
                       }}
                       className={`${
                         active ? 'bg-black text-white' : 'text-gray-900'
