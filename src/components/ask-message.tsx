@@ -3,11 +3,12 @@ import AskCode from './ask-code';
 import { QuoteAgent } from '../agents/quote';
 import React from 'react';
 
-export enum AskMessageType {}
-// TEXT = 'text',
-// IMAGE = 'image',
-// CODE = 'code',
-
+/* eslint-disable no-unused-vars */
+export enum AskMessageType {
+  TEXT = 'text',
+  IMAGE = 'image',
+  CODE = 'code',
+}
 interface AskMessageItem {
   type: AskMessageType | string;
   text: string;
