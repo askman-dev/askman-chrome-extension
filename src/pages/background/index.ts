@@ -72,7 +72,7 @@ function initExtension() {
 chrome.runtime.onInstalled.addListener(function () {});
 
 // Add this function to check if URL is supported
-function isUrlSupported(url: string): boolean {
+function isUrlNotSupported(url: string): boolean {
   if (!url) return false;
   // Chrome URLs and extension pages are not supported
   if (
@@ -81,18 +81,18 @@ function isUrlSupported(url: string): boolean {
     url.startsWith('https://chrome.google.com') ||
     url.startsWith('https://chromewebstore.google.com')
   ) {
-    return false;
+    return true;
   }
   // New tab page is not supported
   if (url === 'chrome://newtab/' || url === 'about:blank') {
-    return false;
+    return true;
   }
-  return true;
+  return false;
 }
 
 // Add this function to handle page action
 async function updateActionPopup(tabId: number, url: string) {
-  if (!isUrlSupported(url)) {
+  if (isUrlNotSupported(url)) {
     // 不支持的页面显示默认popup
     await chrome.action.setPopup({
       tabId,
@@ -107,9 +107,17 @@ async function updateActionPopup(tabId: number, url: string) {
   }
 }
 
+chrome.tabs.onActivated.addListener(activeInfo => {
+  if (!activeInfo.tabId) return;
+
+  chrome.tabs.get(activeInfo.tabId, tab => {
+    updateActionPopup(tab.id, tab.url);
+  });
+});
+
 // Listen for tab updates to set the appropriate popup behavior
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'loading' && tab.url) {
+  if (tab.highlighted) {
     updateActionPopup(tabId, tab.url);
   }
 });
