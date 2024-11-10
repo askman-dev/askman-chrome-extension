@@ -38,7 +38,7 @@ const TextWithLineBreaks = text => {
       );
     } else {
       return (
-        <div key={`text-${index}`} className="mb-2">
+        <div key={`text-${index}`} className="">
           {block.content.map((line, lineIndex) => (
             <React.Fragment key={`line-${lineIndex}`}>
               {line}
@@ -75,9 +75,7 @@ function AskMessage(props: AskMessageItem) {
   return (
     <div
       className={classNames(
-        name === 'ai'
-          ? 'text-gray-800 mb-3 leading-relaxed'
-          : 'text-sky-600 mb-2 leading-relaxed max-h-16 overflow-auto',
+        name === 'ai' ? 'text-gray-800 mb-3 leading-relaxed' : 'text-sky-600 leading-relaxed max-h-16 overflow-auto',
         'font-bold',
       )}>
       {messageItem}
