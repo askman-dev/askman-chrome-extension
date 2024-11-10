@@ -2,7 +2,7 @@
 # The name here can be customized without affecting the actual API request
 # For example, [chatglm] can be renamed to [gem] or [paid-openai]
 # Just ensure it's unique within this config file
-[chatglm]
+[siliconflow]
 # The protocol used to send requests, currently only supporting openai, is HTTPS
 sdk = "openai" 
 # API key, left empty here
@@ -12,7 +12,7 @@ base_url = "https://extapi.askman.dev/v1/"
 send_api_key = false
 cloudflare_gateway_url = ""
 models = [
-  { name = "free", max_tokens = 32768 } # THUDM/glm-4-9b-chat via siliconflow
+  { name = "THUDM/glm-4-9b-chat", max_tokens = 32768 } # THUDM/glm-4-9b-chat via siliconflow
 ]
 [openrouter]
 api_key = "sk-xxx"

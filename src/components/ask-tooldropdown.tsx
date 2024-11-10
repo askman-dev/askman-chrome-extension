@@ -71,7 +71,7 @@ export default function ToolDropdown({
   const [isOpened, setIsOpen] = useState(initOpen);
   const { showPreview, previewPos, previewContent, showToolPreview, hideToolPreview } = useToolPreview();
   const buttonRef = useRef<HTMLButtonElement>(null);
-  console.log('create ToolDropdown, initOpen = ' + initOpen);
+  // console.log('create ToolDropdown, initOpen = ' + initOpen);
 
   useEffect(() => {
     const fetchUserTools = async () => {
@@ -91,18 +91,18 @@ export default function ToolDropdown({
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
-    console.log('[ToolDropdown] initOpen = ' + initOpen, 'isOpened = ' + isOpened);
+    // console.log('[ToolDropdown] initOpen = ' + initOpen, 'isOpened = ' + isOpened);
     if (initOpen && !isOpened) {
-      console.log('[ToolDropdown] click menu button to open');
+      // console.log('[ToolDropdown] click menu button to open');
       buttonRef.current?.click();
     } else if (!initOpen && isOpened) {
-      console.log('[ToolDropdown] click menu button to close');
+      // console.log('[ToolDropdown] click menu button to close');
       buttonRef.current?.click();
     }
   }, [initOpen]);
 
   useEffect(() => {
-    console.log('[ToolDropdown] isOpened = ' + isOpened);
+    // console.log('[ToolDropdown] isOpened = ' + isOpened);
     statusListener(isOpened);
     if (isOpened) {
       setTimeout(() => menuItemsRef.current[0]?.focus(), 0);

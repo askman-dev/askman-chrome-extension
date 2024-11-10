@@ -219,7 +219,7 @@ function AskPanel(props: AskPanelProps) {
 
       // 检测左右方向键
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-        console.log('[ask-panel] listened key press, arrow left or right', e.target, e.currentTarget);
+        // console.log('[ask-panel] listened key press, arrow left or right', e.target, e.currentTarget);
         if (isToolDropdownOpen || isModelDropdownOpen) {
           e.preventDefault();
           e.stopPropagation();
@@ -247,7 +247,7 @@ function AskPanel(props: AskPanelProps) {
   useEffect(() => {
     if (!isToolDropdownOpen && !isQuoteDropdownOpen && !isModelDropdownOpen && inputRef.current) {
       setTimeout(() => {
-        console.log('focus on input because menus are closed');
+        // console.log('focus on input because menus are closed');
         inputRef.current.focus();
       }, 33);
     }
@@ -473,7 +473,8 @@ function AskPanel(props: AskPanelProps) {
                   }
                 }
                 // github 上面按 s 会触发页面搜索
-                if (e.key.match(/^[a-z/\\]$/) && !e.shiftKey && !e.ctrlKey && !e.altKey) e.stopPropagation();
+                // if (e.key.match(/^[a-z/\\]$/) && !e.shiftKey && !e.ctrlKey && !e.altKey) e.stopPropagation();
+                e.stopPropagation();
               }}
               onChange={e => {
                 setUserInput(e.currentTarget.value);
