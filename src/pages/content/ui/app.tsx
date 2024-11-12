@@ -93,7 +93,7 @@ export default function App() {
         setAskPanelVisible(false);
         return;
       }
-      console.log('收到后台消息 ', message);
+      console.log('onBackgroundMessage:', message);
       const selection = document.getSelection()?.toString().trim() || '';
       showChat(selection);
       return;

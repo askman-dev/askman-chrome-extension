@@ -15,6 +15,7 @@ import {
   HumanInvisibleMessage,
   HumanAskMessage,
   SystemInvisibleMessage,
+  CommandType,
 } from '../types';
 import QuoteDropdown from './ask-quotedropdown';
 import KeyBinding from './icons';
@@ -345,7 +346,13 @@ function AskPanel(props: AskPanelProps) {
       {...rest}>
       <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between">
         <span>
-          Askman <KeyBinding text="⌘ I"></KeyBinding>
+          Askman <KeyBinding text="⌘ I"></KeyBinding>{' '}
+          <KeyBinding
+            text="Setting"
+            className="hover:bg-gray-300 cursor-pointer"
+            onClick={() => {
+              chrome.runtime.sendMessage({ cmd: CommandType.OpenOptionsPage });
+            }}></KeyBinding>
         </span>
 
         <div className="grow"></div>

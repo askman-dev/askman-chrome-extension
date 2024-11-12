@@ -26,11 +26,11 @@ function onContextMenuClicked(info: chrome.contextMenus.OnClickData, tab: chrome
       chrome.tabs.sendMessage<TabMessage>(tab.id, { cmd: CommandType.ChatPopupDisplay, selectionText, pageUrl });
       break;
     case 'id-browser-action-context-menu':
-      chrome.runtime.openOptionsPage();
+      // chrome.runtime.openOptionsPage();
       break;
   }
 }
-function onMessageListener(command) {
+function onCommandMessageListener(command) {
   console.log('background received message', command);
   switch (command) {
     case 'ChatPopupDisplay':
@@ -55,6 +55,23 @@ function onMessageListener(command) {
       break;
   }
 }
+function onRuntimeMessageListener(message: TabMessage) {
+  console.log('background received message', message);
+  if (message.cmd === CommandType.OpenOptionsPage) {
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
+      if (tab) {
+        chrome.tabs.create({
+          index: tab.index,
+          url: 'chrome-extension://' + chrome.runtime.id + '/src/pages/options/index.html',
+        });
+      } else {
+        chrome.tabs.create({
+          url: 'chrome-extension://' + chrome.runtime.id + '/src/pages/options/index.html',
+        });
+      }
+    });
+  }
+}
 function initExtension() {
   chrome.contextMenus.create({
     title: 'Askman',
@@ -67,7 +84,8 @@ function initExtension() {
   //   id: 'id-browser-action-context-menu',
   // });
   chrome.contextMenus.onClicked.addListener(onContextMenuClicked);
-  chrome.commands.onCommand.addListener(onMessageListener);
+  chrome.commands.onCommand.addListener(onCommandMessageListener);
+  chrome.runtime.onMessage.addListener(onRuntimeMessageListener);
 }
 chrome.runtime.onInstalled.addListener(function () {});
 
