@@ -46,6 +46,7 @@ export interface ChatMessageContext {
 export enum CommandType {
   ChatPopupDisplay,
   ChatToolbarDisplay,
+  OpenOptionsPage,
 }
 export interface TabMessage {
   cmd: CommandType;
