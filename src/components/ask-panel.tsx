@@ -185,39 +185,16 @@ function AskPanel(props: AskPanelProps) {
   }, []);
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      // 检测 ESC 键
-      // if (e.key === 'Escape') {
-      //   if (isQuoteDropdownOpen) {
-      //     setIsQuoteDropdownOpen(false);
-      //     e.preventDefault();
-      //     e.stopPropagation();
-      //     return;
-      //   }
-      //   if (isToolDropdownOpen) {
-      //     console.log("listen escape on ask-panel, st tooldropbown to false")
-      //     setIsToolDropdownOpen(false);
-      //     e.preventDefault();
-      //     e.stopPropagation();
-      //     return;
-      //   }
-      //   if (isModelDropdownOpen) {
-      //     setIsModelDropdownOpen(false);
-      //     e.preventDefault();
-      //     e.stopPropagation();
-      //     return;
-      //   }
-      // }
-
       // 检测 Command+K (Mac) 或 Ctrl+K (Windows/Linux)
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         // e.preventDefault();
-        // e.stopPropagation();
         if (!isToolDropdownOpen) {
           showToolDropdown();
         } else if (isToolDropdownOpen) {
           showModelDropdown();
         }
 
+        e.stopPropagation();
         return;
       }
 
@@ -422,7 +399,7 @@ function AskPanel(props: AskPanelProps) {
               minRows={1}
               className="flex-grow outline-none text-gray-800 text-sm inline-block font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none 
               focus:border-black"
-              //TODO 输入在有字/无字时会发生度变化，需要修复
+              //TODO 输入在有字/无字时会发生高度变化，需要修复
               onKeyDown={e => {
                 // 检测 ESC 键
                 if (e.key === 'Escape') {
@@ -441,6 +418,8 @@ function AskPanel(props: AskPanelProps) {
                   // e.preventDefault();
                   return;
                 }
+
+                // TODO How to prevent notion.so intercept command+v?
 
                 // 现有的 Enter 键逻辑
                 if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
@@ -488,44 +467,6 @@ function AskPanel(props: AskPanelProps) {
               }}
               onChange={e => {
                 setUserInput(e.currentTarget.value);
-                // const input = e.currentTarget;
-                // const text = input.value;
-                // const atIndex = text.lastIndexOf('@');
-
-                // if (atIndex !== -1) {
-                // const span = document.createElement('span');
-                // span.style.cssText = `
-                //   font: ${window.getComputedStyle(input).font};
-                //   visibility: hidden;
-                //   position: absolute;
-                //   white-space: pre-wrap;
-                //   word-wrap: break-word;
-                //   width: ${
-                //     input.clientWidth -
-                //     parseInt(window.getComputedStyle(input).paddingLeft) -
-                //     parseInt(window.getComputedStyle(input).paddingRight)
-                //   }px;
-                //   padding: ${window.getComputedStyle(input).padding};
-                //   box-sizing: border-box;
-                // `;
-                // // 将 span 添加到输入框的父元素中，这样它会继承正确的定位上下文
-                // input.parentElement.appendChild(span);
-                // const textBeforeAt = text.substring(0, atIndex) + '\u200B';
-                // span.textContent = textBeforeAt;
-                // // 获取所有需要的矩形信息
-                // const spanRect = span.getBoundingClientRect();
-                // const range = document.createRange();
-                // const textNode = span.firstChild as Text;
-                // range.setStart(textNode, textNode.length - 1);
-                // const atRect = range.getBoundingClientRect();
-                // // 清理
-                // input.parentElement.removeChild(span);
-                // // 由于 span 是相对于父元素定位的，我们可以直接使用其坐标
-                // setDropdownPosition({
-                //   left: atRect.left - spanRect.left + parseInt(window.getComputedStyle(input).paddingLeft),
-                //   top: atRect.top - spanRect.top + parseInt(window.getComputedStyle(input).paddingTop),
-                // });
-                // }
                 e.preventDefault();
               }}
               value={userInput}
