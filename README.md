@@ -2,10 +2,7 @@
 
 Askman is an open-source browser extension that connects AI to web pages, providing a context-aware chat interface. Designed for seamless integration, Askman allows users to ask questions about the current page and receive relevant answers directly within their browsing experience.
 
-> <img src="public/icon@2x.svg" width="32px" alt="logo" />
-> 
-> Logo designed in collaboration with Claude and Ray.
-> 
+<img src="public/icon@2x.svg" width="32px" alt="logo" />  Logo designed in collaboration with Claude and Ray.
 
 
 # Features
@@ -18,6 +15,7 @@ Askman is an open-source browser extension that connects AI to web pages, provid
 
 | ![screenshot](.github/public/810shots_so.png) | ![screenshot](.github/public/114shots_so.png) | ![screenshot](.github/public/715shots_so.png) |
 |:---:|:---:|:---:|
+
 
 
 # Installation
@@ -79,6 +77,9 @@ To get started, please read our Contribution Guide.
 
 [![Star History Chart](https://api.star-history.com/svg?repos=askman/askman-chrome-extension&type=Date)](https://star-history.com/#askman/askman-chrome-extension&Date)
 
+
+> 
+> <a href="https://www.buymeacoffee.com/chessjoej"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=chessjoej&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
 
 # Privacy Policy
 
