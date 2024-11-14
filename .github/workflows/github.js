@@ -72,6 +72,7 @@ async function updateIterationPlan(issue, milestone) {
       state: 'all', // Include both open and closed issues
       sort: 'created',
       direction: 'asc'
+      per_page: 99
     });
     console.log(issues.map(_ => _.title))
     const issueLinks = issues.map(issue => {
