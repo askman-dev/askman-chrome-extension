@@ -4,7 +4,7 @@ const octokit = new Octokit({
   auth: process.env.ACTIONS_TOKEN || process.env.GITHUB_TOKEN,
 });
 
-const botMessage = "**This issue was created by a bot. Please do not modify it directly.**";
+const botMessage = "*This issue was created by a bot. Please do not modify it directly.*";
 
 async function getOrCreateIssue(milestone) {
   try {
@@ -83,7 +83,7 @@ async function updateIterationPlan(issue, milestone) {
       owner,
       repo,
       issue_number: issue.number,
-      body: `Iteration Plan for milestone: ${milestone.title}\n\n${botMessage}\n\n${issueLinks}`,
+      body: `${botMessage}\n\nIteration Plan for milestone: ${milestone.title}\n\n${issueLinks}`,
     });
   } catch (error) {
     console.error("Error in updateIterationPlan:", error);
