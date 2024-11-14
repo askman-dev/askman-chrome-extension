@@ -83,7 +83,7 @@ async function updateIterationPlan(issue, milestone) {
       owner,
       repo,
       issue_number: issue.number,
-      body: `Iteration Plan for milestone: ${milestone.title}\n\n${issueLinks}\n\n${botMessage}`,
+      body: `Iteration Plan for milestone: ${milestone.title}\n\n${botMessage}\n\n${issueLinks}`,
     });
   } catch (error) {
     console.error("Error in updateIterationPlan:", error);
