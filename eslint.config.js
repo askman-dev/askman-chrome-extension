@@ -36,6 +36,7 @@ export default [
         SVGSVGElement: 'readonly',
         DOMRect: 'readonly',
         requestAnimationFrame: 'readonly',
+        clearTimeout: 'readonly',
         global: 'readonly', // for unit test
         __dirname: 'readonly',
       },

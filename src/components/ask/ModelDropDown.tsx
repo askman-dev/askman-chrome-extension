@@ -1,5 +1,5 @@
 import React, { Fragment, useRef, useEffect, useState } from 'react';
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import configStorage from '@src/shared/storages/configStorage';
@@ -73,7 +73,7 @@ export default function ModelDropdown({
 
     fetchModels();
   }, []);
-
+  let closeDropdownTimer: any;
   return (
     <button
       className={classNames(`${className}`)}
@@ -82,10 +82,18 @@ export default function ModelDropdown({
       aria-expanded={isOpened}
       type="button">
       <Menu as="div" className={classNames('relative inline-block text-left', className)}>
-        <Menu.Button
+        <MenuButton
           ref={buttonRef}
           className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none min-w-0"
-          onClick={() => setIsOpen(!isOpened)}>
+          onClick={() => setIsOpen(!isOpened)}
+          onMouseEnter={_e => {
+            setIsOpen(true);
+            // e.stopPropagation();
+          }}
+          onMouseLeave={_e => {
+            // Add a small delay before closing to allow moving to menu items
+            closeDropdownTimer = setTimeout(() => setIsOpen(false), 100);
+          }}>
           {({ active }) => {
             setIsOpen(active);
             return (
@@ -100,7 +108,7 @@ export default function ModelDropdown({
               </>
             );
           }}
-        </Menu.Button>
+        </MenuButton>
 
         <Transition
           as={Fragment}
@@ -110,12 +118,17 @@ export default function ModelDropdown({
           leave="transition ease-in duration-75"
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95">
-          <Menu.Items
+          <MenuItems
             static
-            className="absolute left-0 z-10 mt-2 min-w-[10rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+            className="absolute left-0 z-10 mt-0 min-w-[10rem] origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+            onMouseEnter={() => {
+              clearTimeout(closeDropdownTimer);
+              setIsOpen(true);
+            }}
+            onMouseLeave={() => setIsOpen(false)}>
             <div className="py-1">
               {models.map((model, index) => (
-                <Menu.Item key={model.id}>
+                <MenuItem key={model.id}>
                   {({ active }) => (
                     <button
                       ref={el => (menuItemsRef.current[index] = el)}
@@ -141,10 +154,10 @@ export default function ModelDropdown({
                       <span className="whitespace-nowrap">{model.name}</span>
                     </button>
                   )}
-                </Menu.Item>
+                </MenuItem>
               ))}
             </div>
-          </Menu.Items>
+          </MenuItems>
         </Transition>
       </Menu>
     </button>
