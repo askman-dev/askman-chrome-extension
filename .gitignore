@@ -21,3 +21,4 @@ public/manifest.json
 .aider*
 *.code-workspace
 .shire
+.vscode

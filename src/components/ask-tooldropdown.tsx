@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import defaultTools from '@assets/conf/tools.toml';
@@ -132,6 +132,7 @@ export default function ToolDropdown({
     }
   };
   let isCommandPressed = false;
+  let closeDropdownTimer: any;
   return (
     <div
       className={classNames(`${className}`)}
@@ -140,13 +141,17 @@ export default function ToolDropdown({
       aria-haspopup="true"
       aria-expanded={isOpened}>
       <Menu as="div" className="relative" onKeyDown={handleKeyDown}>
-        <Menu.Button
+        <MenuButton
           ref={buttonRef}
           className="inline-flex w-full justify-center rounded-md text-sm text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none min-w-0"
           title="Use framework"
-          onClick={_e => {
-            setIsOpen(!isOpened);
+          onMouseEnter={_e => {
+            setIsOpen(true);
             // e.stopPropagation();
+          }}
+          onMouseLeave={_e => {
+            // Add a small delay before closing to allow moving to menu items
+            closeDropdownTimer = setTimeout(() => setIsOpen(false), 100);
           }}>
           {({ active }) => {
             setIsOpen(active);
@@ -157,7 +162,7 @@ export default function ToolDropdown({
               </>
             );
           }}
-        </Menu.Button>
+        </MenuButton>
         <Transition
           // show={isOpened}
           as={React.Fragment}
@@ -167,12 +172,17 @@ export default function ToolDropdown({
           leave="transition ease-in duration-75"
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95">
-          <Menu.Items
+          <MenuItems
             static
-            className="absolute left-0 mt-2 min-w-[10rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10">
+            className="absolute left-0 mt-0 min-w-[10rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10"
+            onMouseEnter={() => {
+              clearTimeout(closeDropdownTimer);
+              setIsOpen(true);
+            }}
+            onMouseLeave={() => setIsOpen(false)}>
             <div className="px-1 py-1">
               {allTools.map((tool, index) => (
-                <Menu.Item key={tool.name}>
+                <MenuItem key={tool.name}>
                   {({ active }) => (
                     <button
                       ref={el => {
@@ -217,12 +227,12 @@ export default function ToolDropdown({
                       ) : null}
                     </button>
                   )}
-                </Menu.Item>
+                </MenuItem>
               ))}
 
               {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
             </div>
-          </Menu.Items>
+          </MenuItems>
         </Transition>
       </Menu>
     </div>
