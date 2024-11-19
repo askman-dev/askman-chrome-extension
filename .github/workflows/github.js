@@ -52,6 +52,7 @@ async function listOpenMilestones() {
       owner,
       repo,
       state: 'open',
+      per_page: 99
     });
 
     return milestones.filter(milestone => milestone.title.startsWith('2024-'));
