@@ -10,11 +10,13 @@ async function getOrCreateIssue(milestone) {
   try {
     const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
-    const { data: issues } = await octokit.paginate('GET /repos/{owner}/{repo}/issues', {
+    const response = await octokit.paginate(octokit.rest.issues.listForRepo, {
       owner,
       repo,
       milestone: milestone.number,
     });
+    console.info('[octokit.rest.issues.listForRepo]', response);
+    const { data: issues } = response
     let hash = '#' + milestone.number
     let issue = issues.find((issue) => issue.title.includes(milestone.title));
     issue = issues.find((issue) => issue.title.includes(hash));
