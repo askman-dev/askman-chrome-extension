@@ -10,7 +10,7 @@ async function getOrCreateIssue(milestone) {
   try {
     const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
-    const { data: issues } = await octokit.issues.listForRepo({
+    const { data: issues } = await octokit.paginate('GET /repos/{owner}/{repo}/issues', {
       owner,
       repo,
       milestone: milestone.number,
@@ -65,14 +65,13 @@ async function updateIterationPlan(issue, milestone) {
     console.info(`Updating milestone plan: ${milestone.title} `)
     const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
-    const { data: issues } = await octokit.issues.listForRepo({
+    const { data: issues } = await octokit.paginate('GET /repos/{owner}/{repo}/issues', {
       owner,
       repo,
       milestone: milestone.number,
       state: 'all', // Include both open and closed issues
       sort: 'created',
       direction: 'asc'
-      per_page: 99
     });
     console.log(issues.map(_ => _.title))
     const issueLinks = issues.map(issue => {
