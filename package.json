@@ -30,7 +30,7 @@
     "@iarna/toml": "^2.2.5",
     "@langchain/community": "^0.3.11",
     "@langchain/core": "^0.3.17",
-    "@langchain/openai": "^0.3.12",
+    "@langchain/openai": "^0.3.14",
     "@monaco-editor/react": "^4.6.0",
     "@shikijs/core": "^1.15.1",
     "@shikijs/monaco": "^1.15.1",
