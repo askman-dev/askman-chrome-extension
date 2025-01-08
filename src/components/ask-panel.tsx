@@ -397,7 +397,7 @@ function AskPanel(props: AskPanelProps) {
               ref={inputRef}
               maxRows={5}
               minRows={1}
-              className="flex-grow outline-none text-gray-800 text-sm inline-block font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none 
+              className="flex-grow outline-none text-gray-800 text-sm inline-block font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none min-h-[3em] 
               focus:border-black"
               //TODO 输入在有字/无字时会发生高度变化，需要修复
               onKeyDown={e => {
