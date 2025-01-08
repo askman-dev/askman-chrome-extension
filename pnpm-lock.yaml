@@ -19,13 +19,13 @@ importers:
         version: 2.2.5
       '@langchain/community':
         specifier: ^0.3.11
-        version: 0.3.12(@ibm-cloud/watsonx-ai@1.1.2)(@langchain/core@0.3.17(openai@4.71.1(zod@3.23.8)))(axios@1.7.4)(handlebars@4.7.8)(ibm-cloud-sdk-core@5.1.0)(ignore@5.3.2)(jsdom@22.1.0)(jsonwebtoken@9.0.2)(lodash@4.17.21)(openai@4.71.1(zod@3.23.8))(ws@8.17.1)
+        version: 0.3.12(@ibm-cloud/watsonx-ai@1.1.2)(@langchain/core@0.3.17(openai@4.77.4(zod@3.23.8)))(axios@1.7.4)(handlebars@4.7.8)(ibm-cloud-sdk-core@5.1.0)(ignore@5.3.2)(jsdom@22.1.0)(jsonwebtoken@9.0.2)(lodash@4.17.21)(openai@4.77.4(zod@3.23.8))(ws@8.17.1)
       '@langchain/core':
         specifier: ^0.3.17
-        version: 0.3.17(openai@4.71.1(zod@3.23.8))
+        version: 0.3.17(openai@4.77.4(zod@3.23.8))
       '@langchain/openai':
-        specifier: ^0.3.12
-        version: 0.3.12(@langchain/core@0.3.17(openai@4.71.1(zod@3.23.8)))
+        specifier: ^0.3.16
+        version: 0.3.16(@langchain/core@0.3.17(openai@4.77.4(zod@3.23.8)))
       '@monaco-editor/react':
         specifier: ^4.6.0
         version: 4.6.0(monaco-editor@0.51.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -1005,8 +1005,8 @@ packages:
     resolution: {integrity: sha512-o4lgmRcEqAyioP4Snxat1DGIT0oasOYsfo9uvAxVjwGq+XRicXm+bO3smCBSiiPQnd6jJ9ULWJlI0RFUV1oNqQ==}
     engines: {node: '>=18'}
 
-  '@langchain/openai@0.3.12':
-    resolution: {integrity: sha512-z8y0zdKovjY6bB0D3D+K99bPAN+wFRQcrWDfHfX7yVmYwq1O8GOIzQgCBth0vbhbzeuaJ4dz3+oqN/4Q2PCpHg==}
+  '@langchain/openai@0.3.16':
+    resolution: {integrity: sha512-Om9HRlTeI0Ou6D4pfxbWHop4WGfkCdV/7v1W/+Jr7NSf0BNoA9jk5GqGms8ZtOYSGgPvizDu3i0TrM3B4cN4NA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@langchain/core': '>=0.2.26 <0.4.0'
@@ -3223,8 +3223,8 @@ packages:
   oniguruma-to-js@0.4.3:
     resolution: {integrity: sha512-X0jWUcAlxORhOqqBREgPMgnshB7ZGYszBNspP+tS9hPD3l13CdaXcHbgImoHUHlrvGx/7AvFEkTRhAGYh+jzjQ==}
 
-  openai@4.71.1:
-    resolution: {integrity: sha512-C6JNMaQ1eijM0lrjiRUL3MgThVP5RdwNAghpbJFdW0t11LzmyqON8Eh8MuUuEZ+CeD6bgYl2Fkn2BoptVxv9Ug==}
+  openai@4.77.4:
+    resolution: {integrity: sha512-rShjKsZ/HXm1cSxXt6iFeZxiCohrVShawt0aRRQmbb+z/EXcH4OouyQZP1ShyZMb63LJajpl8aGw3DzEi8Wh9Q==}
     hasBin: true
     peerDependencies:
       zod: ^3.23.8
@@ -4752,18 +4752,18 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@langchain/community@0.3.12(@ibm-cloud/watsonx-ai@1.1.2)(@langchain/core@0.3.17(openai@4.71.1(zod@3.23.8)))(axios@1.7.4)(handlebars@4.7.8)(ibm-cloud-sdk-core@5.1.0)(ignore@5.3.2)(jsdom@22.1.0)(jsonwebtoken@9.0.2)(lodash@4.17.21)(openai@4.71.1(zod@3.23.8))(ws@8.17.1)':
+  '@langchain/community@0.3.12(@ibm-cloud/watsonx-ai@1.1.2)(@langchain/core@0.3.17(openai@4.77.4(zod@3.23.8)))(axios@1.7.4)(handlebars@4.7.8)(ibm-cloud-sdk-core@5.1.0)(ignore@5.3.2)(jsdom@22.1.0)(jsonwebtoken@9.0.2)(lodash@4.17.21)(openai@4.77.4(zod@3.23.8))(ws@8.17.1)':
     dependencies:
       '@ibm-cloud/watsonx-ai': 1.1.2
-      '@langchain/core': 0.3.17(openai@4.71.1(zod@3.23.8))
-      '@langchain/openai': 0.3.12(@langchain/core@0.3.17(openai@4.71.1(zod@3.23.8)))
+      '@langchain/core': 0.3.17(openai@4.77.4(zod@3.23.8))
+      '@langchain/openai': 0.3.16(@langchain/core@0.3.17(openai@4.77.4(zod@3.23.8)))
       binary-extensions: 2.3.0
       expr-eval: 2.0.2
       flat: 5.0.2
       ibm-cloud-sdk-core: 5.1.0
       js-yaml: 4.1.0
-      langchain: 0.3.5(@langchain/core@0.3.17(openai@4.71.1(zod@3.23.8)))(axios@1.7.4)(handlebars@4.7.8)(openai@4.71.1(zod@3.23.8))
-      langsmith: 0.2.5(openai@4.71.1(zod@3.23.8))
+      langchain: 0.3.5(@langchain/core@0.3.17(openai@4.77.4(zod@3.23.8)))(axios@1.7.4)(handlebars@4.7.8)(openai@4.77.4(zod@3.23.8))
+      langsmith: 0.2.5(openai@4.77.4(zod@3.23.8))
       uuid: 10.0.0
       zod: 3.23.8
       zod-to-json-schema: 3.23.5(zod@3.23.8)
@@ -4788,13 +4788,13 @@ snapshots:
       - openai
       - peggy
 
-  '@langchain/core@0.3.17(openai@4.71.1(zod@3.23.8))':
+  '@langchain/core@0.3.17(openai@4.77.4(zod@3.23.8))':
     dependencies:
       ansi-styles: 5.2.0
       camelcase: 6.3.0
       decamelize: 1.2.0
       js-tiktoken: 1.0.15
-      langsmith: 0.2.5(openai@4.71.1(zod@3.23.8))
+      langsmith: 0.2.5(openai@4.77.4(zod@3.23.8))
       mustache: 4.2.0
       p-queue: 6.6.2
       p-retry: 4.6.2
@@ -4804,19 +4804,19 @@ snapshots:
     transitivePeerDependencies:
       - openai
 
-  '@langchain/openai@0.3.12(@langchain/core@0.3.17(openai@4.71.1(zod@3.23.8)))':
+  '@langchain/openai@0.3.16(@langchain/core@0.3.17(openai@4.77.4(zod@3.23.8)))':
     dependencies:
-      '@langchain/core': 0.3.17(openai@4.71.1(zod@3.23.8))
+      '@langchain/core': 0.3.17(openai@4.77.4(zod@3.23.8))
       js-tiktoken: 1.0.15
-      openai: 4.71.1(zod@3.23.8)
+      openai: 4.77.4(zod@3.23.8)
       zod: 3.23.8
       zod-to-json-schema: 3.23.5(zod@3.23.8)
     transitivePeerDependencies:
       - encoding
 
-  '@langchain/textsplitters@0.1.0(@langchain/core@0.3.17(openai@4.71.1(zod@3.23.8)))':
+  '@langchain/textsplitters@0.1.0(@langchain/core@0.3.17(openai@4.77.4(zod@3.23.8)))':
     dependencies:
-      '@langchain/core': 0.3.17(openai@4.71.1(zod@3.23.8))
+      '@langchain/core': 0.3.17(openai@4.77.4(zod@3.23.8))
       js-tiktoken: 1.0.15
 
   '@monaco-editor/loader@1.4.0(monaco-editor@0.51.0)':
@@ -6861,15 +6861,15 @@ snapshots:
 
   kind-of@6.0.3: {}
 
-  langchain@0.3.5(@langchain/core@0.3.17(openai@4.71.1(zod@3.23.8)))(axios@1.7.4)(handlebars@4.7.8)(openai@4.71.1(zod@3.23.8)):
+  langchain@0.3.5(@langchain/core@0.3.17(openai@4.77.4(zod@3.23.8)))(axios@1.7.4)(handlebars@4.7.8)(openai@4.77.4(zod@3.23.8)):
     dependencies:
-      '@langchain/core': 0.3.17(openai@4.71.1(zod@3.23.8))
-      '@langchain/openai': 0.3.12(@langchain/core@0.3.17(openai@4.71.1(zod@3.23.8)))
-      '@langchain/textsplitters': 0.1.0(@langchain/core@0.3.17(openai@4.71.1(zod@3.23.8)))
+      '@langchain/core': 0.3.17(openai@4.77.4(zod@3.23.8))
+      '@langchain/openai': 0.3.16(@langchain/core@0.3.17(openai@4.77.4(zod@3.23.8)))
+      '@langchain/textsplitters': 0.1.0(@langchain/core@0.3.17(openai@4.77.4(zod@3.23.8)))
       js-tiktoken: 1.0.15
       js-yaml: 4.1.0
       jsonpointer: 5.0.1
-      langsmith: 0.2.5(openai@4.71.1(zod@3.23.8))
+      langsmith: 0.2.5(openai@4.77.4(zod@3.23.8))
       openapi-types: 12.1.3
       p-retry: 4.6.2
       uuid: 10.0.0
@@ -6883,7 +6883,7 @@ snapshots:
       - encoding
       - openai
 
-  langsmith@0.2.5(openai@4.71.1(zod@3.23.8)):
+  langsmith@0.2.5(openai@4.77.4(zod@3.23.8)):
     dependencies:
       '@types/uuid': 10.0.0
       commander: 10.0.1
@@ -6892,7 +6892,7 @@ snapshots:
       semver: 7.6.3
       uuid: 10.0.0
     optionalDependencies:
-      openai: 4.71.1(zod@3.23.8)
+      openai: 4.77.4(zod@3.23.8)
 
   language-subtag-registry@0.3.23: {}
 
@@ -7253,7 +7253,7 @@ snapshots:
     dependencies:
       regex: 4.4.0
 
-  openai@4.71.1(zod@3.23.8):
+  openai@4.77.4(zod@3.23.8):
     dependencies:
       '@types/node': 18.19.64
       '@types/node-fetch': 2.6.11
