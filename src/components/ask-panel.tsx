@@ -39,6 +39,12 @@ interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
 
 function AskPanel(props: AskPanelProps) {
   const { visible, quotes, onHide, ...rest } = props;
+  
+  const getTruncatedContent = (quote: QuoteContext): string => {
+    const content = quote.selection || quote.pageContent || quote.text || quote.pageTitle || quote.pageUrl || quote.name || quote.type || 'Quote';
+    return content.length > 50 ? content.slice(0, 50) + '...' : content;
+  };
+
   const panelRef = useRef<HTMLDivElement>(null);
   const handleClickOutside = useCallback((event: MouseEvent) => {
     if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
@@ -71,6 +77,8 @@ function AskPanel(props: AskPanelProps) {
   const [selectedModel, setSelectedModel] = useState('free'); // 添加状态来跟踪选中的模型
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ left: 0, top: 0 });
+  const [hoveredQuoteIndex, setHoveredQuoteIndex] = useState<number | null>(null);
+
   const showToolDropdown = () => {
     // toolButtonRef.current?.click();
     console.log('isToolDropdownOpen = ' + isToolDropdownOpen, 'set to true');
@@ -375,9 +383,19 @@ function AskPanel(props: AskPanelProps) {
               <div className="quotes relative flex flex-wrap gap-2">
                 {initQuotes.map((quote, index) => (
                   <div className="flex items-center bg-gray-100 rounded-md px-2 py-1" key={index + '-' + quote}>
-                    <div className="text-black text-xs font-normal overflow-hidden whitespace-nowrap text-ellipsis max-w-[150px]"
-                         title={quote.selection || quote.pageContent || quote.text || quote.pageTitle || quote.pageUrl || quote.name || quote.type || 'Quote'}>
-                      {(quote.name || quote.type || 'Quote').charAt(0).toUpperCase() + (quote.name || quote.type || 'Quote').slice(1)}
+                    <div className="relative">
+                      <div 
+                        className="text-black text-xs font-normal overflow-hidden whitespace-nowrap text-ellipsis max-w-[150px]"
+                        onMouseEnter={() => setHoveredQuoteIndex(index)}
+                        onMouseLeave={() => setHoveredQuoteIndex(null)}
+                      >
+                        {(quote.name || quote.type || 'Quote').charAt(0).toUpperCase() + (quote.name || quote.type || 'Quote').slice(1)}
+                      </div>
+                      {hoveredQuoteIndex === index && (
+                        <div className="absolute left-0 top-full mt-1 z-50 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-normal min-w-[300px] max-w-[400px] shadow-lg">
+                          {getTruncatedContent(quote)}
+                        </div>
+                      )}
                     </div>
                     <button
                       title="删除引用"
@@ -398,7 +416,7 @@ function AskPanel(props: AskPanelProps) {
               ref={inputRef}
               maxRows={5}
               minRows={1}
-              className="flex-grow outline-none text-gray-800 text-sm inline-block font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none min-h-[3em] 
+              className="flex-grow outline-none bg-white text-gray-800 text-sm inline-block font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none min-h-[3em] 
               focus:border-black"
               //TODO 输入在有字/无字时会发生高度变化，需要修复
               onKeyDown={e => {
