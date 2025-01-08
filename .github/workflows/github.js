@@ -14,6 +14,7 @@ async function getOrCreateIssue(milestone) {
       owner,
       repo,
       milestone: milestone.number,
+      state: 'all'
     });
 
     let hash = '#' + milestone.number
