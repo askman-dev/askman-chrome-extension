@@ -14,11 +14,11 @@ async function getOrCreateIssue(milestone) {
       owner,
       repo,
       milestone: milestone.number,
+      state: 'all'
     });
 
     let hash = '#' + milestone.number
-    let issue = issues.find((issue) => issue.title.includes(milestone.title));
-    issue = issues.find((issue) => issue.title.includes(hash));
+    let issue = issues.find((issue) => issue.title.includes(milestone.title) && issue.title.includes(hash));
 
     if (issue) {
       await octokit.issues.update({
