@@ -375,8 +375,9 @@ function AskPanel(props: AskPanelProps) {
               <div className="quotes relative flex flex-wrap gap-2">
                 {initQuotes.map((quote, index) => (
                   <div className="flex items-center bg-gray-100 rounded-md px-2 py-1" key={index + '-' + quote}>
-                    <div className="text-black text-xs font-normal overflow-hidden whitespace-nowrap text-ellipsis max-w-[150px]">
-                      {quote.name || quote.type || 'Quote'}
+                    <div className="text-black text-xs font-normal overflow-hidden whitespace-nowrap text-ellipsis max-w-[150px]"
+                         title={quote.selection || quote.pageContent || quote.text || quote.pageTitle || quote.pageUrl || quote.name || quote.type || 'Quote'}>
+                      {(quote.name || quote.type || 'Quote').charAt(0).toUpperCase() + (quote.name || quote.type || 'Quote').slice(1)}
                     </div>
                     <button
                       title="删除引用"

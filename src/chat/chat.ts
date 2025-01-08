@@ -153,7 +153,7 @@ export class ChatCoreContext implements ChatCoreInterface {
 
     // Prevent users from forgetting to fill in chat.input in the framework.
     if (userPrompt && !(framework?.hbs.indexOf('{{chat.input}}') > -1)) {
-      prompt += '\n' + userPrompt;
+      prompt += prompt ? '\n' + userPrompt : userPrompt;
     }
     if (prompt.trim() == '') {
       console.warn('[Askman] prompt is empty, skip sending');
