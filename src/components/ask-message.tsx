@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import AskCode from './ask-code';
 import { QuoteAgent } from '../agents/quote';
-import React from 'react';
+import React, { useState } from 'react';
 
 /* eslint-disable no-unused-vars */
 export enum AskMessageType {
@@ -56,8 +56,43 @@ const TextWithLineBreaks = text => {
 
   return rendered;
 };
+
+const CopyButton = ({ text }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); // 2秒后恢复
+    } catch (err) {
+      console.error('Failed to copy text:', err);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="absolute top-0 right-1 p-2 rounded bg-gray-100 hover:bg-gray-200 transition-all duration-300 opacity-50 hover:opacity-100 z-10"
+      aria-label={copied ? "Copied" : "Copy content"}
+    >
+      {copied ? (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+        </svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+          <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+        </svg>
+      )}
+    </button>
+  );
+};
+
 function AskMessage(props: AskMessageItem) {
   const { type, text, name } = props;
+  const [showCopyButton, setShowCopyButton] = useState(false);
   let messageItem = <div>{text}</div>;
 
   // 根据不同的类型，渲染不同的内容
@@ -75,10 +110,17 @@ function AskMessage(props: AskMessageItem) {
   return (
     <div
       className={classNames(
-        name === 'ai' ? 'text-gray-800 mb-3 leading-relaxed' : 'text-sky-600 leading-relaxed max-h-16 overflow-auto',
+        'relative',
+        name === 'ai' ? 'text-gray-800 mb-3 leading-relaxed' : 'text-sky-600 mb-1 leading-relaxed max-h-16',
         'font-bold',
-      )}>
-      {messageItem}
+      )}
+      onMouseEnter={() => setShowCopyButton(true)}
+      onMouseLeave={() => setShowCopyButton(false)}
+    >
+      <div className="pr-8">
+        {messageItem}
+      </div>
+      {showCopyButton && <CopyButton text={text} />}
     </div>
   );
 }
