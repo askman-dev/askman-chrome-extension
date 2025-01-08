@@ -11,10 +11,12 @@ interface ConfigEditorInstanceProps {
 const ConfigEditorInstance: React.FC<ConfigEditorInstanceProps> = ({ initialValue, readOnly, onSave, filename }) => {
   const [value, setValue] = useState(initialValue);
   const [error, setError] = useState<string | null>(null);
+  const [editorKey, setEditorKey] = useState(0);
 
   useEffect(() => {
     setValue(initialValue);
-  }, [initialValue]);
+    setEditorKey(k => k + 1);
+  }, [initialValue, filename]);
 
   const handleChange = (newValue: string) => {
     setValue(newValue);
@@ -24,7 +26,6 @@ const ConfigEditorInstance: React.FC<ConfigEditorInstanceProps> = ({ initialValu
   const validateConfig = (config: string) => {
     try {
       const parsedConfig = TOML.parse(config);
-      //   const stringifiedConfig = TOML.stringify(parsedConfig);
       if (!parsedConfig) {
         setError('The configuration format is incorrect.');
       } else {
@@ -43,6 +44,7 @@ const ConfigEditorInstance: React.FC<ConfigEditorInstanceProps> = ({ initialValu
 
   return (
     <TOMLEditor
+      key={`${filename}-${editorKey}`}
       filename={filename}
       value={value}
       onChange={handleChange}

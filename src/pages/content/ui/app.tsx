@@ -10,6 +10,7 @@ import PageGithubReadmeToolDropdown from '@root/src/agents/page-github/component
 import { createPortal } from 'react-dom';
 import { PageStackoverflowAgent } from '@root/src/agents/page-stackoverflow/script';
 import PageStackoverflowToolDropdown from '@root/src/agents/page-stackoverflow/component';
+import { StorageManager } from '@src/utils/StorageManager';
 
 const ASK_BUTTON_OFFSET_X = 5; // 按钮距离左侧的偏移量
 
@@ -20,16 +21,52 @@ export default function App() {
   const [askPanelVisible, setAskPanelVisible] = useState<boolean>(false);
   const targetDom = useRef<HTMLElement>(null);
   const [pageActionButton, setPageActionButton] = useState<HTMLDivElement>(null);
-
-  // const [currentCodeSnippnet, setCurrentCodeSnippnet] = useState<string>('');
+  const [preferences, setPreferences] = useState({ ASK_BUTTON: false, ASK_BUTTON_BLOCK_PAGE: [] });
   const [askPanelQuotes, setAskPanelQuotes] = useState<Promise<QuoteContext>[]>([]);
   const [parentRect, setParentRect] = useState<DOMRect>();
+
+  // 加载用户偏好设置
+  useEffect(() => {
+    StorageManager.getUserPreferences().then(prefs => {
+      setPreferences(prefs);
+    });
+  }, []);
+
+  // 检查当前页面是否在屏蔽列表中
+  const isCurrentPageBlocked = () => {
+    const currentUrl = window.location.href;
+    const currentDomain = window.location.hostname;
+    
+    return preferences.ASK_BUTTON_BLOCK_PAGE.some(pattern => {
+      // 检查完整 URL 匹配
+      if (pattern.startsWith('http') && currentUrl.startsWith(pattern)) {
+        return true;
+      }
+      // 检查域名匹配
+      if (!pattern.includes('/') && currentDomain.includes(pattern)) {
+        return true;
+      }
+      // 检查通配符模式
+      if (pattern.includes('*')) {
+        const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+        return regex.test(currentUrl);
+      }
+      return false;
+    });
+  };
+
   const { run: handleMouseOver } = useDebounceFn(
     (e: MouseEvent) => {
+      // 如果按钮功能被禁用或当前页面在屏蔽列表中，直接返回
+      if (!preferences.ASK_BUTTON || isCurrentPageBlocked()) {
+        setAskButtonVisible(false);
+        return false;
+      }
+
       const domEl: HTMLElement = (e.target as HTMLElement).closest('pre');
       const highlightEl: HTMLElement = (e.target as HTMLElement).closest('div.highlight');
       const btnEl: HTMLElement = (e.target as HTMLElement).closest('#askman-chrome-extension-content-view-root');
-      // console.log(domEl, btnEl, e.target)
+      
       if (domEl?.tagName === 'PRE' || domEl?.contentEditable === 'true' || highlightEl) {
         if (domEl) targetDom.current = domEl;
         else if (highlightEl) targetDom.current = highlightEl;

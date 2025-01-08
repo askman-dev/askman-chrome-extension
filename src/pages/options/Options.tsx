@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import ConfigManager from '@src/components/config/ConfigManager';
-import { USER_TOOLS_KEY, USER_MODELS_KEY, USER_CHAT_PRESETS_KEY } from '@src/utils/StorageManager';
+import { USER_TOOLS_KEY, USER_MODELS_KEY, USER_CHAT_PRESETS_KEY, USER_PREFERENCES_KEY } from '@src/utils/StorageManager';
 
 const Options: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Models');
 
-  const tabs = ['Models', 'System Prompt', 'Prompts', 'Page Intelligence (coming soon)'];
+  const tabs = ['Models', 'System Prompt', 'Prompts', 'Preferences'];
 
   const getConfigProps = () => {
     switch (activeTab) {
@@ -28,6 +28,13 @@ const Options: React.FC = () => {
           configType: 'Prompts',
           systemConfigPath: '/assets/conf/tools.toml',
           userConfigStorageKey: USER_TOOLS_KEY,
+          isEditable: true,
+        };
+      case 'Preferences':
+        return {
+          configType: 'Preferences',
+          systemConfigPath: '/assets/conf/preferences.toml',
+          userConfigStorageKey: USER_PREFERENCES_KEY,
           isEditable: true,
         };
       default:

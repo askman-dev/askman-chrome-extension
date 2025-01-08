@@ -1,0 +1,41 @@
+# User Preferences Configuration
+# This file contains all user-configurable preferences for the Askman Chrome extension
+
+#-----------------------------------------------
+# Language Settings
+#-----------------------------------------------
+# USER_LANGUAGE: Controls the display language of the AI response
+# Available options:
+#   - "en" : English
+#   - "zh" : Chinese (Simplified)
+USER_LANGUAGE = "en"
+
+#-----------------------------------------------
+# UI Behavior Settings
+#-----------------------------------------------
+# ASK_BUTTON: Controls whether to show the ASK button when text is selected on webpage
+# Available options:
+#   - true  : Show ASK button when text is selected
+#   - false : Never show ASK button
+ASK_BUTTON = false
+
+#-----------------------------------------------
+# Page Control Settings
+#-----------------------------------------------
+# ASK_BUTTON_BLOCK_PAGE: List of URLs or URL patterns where ASK button should be blocked
+# Format: Array of strings, each string can be:
+#   - Exact URL: "https://example.com"
+#   - Domain(subdomain will be blocked): "example.com"
+#   - URL Pattern: "*.example.com/*"
+# Example:
+#   ASK_BUTTON_BLOCK_PAGE = [
+#     "github.com",
+#     "*.google.com/*",
+#     "https://example.com/specific-page"
+#   ]
+ASK_BUTTON_BLOCK_PAGE = [
+    "docs.google.com",
+    "drive.google.com",
+    "feishu.cn",
+    "feishu.com"
+] 

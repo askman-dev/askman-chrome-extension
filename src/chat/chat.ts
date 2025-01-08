@@ -5,8 +5,8 @@ import { QuoteAgent, QuoteContext } from '../agents/quote';
 import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
 import configStorage from '@src/shared/storages/configStorage';
 import { createContext } from 'react';
-import chatPresets from '@assets/conf/chat-presets.toml';
 import { ToolsPromptInterface, SystemInvisibleMessage, HumanAskMessage } from '../types';
+import { StorageManager } from '@src/utils/StorageManager';
 
 export interface ChatCoreInterface {
   model: ChatOpenAI;
@@ -30,18 +30,7 @@ export class ChatCoreContext implements ChatCoreInterface {
   constructor() {
     this.history = [];
     this.history.length = 0;
-    this.history.push(
-      new SystemInvisibleMessage({
-        content: chatPresets['system-init']['system'],
-        name: 'system',
-      }),
-    );
-    // this.history.push(new AIInvisibleMessage({ content: chatPresets['system-init']['ai'], name: 'ai' }));
-    // this.history.push(new HumanMessage({content: 'Quotes: * ` 404. That’s an error. The requested URL /not+found was not found on this server. That’s all we know.` from [Error 404 (Not Found)!!1](https://google.com/not+found)', name: "human"}));
-    // this.history.push(new AIMessage({content: "遵命，无论如何我都会帮助你", name: "ai"}));
-    // this.history.push(new HumanMessage("fff"))
-    // this.history.push(new AIMessage({content: `你说了很多遍了，我知道了`, name: "ai"}));
-
+    this.initSystemMessage();
     this.model = new ChatOpenAI({
       temperature: 0.2,
       topP: 0.95,
@@ -53,6 +42,18 @@ export class ChatCoreContext implements ChatCoreInterface {
     });
     this.init();
   }
+
+  private async initSystemMessage() {
+    try {
+      const systemPrompt = await StorageManager.getSystemPrompt();
+      this.history.push(
+        new SystemInvisibleMessage(systemPrompt)
+      );
+    } catch (e) {
+      console.error('Failed to initialize system message:', e);
+    }
+  }
+
   init() {}
   updateChatModel({ modelName, baseURL, apiKey }: { modelName: string; baseURL: string; apiKey: string }) {
     this.model = new ChatOpenAI({

@@ -62,13 +62,19 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
       console.error('Error saving user tools:', e);
     }
   };
-
+  
   const renderActiveEditor = () => {
+    // 生成一个包含所有相关信息的唯一 key
+    const getEditorKey = (base: string) => {
+      const key = `${configType}/${base}/${systemConfigPath}/${userConfigStorageKey}`;
+      return key;
+    };
+
     switch (activeTab) {
       case 'Preview':
         return (
           <ConfigEditorInstance
-            key={configType + '/preview'}
+            key={getEditorKey('preview')}
             initialValue={mergedConfig}
             readOnly={true}
             filename={configType}
@@ -77,7 +83,7 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
       case 'User Values':
         return (
           <ConfigEditorInstance
-            key={configType + '/user'}
+            key={getEditorKey('user')}
             initialValue={userConfig}
             readOnly={!isEditable}
             onSave={handleSaveUserConfig}
@@ -87,7 +93,7 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
       case 'System Values':
         return (
           <ConfigEditorInstance
-            key={configType + '/system'}
+            key={getEditorKey('system')}
             initialValue={systemConfig}
             readOnly={true}
             filename={systemConfigPath}
