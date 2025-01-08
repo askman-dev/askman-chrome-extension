@@ -1,8 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as monaco from 'monaco-editor-core';
 import { editor } from 'monaco-editor';
-import { createHighlighter } from 'shiki';
+import { createHighlighter, Highlighter } from 'shiki';
 import { shikiToMonaco } from '@shikijs/monaco';
+import classNames from 'classnames';
+
+// 创建一个全局的 Shiki 高亮器实例
+let globalHighlighter: Highlighter | null = null;
+const getOrCreateHighlighter = async () => {
+  if (!globalHighlighter) {
+    globalHighlighter = await createHighlighter({
+      themes: ['github-dark'],
+      langs: ['toml'],
+    });
+  }
+  return globalHighlighter;
+};
 
 interface TOMLEditorProps {
   value: string;
@@ -10,7 +23,7 @@ interface TOMLEditorProps {
   readOnly?: boolean;
   onSave?: () => void;
   error?: string | null;
-  filename: string; // 新增的属性
+  filename: string;
 }
 
 const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = false, onSave, error, filename }) => {
@@ -54,11 +67,9 @@ const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = fal
 
     const monaco = monacoRef.current;
     monaco.languages.register({ id: 'toml' });
-    const highlighter = await createHighlighter({
-      themes: ['github-dark'],
-      langs: ['toml'],
-    });
-
+    
+    // 使用全局高亮器实例
+    const highlighter = await getOrCreateHighlighter();
     shikiToMonaco(highlighter, monaco);
 
     // @ts-expect-error 忽略类型不匹配的错误
@@ -100,7 +111,10 @@ const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = fal
 
   return (
     <div className="bg-[#272822] p-4 pt-2 rounded-lg">
-      <div className="flex items-center mb-2 h-6">
+      <div className={classNames(
+        "flex items-center mb-2 h-6 px-2 rounded",
+        isModified ? "bg-orange-600" : ""
+      )}>
         <span className="text-white">
           {readOnly ? '[Read Only]' : '[Editable]'} {filename}
         </span>
