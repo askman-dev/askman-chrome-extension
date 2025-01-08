@@ -117,7 +117,7 @@ function AskMessage(props: AskMessageItem) {
       onMouseEnter={() => setShowCopyButton(true)}
       onMouseLeave={() => setShowCopyButton(false)}
     >
-      <div className="pr-8 max-h-16 overflow-auto">
+      <div className={classNames("pr-8", name === 'human' ? 'max-h-16 overflow-auto' : '')}>
         {messageItem}
       </div>
       {showCopyButton && <CopyButton text={text} />}
