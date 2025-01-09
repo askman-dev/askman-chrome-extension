@@ -73,12 +73,19 @@ const CopyButton = ({ text }) => {
   return (
     <button
       onClick={handleCopy}
-      className="absolute top-0 right-1 p-2 rounded bg-gray-100 hover:bg-gray-200 transition-all duration-300 opacity-50 hover:opacity-100 z-10"
-      aria-label={copied ? "Copied" : "Copy content"}
-    >
+      className="absolute top-[-6px] right-1 p-2 rounded bg-gray-100 hover:bg-gray-200 transition-all duration-300 opacity-10 hover:opacity-100 z-10"
+      aria-label={copied ? 'Copied' : 'Copy content'}>
       {copied ? (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-sky-600" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5 text-sky-600"
+          viewBox="0 0 20 20"
+          fill="currentColor">
+          <path
+            fillRule="evenodd"
+            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+            clipRule="evenodd"
+          />
         </svg>
       ) : (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -115,11 +122,8 @@ function AskMessage(props: AskMessageItem) {
         'font-bold',
       )}
       onMouseEnter={() => setShowCopyButton(true)}
-      onMouseLeave={() => setShowCopyButton(false)}
-    >
-      <div className={classNames("pr-8", name === 'human' ? 'max-h-16 overflow-auto' : '')}>
-        {messageItem}
-      </div>
+      onMouseLeave={() => setShowCopyButton(false)}>
+      <div className={classNames('pr-8', name === 'human' ? 'max-h-16 overflow-auto' : '')}>{messageItem}</div>
       {showCopyButton && <CopyButton text={text} />}
     </div>
   );
