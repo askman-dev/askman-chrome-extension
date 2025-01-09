@@ -7,6 +7,7 @@ import { ToolsPromptInterface } from '../types';
 import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
 import { StorageManager } from '../utils/StorageManager';
 import { ToolPreview } from './tool-preview';
+import { usePreventOverflowHidden } from '@src/shared/hooks/usePreventOverflowHidden';
 
 interface ToolDropdownProps {
   displayName: string;
@@ -133,6 +134,9 @@ export default function ToolDropdown({
   };
   let isCommandPressed = false;
   let closeDropdownTimer: any;
+
+  usePreventOverflowHidden();
+
   return (
     <div
       className={classNames(`${className}`)}
@@ -140,7 +144,7 @@ export default function ToolDropdown({
       onBlur={handleBlur}
       aria-haspopup="true"
       aria-expanded={isOpened}>
-      <Menu as="div" className="relative" onKeyDown={handleKeyDown}>
+      <Menu as="div" className="relative" onKeyDown={handleKeyDown} style={{ isolation: 'isolate' }}>
         <MenuButton
           ref={buttonRef}
           className="inline-flex w-full justify-center rounded-md text-sm text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none min-w-0"
