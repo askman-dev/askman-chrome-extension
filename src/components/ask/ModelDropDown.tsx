@@ -3,6 +3,7 @@ import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/r
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import configStorage from '@src/shared/storages/configStorage';
+import { usePreventOverflowHidden } from '@src/shared/hooks/usePreventOverflowHidden';
 
 interface ModelDropdownProps {
   displayName: string;
@@ -74,6 +75,9 @@ export default function ModelDropdown({
     fetchModels();
   }, []);
   let closeDropdownTimer: any;
+
+  usePreventOverflowHidden();
+
   return (
     <button
       className={classNames(`${className}`)}
@@ -81,7 +85,10 @@ export default function ModelDropdown({
       aria-haspopup="true"
       aria-expanded={isOpened}
       type="button">
-      <Menu as="div" className={classNames('relative inline-block text-left', className)}>
+      <Menu
+        as="div"
+        className={classNames('relative inline-block text-left', className)}
+        style={{ isolation: 'isolate' }}>
         <MenuButton
           ref={buttonRef}
           className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none min-w-0"
