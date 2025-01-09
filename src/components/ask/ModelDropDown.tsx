@@ -63,6 +63,8 @@ export default function ModelDropdown({
           config.models.forEach(m => {
             modelArray.push({
               name: provider + '/' + (m.name || m.id),
+              shortName: m.name || m.id,
+              provider,
               config,
             });
           });
@@ -158,7 +160,9 @@ export default function ModelDropdown({
                       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
                         {index}
                       </span>
-                      <span className="whitespace-nowrap">{model.name}</span>
+                      <span className="whitespace-nowrap">
+                        {model.shortName} <span className="text-gray-400">[{model.provider}]</span>
+                      </span>
                     </button>
                   )}
                 </MenuItem>
