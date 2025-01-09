@@ -42,7 +42,15 @@ function AskPanel(props: AskPanelProps) {
   const [isMaximized, setIsMaximized] = useState(false);
 
   const getTruncatedContent = (quote: QuoteContext): string => {
-    const content = quote.selection || quote.pageContent || quote.text || quote.pageTitle || quote.pageUrl || quote.name || quote.type || 'Quote';
+    const content =
+      quote.selection ||
+      quote.pageContent ||
+      quote.text ||
+      quote.pageTitle ||
+      quote.pageUrl ||
+      quote.name ||
+      quote.type ||
+      'Quote';
     return content.length > 50 ? content.slice(0, 50) + '...' : content;
   };
 
@@ -327,7 +335,9 @@ function AskPanel(props: AskPanelProps) {
       ref={panelRef}
       className={classNames(
         'antialiased bg-white text-black text-left fixed border-1 border-solid border-gray-200 drop-shadow-lg text-sm rounded-lg p-4',
-        isMaximized ? 'w-[80%] h-[80%] top-[10%] right-[10px] flex flex-col' : 'w-[473px] min-w-80 max-w-lg min-h-[155px]',
+        isMaximized
+          ? 'w-[80%] h-[80%] top-[10%] right-[10px] flex flex-col'
+          : 'w-[473px] min-w-80 max-w-lg min-h-[155px]',
         `${askPanelVisible ? 'visible' : 'invisible'}`,
       )}
       {...rest}>
@@ -343,7 +353,7 @@ function AskPanel(props: AskPanelProps) {
         </span>
 
         <div className="grow"></div>
-        
+
         <button
           className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2"
           onClick={() => setIsMaximized(!isMaximized)}>
@@ -353,7 +363,7 @@ function AskPanel(props: AskPanelProps) {
             <ArrowsPointingOutIcon className="w-4 h-4 cursor-pointer" />
           )}
         </button>
-        
+
         <button
           className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white"
           onClick={() => {
@@ -363,10 +373,8 @@ function AskPanel(props: AskPanelProps) {
           <XMarkIcon className="w-4 h-4 cursor-pointer" />
         </button>
       </div>
-      <div className={classNames(
-        "py-2 overflow-x-hidden overflow-y-auto mb-2",
-        isMaximized ? "flex-grow" : "max-h-80"
-      )}>
+      <div
+        className={classNames('py-2 overflow-x-hidden overflow-y-auto mb-2', isMaximized ? 'flex-grow' : 'max-h-80')}>
         {history.map(message => (
           <AskMessage key={message.id} {...message} />
         ))}
@@ -400,12 +408,12 @@ function AskPanel(props: AskPanelProps) {
                   {initQuotes.map((quote, index) => (
                     <div className="flex items-center bg-gray-100 rounded-md px-2 py-1" key={index + '-' + quote}>
                       <div className="relative">
-                        <div 
+                        <div
                           className="text-black text-xs font-normal overflow-hidden whitespace-nowrap text-ellipsis max-w-[150px]"
                           onMouseEnter={() => setHoveredQuoteIndex(index)}
-                          onMouseLeave={() => setHoveredQuoteIndex(null)}
-                        >
-                          {(quote.name || quote.type || 'Quote').charAt(0).toUpperCase() + (quote.name || quote.type || 'Quote').slice(1)}
+                          onMouseLeave={() => setHoveredQuoteIndex(null)}>
+                          {(quote.name || quote.type || 'Quote').charAt(0).toUpperCase() +
+                            (quote.name || quote.type || 'Quote').slice(1)}
                         </div>
                         {hoveredQuoteIndex === index && (
                           <div className="absolute left-0 top-full mt-1 z-50 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-normal min-w-[300px] max-w-[400px] shadow-lg">
@@ -439,12 +447,14 @@ function AskPanel(props: AskPanelProps) {
                   // 检测 ESC 键
                   if (e.key === 'Escape') {
                     if (isQuoteDropdownOpen || isToolDropdownOpen || isModelDropdownOpen) {
+                      e.stopPropagation();
                       e.preventDefault();
                       return;
                     }
                   } else if (e.key === '@' && !e.nativeEvent.isComposing) {
                     updateDropdownPosition(inputRef.current, inputRef.current.selectionStart);
                     showQuoteDropdown();
+                    e.stopPropagation();
                     e.preventDefault();
                     return;
                   }
@@ -459,6 +469,7 @@ function AskPanel(props: AskPanelProps) {
                   // 现有的 Enter 键逻辑
                   if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
                     if (e.nativeEvent instanceof KeyboardEvent && e.nativeEvent.isComposing) {
+                      e.stopPropagation();
                       e.preventDefault();
                       return;
                     }
@@ -498,6 +509,9 @@ function AskPanel(props: AskPanelProps) {
                   }
                   // github 上面按 s 会触发页面搜索
                   // if (e.key.match(/^[a-z/\\]$/) && !e.shiftKey && !e.ctrlKey && !e.altKey) e.stopPropagation();
+                  e.stopPropagation();
+                }}
+                onKeyUp={e => {
                   e.stopPropagation();
                 }}
                 onChange={e => {
