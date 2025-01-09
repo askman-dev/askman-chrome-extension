@@ -55,8 +55,9 @@ async function listOpenMilestones() {
       state: 'open',
       per_page: 99
     });
+    const regex = /^20\d{2}-\d{2}$/;
 
-    return milestones.filter(milestone => milestone.title.startsWith('2024-'));
+    return milestones.filter(milestone => regex.test(milestone.title));
   } catch (error) {
     console.error("Error in listOpenMilestones:", error);
   }
