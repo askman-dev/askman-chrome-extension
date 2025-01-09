@@ -143,7 +143,7 @@ export default function ModelDropdown({
                       ref={el => (menuItemsRef.current[index] = el)}
                       className={`${
                         active ? 'bg-black text-white' : 'text-gray-900'
-                      } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
+                      } flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none group`}
                       onClick={() => {
                         onItemClick(model.name, isCommandPressed);
                         setIsOpen(false);
@@ -160,8 +160,11 @@ export default function ModelDropdown({
                       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
                         {index}
                       </span>
-                      <span className="whitespace-nowrap">
-                        {model.shortName} <span className="text-gray-400">[{model.provider}]</span>
+                      <span className="whitespace-nowrap flex-1 flex justify-between items-center">
+                        <span>{model.shortName}</span>
+                        <span className="text-gray-400 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          [{model.provider}]
+                        </span>
                       </span>
                     </button>
                   )}
