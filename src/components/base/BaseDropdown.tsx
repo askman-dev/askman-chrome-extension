@@ -121,7 +121,7 @@ export function BaseDropdown({
       <Menu as="div" className="relative" style={{ isolation: 'isolate' }}>
         <MenuButton
           ref={buttonRef}
-          className="inline-flex w-full justify-center rounded-md text-sm text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none min-w-0"
+          className="inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
           onMouseEnter={() => {
             console.log('[BaseDropdown] Mouse enter');
             setIsOpen(true);
@@ -138,11 +138,11 @@ export function BaseDropdown({
             setIsOpen(active);
             return (
               <>
-                <span className="truncate max-w-[8rem] text-right" dir="rtl">
+                <span className="truncate max-w-[6rem] text-right" dir="rtl">
                   {displayName}
                 </span>
-                {showShortcut && <> {shortcutKey}</>}
-                <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200" />
+                {showShortcut && <span className="flex-shrink-0"> {shortcutKey}</span>}
+                <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 flex-shrink-0" />
               </>
             );
           }}
