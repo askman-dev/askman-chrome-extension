@@ -28,15 +28,11 @@ export default function ModelDropdown({
 
   useEffect(() => {
     const fetchModels = async () => {
-      console.log('Fetching models...');
       const userModels = (await configStorage.getModelConfig()) || [];
-      console.log('Raw models:', userModels);
       const modelArray: ModelItem[] = [];
       userModels.forEach(({ provider, config }) => {
-        console.log('Processing provider:', provider, 'config:', config);
         if (config.models) {
           config.models.forEach(m => {
-            console.log('Processing model:', m);
             modelArray.push({
               id: provider + '/' + (m.name || m.id),
               name: provider + '/' + (m.name || m.id),
@@ -46,7 +42,6 @@ export default function ModelDropdown({
           });
         }
       });
-      console.log('Processed models:', modelArray);
       setModels(modelArray);
     };
 
