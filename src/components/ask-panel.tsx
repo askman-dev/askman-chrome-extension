@@ -59,8 +59,9 @@ function AskPanel(props: AskPanelProps) {
   const handleClickOutside = useCallback((event: MouseEvent) => {
     if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
       setIsToolDropdownOpen(false);
-      // setIsQuoteDropdownOpen(false);
+      setIsQuoteDropdownOpen(false);
       setIsModelDropdownOpen(false);
+      setIsSystemPromptDropdownOpen(false);
     }
   }, []);
 
@@ -88,24 +89,34 @@ function AskPanel(props: AskPanelProps) {
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ left: 0, top: 0 });
   const [hoveredQuoteIndex, setHoveredQuoteIndex] = useState<number | null>(null);
+  const [isSystemPromptDropdownOpen, setIsSystemPromptDropdownOpen] = useState(false);
 
   const showToolDropdown = () => {
-    // toolButtonRef.current?.click();
     console.log('isToolDropdownOpen = ' + isToolDropdownOpen, 'set to true');
     setIsToolDropdownOpen(true);
     setIsQuoteDropdownOpen(false);
     setIsModelDropdownOpen(false);
+    setIsSystemPromptDropdownOpen(false);
   };
   const showQuoteDropdown = () => {
     setIsQuoteDropdownOpen(true);
     setIsToolDropdownOpen(false);
     setIsModelDropdownOpen(false);
+    setIsSystemPromptDropdownOpen(false);
   };
   const showModelDropdown = () => {
     setIsModelDropdownOpen(true);
     setIsToolDropdownOpen(false);
     setIsQuoteDropdownOpen(false);
+    setIsSystemPromptDropdownOpen(false);
   };
+  const showSystemPromptDropdown = () => {
+    setIsSystemPromptDropdownOpen(true);
+    setIsToolDropdownOpen(false);
+    setIsQuoteDropdownOpen(false);
+    setIsModelDropdownOpen(false);
+  };
+
   // chat list ref
   // const chatListRef = useRef<HTMLDivElement>(null);
 
@@ -140,6 +151,9 @@ function AskPanel(props: AskPanelProps) {
   };
   const updateQuoteDropdownStatus = (status: boolean) => {
     setIsQuoteDropdownOpen(status);
+  };
+  const updateSystemPromptDropdownStatus = (status: boolean) => {
+    setIsSystemPromptDropdownOpen(status);
   };
 
   useEffect(() => {
@@ -206,10 +220,14 @@ function AskPanel(props: AskPanelProps) {
       // 检测 Command+K (Mac) 或 Ctrl+K (Windows/Linux)
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         // e.preventDefault();
-        if (!isToolDropdownOpen) {
+        if (!isToolDropdownOpen && !isModelDropdownOpen && !isSystemPromptDropdownOpen) {
           showToolDropdown();
         } else if (isToolDropdownOpen) {
           showModelDropdown();
+        } else if (isModelDropdownOpen) {
+          showSystemPromptDropdown();
+        } else if (isSystemPromptDropdownOpen) {
+          showToolDropdown();
         }
 
         e.stopPropagation();
@@ -218,18 +236,26 @@ function AskPanel(props: AskPanelProps) {
 
       // 检测左右方向键
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-        // console.log('[ask-panel] listened key press, arrow left or right', e.target, e.currentTarget);
-        if (isToolDropdownOpen || isModelDropdownOpen) {
+        if (isToolDropdownOpen || isModelDropdownOpen || isSystemPromptDropdownOpen) {
           e.preventDefault();
           e.stopPropagation();
-          if (isToolDropdownOpen && e.key === 'ArrowRight') {
-            showModelDropdown();
-          } else if (isModelDropdownOpen && e.key === 'ArrowRight') {
-            showToolDropdown();
-          } else if (isToolDropdownOpen && e.key === 'ArrowLeft') {
-            showModelDropdown();
-          } else if (isModelDropdownOpen && e.key === 'ArrowLeft') {
-            showToolDropdown();
+
+          if (e.key === 'ArrowRight') {
+            if (isToolDropdownOpen) {
+              showModelDropdown();
+            } else if (isModelDropdownOpen) {
+              showSystemPromptDropdown();
+            } else if (isSystemPromptDropdownOpen) {
+              showToolDropdown();
+            }
+          } else if (e.key === 'ArrowLeft') {
+            if (isToolDropdownOpen) {
+              showSystemPromptDropdown();
+            } else if (isModelDropdownOpen) {
+              showToolDropdown();
+            } else if (isSystemPromptDropdownOpen) {
+              showModelDropdown();
+            }
           }
           return;
         }
@@ -240,17 +266,22 @@ function AskPanel(props: AskPanelProps) {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isToolDropdownOpen, isQuoteDropdownOpen, isModelDropdownOpen]);
+  }, [isToolDropdownOpen, isQuoteDropdownOpen, isModelDropdownOpen, isSystemPromptDropdownOpen]);
 
   // Add this new useEffect to focus on input when menus are closed
   useEffect(() => {
-    if (!isToolDropdownOpen && !isQuoteDropdownOpen && !isModelDropdownOpen && inputRef.current) {
+    if (
+      !isToolDropdownOpen &&
+      !isQuoteDropdownOpen &&
+      !isModelDropdownOpen &&
+      !isSystemPromptDropdownOpen &&
+      inputRef.current
+    ) {
       setTimeout(() => {
-        // console.log('focus on input because menus are closed');
         inputRef.current.focus();
       }, 33);
     }
-  }, [isToolDropdownOpen, isQuoteDropdownOpen, isModelDropdownOpen]);
+  }, [isToolDropdownOpen, isQuoteDropdownOpen, isModelDropdownOpen, isSystemPromptDropdownOpen]);
 
   const addQuote = (newQuote: QuoteContext) => {
     setInitQuotes(prevQuotes => [...prevQuotes, newQuote]);
@@ -536,7 +567,11 @@ function AskPanel(props: AskPanelProps) {
               />
             </div>
             <div className="flex">
-              <SystemPromptDropdown className="inline-block mr-2" />
+              <SystemPromptDropdown
+                className="relative inline-block text-left"
+                statusListener={updateSystemPromptDropdownStatus}
+                initOpen={isSystemPromptDropdownOpen}
+              />
               <ToolDropdown
                 displayName={userTools?.name || 'Frame'}
                 initOpen={isToolDropdownOpen}
