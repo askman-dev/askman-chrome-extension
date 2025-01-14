@@ -48,6 +48,7 @@ export default function SystemPromptDropdown({
       console.log('[SystemPromptDropdown] Preset updated to:', preset.name);
       setSelectedPreset(preset.name);
       hideToolPreview();
+      statusListener(false);
     } catch (error) {
       console.error('Error setting system preset:', error);
     }
