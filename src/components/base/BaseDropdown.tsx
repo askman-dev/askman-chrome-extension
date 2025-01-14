@@ -16,7 +16,9 @@ export interface BaseDropdownProps {
     shortName?: string;
   }>;
   shortcutKey?: string;
-  renderItem?: (_item: any, _index: number, _active: boolean) => React.ReactElement;
+  renderItem?: (_item: any, _index: number, _active: boolean, _isSelected?: boolean) => React.ReactElement;
+  selectedId?: string;
+  showShortcut?: boolean;
 }
 
 export function BaseDropdown({
@@ -28,6 +30,8 @@ export function BaseDropdown({
   items,
   shortcutKey = '⌘ K',
   renderItem,
+  selectedId,
+  showShortcut = true,
 }: BaseDropdownProps) {
   const [isOpened, setIsOpen] = useState(initOpen);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -36,14 +40,18 @@ export function BaseDropdown({
   let closeDropdownTimer: any;
 
   useEffect(() => {
+    console.log('[BaseDropdown] initOpen changed:', { initOpen, isOpened });
     if (initOpen && !isOpened) {
+      console.log('[BaseDropdown] Opening menu due to initOpen');
       buttonRef.current?.click();
     } else if (!initOpen && isOpened) {
+      console.log('[BaseDropdown] Closing menu due to initOpen');
       buttonRef.current?.click();
     }
-  }, [initOpen]);
+  }, [initOpen, isOpened]);
 
   useEffect(() => {
+    console.log('[BaseDropdown] isOpened changed:', isOpened);
     statusListener(isOpened);
     if (isOpened) {
       setTimeout(() => menuItemsRef.current[0]?.focus(), 0);
@@ -56,7 +64,7 @@ export function BaseDropdown({
 
   usePreventOverflowHidden();
 
-  const defaultRenderItem = (item: any, index: number, active: boolean) => (
+  const defaultRenderItem = (item: any, index: number, active: boolean, isSelected?: boolean) => (
     <button
       ref={el => (menuItemsRef.current[index] = el)}
       className={`${
@@ -78,17 +86,28 @@ export function BaseDropdown({
       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
         {index}
       </span>
-      {item.name}
-      {active ? (
-        <>
-          <div className="grow"></div>
+      <span className="flex items-center justify-between w-full">
+        <span>{item.name}</span>
+        {isSelected ? (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 text-black"
+            viewBox="0 0 20 20"
+            fill="currentColor">
+            <path
+              fillRule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clipRule="evenodd"
+            />
+          </svg>
+        ) : active && showShortcut ? (
           <span
             className="inline-flex items-center justify-center w-[3rem] h-5 text-xs font-semibold"
             title="Quick Send">
             {navigator.platform.includes('Mac') ? '⌘ ↩︎' : 'Ctrl ↩︎'}
           </span>
-        </>
-      ) : null}
+        ) : null}
+      </span>
     </button>
   );
 
@@ -99,19 +118,25 @@ export function BaseDropdown({
           ref={buttonRef}
           className="inline-flex w-full justify-center rounded-md text-sm text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none min-w-0"
           onMouseEnter={() => {
+            console.log('[BaseDropdown] Mouse enter');
             setIsOpen(true);
           }}
           onMouseLeave={() => {
-            closeDropdownTimer = setTimeout(() => setIsOpen(false), 100);
+            console.log('[BaseDropdown] Mouse leave, scheduling close');
+            closeDropdownTimer = setTimeout(() => {
+              console.log('[BaseDropdown] Executing scheduled close');
+              setIsOpen(false);
+            }, 100);
           }}>
           {({ active }) => {
+            console.log('[BaseDropdown] Menu button active:', active);
             setIsOpen(active);
             return (
               <>
                 <span className="truncate max-w-[8rem] text-right" dir="rtl">
                   {displayName}
-                </span>{' '}
-                {shortcutKey}
+                </span>
+                {showShortcut && <> {shortcutKey}</>}
                 <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200" />
               </>
             );
@@ -138,7 +163,9 @@ export function BaseDropdown({
               {items.map((item, index) => (
                 <MenuItem key={item.id}>
                   {({ active }) =>
-                    renderItem ? renderItem(item, index, active) : defaultRenderItem(item, index, active)
+                    renderItem
+                      ? renderItem(item, index, active, item.id === selectedId)
+                      : defaultRenderItem(item, index, active, item.id === selectedId)
                   }
                 </MenuItem>
               ))}

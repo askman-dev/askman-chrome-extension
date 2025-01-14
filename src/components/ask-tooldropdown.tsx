@@ -5,6 +5,7 @@ import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
 import { StorageManager } from '../utils/StorageManager';
 import { ToolPreview } from './tool-preview';
 import { BaseDropdown } from './base/BaseDropdown';
+import { useToolPreview } from '@src/shared/hooks/useToolPreview';
 
 interface ToolDropdownProps {
   displayName: string;
@@ -27,36 +28,6 @@ for (const k in defaultTools) {
   } catch (e) {
     console.error('Cannot parse default tools', e);
   }
-}
-
-function useToolPreview() {
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewPos, setPreviewPos] = useState({ x: 0, y: 0 });
-  const [previewContent, setPreviewContent] = useState('');
-
-  const showToolPreview = (element: HTMLElement, content: string) => {
-    const buttonRect = element.getBoundingClientRect();
-    const parentRect = element.parentElement?.getBoundingClientRect() || { left: 0, top: 0 };
-
-    setPreviewPos({
-      x: buttonRect.left - parentRect.left + buttonRect.width,
-      y: buttonRect.top - parentRect.top,
-    });
-    setPreviewContent(content);
-    setShowPreview(true);
-  };
-
-  const hideToolPreview = () => {
-    setShowPreview(false);
-  };
-
-  return {
-    showPreview,
-    previewPos,
-    previewContent,
-    showToolPreview,
-    hideToolPreview,
-  };
 }
 
 export default function ToolDropdown({
