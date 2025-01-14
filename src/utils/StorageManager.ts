@@ -16,6 +16,7 @@ export interface ModelInterface {
 export interface ChatPresetContext {
   human?: string;
   ai?: string;
+  system?: string;
 }
 
 export interface UserPreferences {
@@ -104,26 +105,28 @@ export const StorageManager = {
       const systemConfigResponse = await fetch(systemConfigPath);
       const systemConfigStr = await systemConfigResponse.text();
       logger.debug('Loaded preferences.toml:', systemConfigStr);
-      
+
       const parsedConfig = TOML.parse(systemConfigStr);
       logger.debug('Parsed config:', parsedConfig);
-      
+
       const defaultPreferences: UserPreferences = {
         USER_LANGUAGE: parsedConfig.USER_LANGUAGE as string,
         ASK_BUTTON: parsedConfig.ASK_BUTTON as boolean,
-        ASK_BUTTON_BLOCK_PAGE: parsedConfig.ASK_BUTTON_BLOCK_PAGE as string[]
+        ASK_BUTTON_BLOCK_PAGE: parsedConfig.ASK_BUTTON_BLOCK_PAGE as string[],
       };
       logger.debug('Default preferences:', defaultPreferences);
 
       const preferences = await StorageManager.get(USER_PREFERENCES_KEY);
       logger.debug('Stored preferences:', preferences);
-      
+
       if (preferences) {
         const mergedPreferences = {
           ...defaultPreferences,
           ...(preferences.USER_LANGUAGE !== undefined && { USER_LANGUAGE: preferences.USER_LANGUAGE }),
           ...(preferences.ASK_BUTTON !== undefined && { ASK_BUTTON: preferences.ASK_BUTTON }),
-          ...(preferences.ASK_BUTTON_BLOCK_PAGE !== undefined && { ASK_BUTTON_BLOCK_PAGE: preferences.ASK_BUTTON_BLOCK_PAGE })
+          ...(preferences.ASK_BUTTON_BLOCK_PAGE !== undefined && {
+            ASK_BUTTON_BLOCK_PAGE: preferences.ASK_BUTTON_BLOCK_PAGE,
+          }),
         };
         logger.debug('Merged preferences:', mergedPreferences);
         return mergedPreferences;
@@ -134,7 +137,7 @@ export const StorageManager = {
       return {
         USER_LANGUAGE: 'en',
         ASK_BUTTON: false,
-        ASK_BUTTON_BLOCK_PAGE: []
+        ASK_BUTTON_BLOCK_PAGE: [],
       };
     }
   },
@@ -142,16 +145,23 @@ export const StorageManager = {
   getSystemPrompt: async (): Promise<SystemPromptContent> => {
     try {
       const preferences = await StorageManager.getUserPreferences();
-      
-      const template = Handlebars.compileAST(chatPresets['system-init']['system']);
-      
+      const userChatPresets = await StorageManager.getUserChatPresets();
+
+      // Merge system and user configs, with user config taking precedence
+      const mergedConfig = {
+        ...chatPresets,
+        ...userChatPresets,
+      };
+
+      const template = Handlebars.compileAST(mergedConfig['system-init'].system);
+
       const systemContent = template({
-        USER_LANGUAGE: preferences.USER_LANGUAGE
+        USER_LANGUAGE: preferences.USER_LANGUAGE,
       });
 
       return {
         content: systemContent,
-        name: 'system'
+        name: 'system',
       };
     } catch (e) {
       logger.error('Error loading system prompt:', e);
