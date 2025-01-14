@@ -69,27 +69,41 @@ export default function ToolDropdown({
   statusListener,
 }: ToolDropdownProps) {
   const [allTools, setAllTools] = useState<ToolsPromptInterface[]>([]);
+  const [systemPresets, setSystemPresets] = useState<ToolsPromptInterface[]>([]);
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [isOpened, setIsOpen] = useState(initOpen);
+  const [showSystemPresets, setShowSystemPresets] = useState(false);
   const { showPreview, previewPos, previewContent, showToolPreview, hideToolPreview } = useToolPreview();
   const buttonRef = useRef<HTMLButtonElement>(null);
-  // console.log('create ToolDropdown, initOpen = ' + initOpen);
+  const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
-    const fetchUserTools = async () => {
-      const userToolSettings = await StorageManager.getUserTools();
-      // Convert UserToolsObject to ToolsPromptInterface[]
-      const userTools = Object.values(userToolSettings).map(tool => ({
-        name: tool.name,
-        hbs: tool.hbs,
-        template: Handlebars.compileAST(tool.hbs),
-      }));
-      setAllTools([...tools, ...userTools]);
+    const fetchTools = async () => {
+      try {
+        // 获取用户工具
+        const userToolSettings = await StorageManager.getUserTools();
+        const userTools = Object.values(userToolSettings).map(tool => ({
+          name: tool.name,
+          hbs: tool.hbs,
+          template: Handlebars.compileAST(tool.hbs),
+        }));
+        setAllTools([...tools, ...userTools]);
+
+        // 获取系统预设
+        const presets = await StorageManager.getSystemPresets();
+        setSystemPresets(presets);
+
+        // 获取当前选中的预设
+        const currentPreset = await StorageManager.getCurrentSystemPreset();
+        console.log('Current preset:', currentPreset); // 添加日志
+        setSelectedPreset(currentPreset || 'system-init');
+      } catch (error) {
+        console.error('Error fetching tools and presets:', error);
+      }
     };
 
-    fetchUserTools();
+    fetchTools();
   }, []);
-
-  const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
     // console.log('[ToolDropdown] initOpen = ' + initOpen, 'isOpened = ' + isOpened);
@@ -137,6 +151,26 @@ export default function ToolDropdown({
 
   usePreventOverflowHidden();
 
+  const handleSystemPresetClick = async (preset: ToolsPromptInterface) => {
+    try {
+      console.log('Handling system preset click:', preset.name);
+      await StorageManager.setCurrentSystemPreset(preset.name);
+      console.log('Current preset updated to:', preset.name);
+      setSelectedPreset(preset.name);
+      setIsOpen(false);
+      setShowSystemPresets(false);
+    } catch (error) {
+      console.error('Error setting system preset:', error);
+    }
+  };
+
+  // 在主菜单项中显示当前选中的预设名称
+  const getSelectedPresetDisplayName = () => {
+    if (!selectedPreset) return '';
+    const preset = systemPresets.find(p => p.name === selectedPreset);
+    return preset ? preset.name : '';
+  };
+
   return (
     <div
       className={classNames(`${className}`)}
@@ -151,10 +185,8 @@ export default function ToolDropdown({
           title="Use framework"
           onMouseEnter={_e => {
             setIsOpen(true);
-            // e.stopPropagation();
           }}
           onMouseLeave={_e => {
-            // Add a small delay before closing to allow moving to menu items
             closeDropdownTimer = setTimeout(() => setIsOpen(false), 100);
           }}>
           {({ active }) => {
@@ -168,7 +200,6 @@ export default function ToolDropdown({
           }}
         </MenuButton>
         <Transition
-          // show={isOpened}
           as={React.Fragment}
           enter="transition ease-out duration-100"
           enterFrom="transform opacity-0 scale-95"
@@ -178,13 +209,17 @@ export default function ToolDropdown({
           leaveTo="transform opacity-0 scale-95">
           <MenuItems
             static
-            className="absolute left-0 mt-0 min-w-[10rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10"
+            className="absolute left-0 mt-0 min-w-[16rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10"
             onMouseEnter={() => {
               clearTimeout(closeDropdownTimer);
               setIsOpen(true);
             }}
-            onMouseLeave={() => setIsOpen(false)}>
+            onMouseLeave={() => {
+              setIsOpen(false);
+              setShowSystemPresets(false);
+            }}>
             <div className="px-1 py-1">
+              {/* Existing Tools */}
               {allTools.map((tool, index) => (
                 <MenuItem key={tool.name}>
                   {({ active }) => (
@@ -223,7 +258,7 @@ export default function ToolDropdown({
                         <>
                           <div className="grow"></div>
                           <span
-                            className="inline-flex items-center justify-center w-[2rem] h-5 text-xs font-semibold border border-gray-300 rounded"
+                            className="inline-flex items-center justify-center w-[3rem] h-5 text-xs font-semibold"
                             title="Quick Send">
                             {navigator.platform.includes('Mac') ? '⌘ ↩︎' : 'Ctrl ↩︎'}
                           </span>
@@ -233,6 +268,106 @@ export default function ToolDropdown({
                   )}
                 </MenuItem>
               ))}
+
+              {/* System Presets Menu Item */}
+              <div className="relative">
+                <div
+                  className="flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none cursor-pointer hover:bg-black hover:text-white"
+                  onMouseEnter={() => setShowSystemPresets(true)}
+                  onMouseLeave={e => {
+                    const target = e.currentTarget;
+                    const relatedTarget = e.relatedTarget as HTMLElement;
+                    if (relatedTarget && target.nextElementSibling?.contains(relatedTarget)) {
+                      return;
+                    }
+                    setShowSystemPresets(false);
+                  }}>
+                  <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
+                    S
+                  </span>
+                  <span className="flex items-center">
+                    System Prompt
+                    {selectedPreset && (
+                      <span className="ml-2 text-xs text-gray-500">({getSelectedPresetDisplayName()})</span>
+                    )}
+                  </span>
+                  <ChevronDownIcon
+                    className={`ml-auto h-5 w-5 transition-transform duration-200 ${
+                      showSystemPresets ? 'rotate-180' : ''
+                    }`}
+                  />
+                </div>
+
+                {/* System Presets Submenu */}
+                {showSystemPresets && (
+                  <div
+                    className="absolute left-0 w-full bg-gray-50 shadow-lg rounded-b-md"
+                    onMouseEnter={() => {
+                      console.log('Submenu container mouse enter');
+                      setShowSystemPresets(true);
+                    }}
+                    onMouseLeave={() => {
+                      console.log('Submenu container mouse leave');
+                      setShowSystemPresets(false);
+                    }}>
+                    {systemPresets.map(preset => {
+                      const isSelected = selectedPreset === preset.name;
+                      return (
+                        <div
+                          key={preset.name}
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-black hover:text-white cursor-pointer ${
+                            isSelected ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-900'
+                          }`}
+                          onClick={e => {
+                            console.log('Preset clicked:', preset.name);
+                            e.stopPropagation();
+                            e.preventDefault();
+                            e.nativeEvent.stopImmediatePropagation();
+                            handleSystemPresetClick(preset);
+                          }}
+                          onMouseDown={e => {
+                            console.log('Preset mouse down:', preset.name);
+                            e.stopPropagation();
+                            e.preventDefault();
+                          }}
+                          onMouseEnter={e => {
+                            console.log('Mouse enter preset:', preset.name);
+                            e.stopPropagation();
+                            showToolPreview(e.currentTarget, preset.hbs);
+                          }}
+                          onMouseLeave={_e => {
+                            console.log('Mouse leave preset:', preset.name);
+                            hideToolPreview();
+                          }}>
+                          <span
+                            className="flex items-center justify-between w-full"
+                            onClick={e => {
+                              console.log('Preset span clicked:', preset.name);
+                              e.stopPropagation();
+                              e.preventDefault();
+                              handleSystemPresetClick(preset);
+                            }}>
+                            <span>{preset.name}</span>
+                            {isSelected && (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5 text-black"
+                                viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path
+                                  fillRule="evenodd"
+                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            )}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
               {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
             </div>

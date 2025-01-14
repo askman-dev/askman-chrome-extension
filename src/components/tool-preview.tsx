@@ -16,15 +16,20 @@ export const ToolPreview: React.FC<ToolPreviewProps> = ({ content, x, y }) => {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
-      let finalX = x + 5;
-      let finalY = y + 5;
+      // 向右显示，与光标保持距离
+      let finalX = x + 10; // 增加与光标的水平距离
+      let finalY = y - rect.height / 2; // 垂直居中对齐
 
-      if (finalX + rect.width > viewportWidth) {
-        finalX = x - rect.width - 5;
+      // 如果右侧空间不足，则显示在左侧
+      if (finalX + rect.width > viewportWidth - 20) {
+        finalX = x - rect.width - 10;
       }
 
-      if (finalY + rect.height > viewportHeight) {
-        finalY = y - rect.height - 5;
+      // 确保不会超出顶部和底部
+      if (finalY < 10) {
+        finalY = 10;
+      } else if (finalY + rect.height > viewportHeight - 10) {
+        finalY = viewportHeight - rect.height - 10;
       }
 
       tooltipRef.current.style.left = `${finalX}px`;
@@ -35,8 +40,8 @@ export const ToolPreview: React.FC<ToolPreviewProps> = ({ content, x, y }) => {
   return (
     <div
       ref={tooltipRef}
-      className="absolute z-50 p-2 bg-black text-white text-sm text-left rounded shadow-lg max-w-md whitespace-pre-wrap">
-      <pre>{content}</pre>
+      className="absolute z-50 p-2 bg-black text-white text-sm text-left rounded shadow-lg min-w-[200px] max-w-[300px] max-h-[200px] overflow-hidden">
+      <pre className="text-xs whitespace-pre-wrap line-clamp-[12]">{content}</pre>
     </div>
   );
 };

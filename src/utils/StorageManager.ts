@@ -2,6 +2,8 @@ import * as TOML from '@iarna/toml';
 import { logger } from './logger';
 import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
 import chatPresets from '@assets/conf/chat-presets.toml';
+import { ToolsPromptInterface } from '../types';
+import { TemplateDelegate } from '../../third-party/kbn-handlebars';
 
 export interface UserToolSetting {
   name: string;
@@ -30,10 +32,17 @@ export interface SystemPromptContent {
   name: string;
 }
 
+export interface SystemPresetInterface extends ToolsPromptInterface {
+  name: string;
+  hbs: string;
+  template?: TemplateDelegate;
+}
+
 export const USER_TOOLS_KEY = 'userTools';
 export const USER_MODELS_KEY = 'userModels';
 export const USER_CHAT_PRESETS_KEY = 'userChatPresets';
 export const USER_PREFERENCES_KEY = 'userPreferences';
+export const CURRENT_SYSTEM_PRESET_KEY = 'currentSystemPreset';
 
 export interface UserToolsObject {
   [key: string]: UserToolSetting;
@@ -146,6 +155,7 @@ export const StorageManager = {
     try {
       const preferences = await StorageManager.getUserPreferences();
       const userChatPresets = await StorageManager.getUserChatPresets();
+      const currentPreset = await StorageManager.getCurrentSystemPreset();
 
       // Merge system and user configs, with user config taking precedence
       const mergedConfig = {
@@ -153,19 +163,70 @@ export const StorageManager = {
         ...userChatPresets,
       };
 
-      const template = Handlebars.compileAST(mergedConfig['system-init'].system);
+      // 如果有选中的预设且存在，则使用选中的预设
+      if (currentPreset && mergedConfig[currentPreset]?.system) {
+        const template = Handlebars.compileAST(mergedConfig[currentPreset].system);
+        const systemContent = template({
+          USER_LANGUAGE: preferences.USER_LANGUAGE,
+        });
 
+        return {
+          content: systemContent,
+          name: currentPreset,
+        };
+      }
+
+      // 如果没有选中的预设或预设不存在，使用默认的 system-init
+      const template = Handlebars.compileAST(mergedConfig['system-init'].system);
       const systemContent = template({
         USER_LANGUAGE: preferences.USER_LANGUAGE,
       });
 
       return {
         content: systemContent,
-        name: 'system',
+        name: 'system-init',
       };
     } catch (e) {
       logger.error('Error loading system prompt:', e);
       throw e;
     }
+  },
+
+  getSystemPresets: async (): Promise<SystemPresetInterface[]> => {
+    try {
+      const userChatPresets = await StorageManager.getUserChatPresets();
+
+      // Merge system and user configs, with user config taking precedence
+      const mergedConfig = {
+        ...chatPresets,
+        ...userChatPresets,
+      };
+
+      const systemPresets: SystemPresetInterface[] = [];
+      for (const k in mergedConfig) {
+        if (k.startsWith('system-')) {
+          const preset = mergedConfig[k] as ChatPresetContext;
+          if (preset.system) {
+            systemPresets.push({
+              name: k,
+              hbs: preset.system,
+              template: Handlebars.compileAST(preset.system),
+            });
+          }
+        }
+      }
+      return systemPresets;
+    } catch (e) {
+      logger.error('Error loading system presets:', e);
+      return [];
+    }
+  },
+
+  getCurrentSystemPreset: async (): Promise<string | null> => {
+    return StorageManager.get(CURRENT_SYSTEM_PRESET_KEY);
+  },
+
+  setCurrentSystemPreset: async (presetName: string): Promise<void> => {
+    return StorageManager.save(CURRENT_SYSTEM_PRESET_KEY, presetName);
   },
 };
