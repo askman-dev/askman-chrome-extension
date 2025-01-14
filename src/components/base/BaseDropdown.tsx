@@ -60,6 +60,7 @@ export function BaseDropdown({
 
   const handleKeyDown = (_e: React.KeyboardEvent) => {
     // Keyboard navigation logic can be added here
+    console.log('[BaseDropdown] handleKeyDown', isOpened);
   };
 
   usePreventOverflowHidden();
@@ -71,15 +72,19 @@ export function BaseDropdown({
         active ? 'bg-black text-white' : 'text-gray-900'
       } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
       onClick={() => {
+        console.log('[BaseDropdown] onClick', item);
         onItemClick(item, isCommandPressed);
         setIsOpen(false);
       }}
       onMouseDown={() => {
+        console.log('[BaseDropdown] onMouseDown', item);
         onItemClick(item, isCommandPressed);
         setIsOpen(false);
       }}
       onKeyDown={e => {
+        console.log('[BaseDropdown] onKeyDown', e.key);
         if (e.key === 'Enter') {
+          console.log('[BaseDropdown] Enter key pressed in menu item');
           isCommandPressed = e.metaKey || e.ctrlKey;
         }
       }}>

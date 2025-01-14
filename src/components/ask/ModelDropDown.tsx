@@ -60,8 +60,20 @@ export default function ModelDropdown({
       className={`${
         active ? 'bg-black text-white' : 'text-gray-900'
       } flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none group`}
-      onClick={() => onItemClick(model.name, false)}
-      onMouseDown={() => onItemClick(model.name, false)}>
+      onKeyDown={e => {
+        if (e.key === 'Enter') {
+          console.log('[ModelDropdown] Enter key pressed in menu item');
+          onItemClick(model.name, false);
+        }
+      }}
+      onClick={() => {
+        onItemClick(model.name, false);
+        statusListener(false);
+      }}
+      onMouseDown={() => {
+        onItemClick(model.name, false);
+        statusListener(false);
+      }}>
       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
         {index}
       </span>

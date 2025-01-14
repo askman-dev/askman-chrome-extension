@@ -67,10 +67,12 @@ export default function ToolDropdown({
       onClick={() => {
         onItemClick(tool, false);
         hideToolPreview();
+        statusListener(false);
       }}
       onMouseDown={() => {
         onItemClick(tool, false);
         hideToolPreview();
+        statusListener(false);
       }}
       onMouseEnter={e => showToolPreview(e.currentTarget, tool.hbs)}
       onMouseLeave={hideToolPreview}>
