@@ -1,5 +1,4 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { TemplateDelegate } from 'third-party/kbn-handlebars';
 
 export class SystemInvisibleMessage extends SystemMessage {
   isVisible = false;
@@ -62,7 +61,8 @@ export interface PromptTool {
 }
 
 export interface ToolsPromptInterface {
+  id: string;
   name: string;
   hbs: string;
-  template?: TemplateDelegate;
+  template: any;
 }
