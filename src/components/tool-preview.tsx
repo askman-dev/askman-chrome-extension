@@ -10,30 +10,27 @@ export const ToolPreview: React.FC<ToolPreviewProps> = ({ content, x, y }) => {
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 确保提示框不会超出视窗
+    console.log('tool preview', x, y);
     if (tooltipRef.current) {
-      const rect = tooltipRef.current.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
+      console.log('tool preview 2');
+      // const rect = tooltipRef.current.getBoundingClientRect();
+      // const viewportWidth = window.innerWidth;
 
-      // 向右显示，与光标保持距离
-      let finalX = x + 10; // 增加与光标的水平距离
-      let finalY = y - rect.height / 2; // 垂直居中对齐
+      // 水平位置：在右侧显示，与菜单保持一定距离
+      let finalX = x + 10;
+
+      // 垂直位置：与菜单项垂直居中对齐，增加偏移量
+      let finalY = y; // 增加偏移量以更好对齐
 
       // 如果右侧空间不足，则显示在左侧
-      if (finalX + rect.width > viewportWidth - 20) {
-        finalX = x - rect.width - 10;
-      }
-
-      // 确保不会超出顶部和底部
-      if (finalY < 10) {
-        finalY = 10;
-      } else if (finalY + rect.height > viewportHeight - 10) {
-        finalY = viewportHeight - rect.height - 10;
-      }
+      // TODO fix 这里计算有错误
+      // if (finalX + rect.width > viewportWidth - 20) {
+      //   finalX = x - rect.width - 10;
+      // }
 
       tooltipRef.current.style.left = `${finalX}px`;
       tooltipRef.current.style.top = `${finalY}px`;
+      console.log('finalX = ', finalX, 'finalY = ', finalY);
     }
   }, [x, y]);
 
