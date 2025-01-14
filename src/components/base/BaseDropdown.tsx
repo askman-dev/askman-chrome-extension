@@ -34,9 +34,9 @@ export function BaseDropdown({
   showShortcut = true,
 }: BaseDropdownProps) {
   const [isOpened, setIsOpen] = useState(initOpen);
+  const [isCommandPressed, setIsCommandPressed] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
-  let isCommandPressed = false;
   let closeDropdownTimer: any;
 
   useEffect(() => {
@@ -54,31 +54,25 @@ export function BaseDropdown({
     }
   }, [isOpened]);
 
-  const handleKeyDown = (_e: React.KeyboardEvent) => {
-    console.log('[BaseDropdown] handleKeyDown', isOpened);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.metaKey) {
+      setIsCommandPressed(true);
+    }
+  };
+
+  const handleKeyUp = (e: React.KeyboardEvent) => {
+    if (!e.metaKey) {
+      setIsCommandPressed(false);
+    }
   };
 
   usePreventOverflowHidden();
 
   const defaultRenderItem = (item: any, index: number, active: boolean, isSelected?: boolean) => (
-    <button
-      ref={el => (menuItemsRef.current[index] = el)}
+    <div
       className={`${
         active ? 'bg-black text-white' : 'text-gray-900'
-      } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
-      onClick={() => {
-        onItemClick(item, isCommandPressed);
-        setIsOpen(false);
-      }}
-      onMouseDown={() => {
-        onItemClick(item, isCommandPressed);
-        setIsOpen(false);
-      }}
-      onKeyDown={e => {
-        if (e.key === 'Enter') {
-          isCommandPressed = e.metaKey || e.ctrlKey;
-        }
-      }}>
+      } group flex w-full items-center rounded-md px-2 py-2 text-sm`}>
       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
         {index}
       </span>
@@ -104,11 +98,16 @@ export function BaseDropdown({
           </span>
         ) : null}
       </span>
-    </button>
+    </div>
   );
 
   return (
-    <div className={classNames(`${className}`)} onKeyDown={handleKeyDown} aria-haspopup="true" aria-expanded={isOpened}>
+    <div
+      className={classNames(`${className}`)}
+      onKeyDown={handleKeyDown}
+      onKeyUp={handleKeyUp}
+      aria-haspopup="true"
+      aria-expanded={isOpened}>
       <Menu as="div" className="relative" style={{ isolation: 'isolate' }}>
         <MenuButton
           ref={buttonRef}
@@ -126,7 +125,7 @@ export function BaseDropdown({
             return (
               <>
                 <span className="truncate max-w-[6rem] text-right" dir="rtl">
-                  {displayName}
+                  {typeof displayName === 'string' ? displayName : displayName.shortName}
                 </span>
                 {showShortcut && <span className="flex-shrink-0"> {shortcutKey}</span>}
                 <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 flex-shrink-0" />
@@ -154,11 +153,19 @@ export function BaseDropdown({
             <div className="px-1 py-1">
               {items.map((item, index) => (
                 <MenuItem key={item.id}>
-                  {({ active }) =>
-                    renderItem
-                      ? renderItem(item, index, active, item.id === selectedId)
-                      : defaultRenderItem(item, index, active, item.id === selectedId)
-                  }
+                  {({ active }) => (
+                    <button
+                      ref={el => (menuItemsRef.current[index] = el)}
+                      className="w-full focus:outline-none"
+                      onClick={() => {
+                        onItemClick(item, isCommandPressed);
+                        statusListener(false);
+                      }}>
+                      {renderItem
+                        ? renderItem(item, index, active, item.id === selectedId)
+                        : defaultRenderItem(item, index, active, item.id === selectedId)}
+                    </button>
+                  )}
                 </MenuItem>
               ))}
             </div>
