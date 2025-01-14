@@ -27,21 +27,57 @@ export default function ModelDropdown({
   let isCommandPressed = false;
 
   useEffect(() => {
-    // console.log('[ModelDropdown] initOpen = ' + initOpen, 'isOpened = ' + isOpened);
+    const fetchModels = async () => {
+      console.log('Fetching models...');
+      const userModels = (await configStorage.getModelConfig()) || [];
+      console.log('Raw models:', userModels);
+      const modelArray = [];
+      userModels.forEach(({ provider, config }) => {
+        console.log('Processing provider:', provider, 'config:', config);
+        if (config.models) {
+          config.models.forEach(m => {
+            console.log('Processing model:', m);
+            modelArray.push({
+              name: provider + '/' + (m.name || m.id),
+              shortName: m.name || m.id,
+              provider,
+              config,
+            });
+          });
+        }
+      });
+      console.log('Processed models:', modelArray);
+      setModels(modelArray);
+    };
+
+    fetchModels().catch(error => {
+      console.error('Error fetching models:', error);
+    });
+  }, []);
+
+  useEffect(() => {
+    console.log('Models state updated:', models);
+  }, [models]);
+
+  useEffect(() => {
+    console.log('ModelDropdown useEffect[initOpen]:', { initOpen, isOpened, buttonRef: buttonRef.current });
     if (initOpen && !isOpened) {
-      // console.log('[ModelDropdown] click menu button to open');
+      console.log('Attempting to open dropdown');
       buttonRef.current?.click();
     } else if (!initOpen && isOpened) {
-      // console.log('[ModelDropdown] click menu button to close');
+      console.log('Attempting to close dropdown');
       buttonRef.current?.click();
     }
   }, [initOpen]);
 
   useEffect(() => {
-    // console.log('[ModelDropdown] isOpened = ' + isOpened);
+    console.log('ModelDropdown useEffect[isOpened]:', { isOpened });
     statusListener(isOpened);
     if (isOpened) {
-      setTimeout(() => menuItemsRef.current[0]?.focus(), 0);
+      setTimeout(() => {
+        console.log('Attempting to focus first item');
+        menuItemsRef.current[0]?.focus();
+      }, 0);
     }
   }, [isOpened]);
 
@@ -54,28 +90,6 @@ export default function ModelDropdown({
     // }
   };
 
-  useEffect(() => {
-    const fetchModels = async () => {
-      const userModels = (await configStorage.getModelConfig()) || [];
-      const modelArray = [];
-      userModels.forEach(({ provider, config }) => {
-        if (config.models) {
-          config.models.forEach(m => {
-            modelArray.push({
-              name: provider + '/' + (m.name || m.id),
-              shortName: m.name || m.id,
-              provider,
-              config,
-            });
-          });
-        }
-      });
-      setModels(modelArray);
-      // modelArray.length && onItemClick(modelArray[0].name);
-    };
-
-    fetchModels();
-  }, []);
   let closeDropdownTimer: any;
 
   usePreventOverflowHidden();
@@ -108,7 +122,7 @@ export default function ModelDropdown({
             return (
               <>
                 <span className="inline-block truncate max-w-[8rem] text-right" dir="rtl">
-                  {displayName == 'free' ? 'Model' : displayName} ⌘ KK
+                  {typeof displayName === 'string' ? displayName : 'Model'} ⌘ KK
                 </span>
                 <ChevronDownIcon
                   className="-mr-1 h-5 w-5 text-violet-200 hover:text-violet-100 flex-shrink-0"
