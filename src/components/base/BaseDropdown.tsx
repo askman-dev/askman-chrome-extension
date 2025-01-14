@@ -40,18 +40,14 @@ export function BaseDropdown({
   let closeDropdownTimer: any;
 
   useEffect(() => {
-    console.log('[BaseDropdown] initOpen changed:', { initOpen, isOpened });
     if (initOpen && !isOpened) {
-      console.log('[BaseDropdown] Opening menu due to initOpen');
       buttonRef.current?.click();
     } else if (!initOpen && isOpened) {
-      console.log('[BaseDropdown] Closing menu due to initOpen');
       buttonRef.current?.click();
     }
   }, [initOpen, isOpened]);
 
   useEffect(() => {
-    console.log('[BaseDropdown] isOpened changed:', isOpened);
     statusListener(isOpened);
     if (isOpened) {
       setTimeout(() => menuItemsRef.current[0]?.focus(), 0);
@@ -59,7 +55,6 @@ export function BaseDropdown({
   }, [isOpened]);
 
   const handleKeyDown = (_e: React.KeyboardEvent) => {
-    // Keyboard navigation logic can be added here
     console.log('[BaseDropdown] handleKeyDown', isOpened);
   };
 
@@ -72,19 +67,15 @@ export function BaseDropdown({
         active ? 'bg-black text-white' : 'text-gray-900'
       } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
       onClick={() => {
-        console.log('[BaseDropdown] onClick', item);
         onItemClick(item, isCommandPressed);
         setIsOpen(false);
       }}
       onMouseDown={() => {
-        console.log('[BaseDropdown] onMouseDown', item);
         onItemClick(item, isCommandPressed);
         setIsOpen(false);
       }}
       onKeyDown={e => {
-        console.log('[BaseDropdown] onKeyDown', e.key);
         if (e.key === 'Enter') {
-          console.log('[BaseDropdown] Enter key pressed in menu item');
           isCommandPressed = e.metaKey || e.ctrlKey;
         }
       }}>
@@ -123,18 +114,14 @@ export function BaseDropdown({
           ref={buttonRef}
           className="inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
           onMouseEnter={() => {
-            console.log('[BaseDropdown] Mouse enter');
             setIsOpen(true);
           }}
           onMouseLeave={() => {
-            console.log('[BaseDropdown] Mouse leave, scheduling close');
             closeDropdownTimer = setTimeout(() => {
-              console.log('[BaseDropdown] Executing scheduled close');
               setIsOpen(false);
             }, 100);
           }}>
           {({ active }) => {
-            console.log('[BaseDropdown] Menu button active:', active);
             setIsOpen(active);
             return (
               <>

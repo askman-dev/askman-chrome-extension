@@ -20,14 +20,12 @@ export default function SystemPromptDropdown({
   const { showPreview, previewPos, previewContent, showToolPreview, hideToolPreview } = useToolPreview();
 
   useEffect(() => {
-    console.log('[SystemPromptDropdown] Component mounted');
     const fetchPresets = async () => {
       try {
         const presets = await StorageManager.getSystemPresets();
         setSystemPresets(presets);
 
         const currentPreset = await StorageManager.getCurrentSystemPreset();
-        console.log('[SystemPromptDropdown] Current preset:', currentPreset);
         setSelectedPreset(currentPreset || 'system-init');
       } catch (error) {
         console.error('Error fetching presets:', error);
@@ -38,14 +36,12 @@ export default function SystemPromptDropdown({
   }, []);
 
   useEffect(() => {
-    console.log('[SystemPromptDropdown] Props changed:', { initOpen });
+    // console.log('[SystemPromptDropdown] Props changed:', { initOpen });
   }, [initOpen]);
 
   const handleSystemPresetClick = async (preset: SystemPresetInterface) => {
     try {
-      console.log('[SystemPromptDropdown] Handling preset click:', preset.name);
       await StorageManager.setCurrentSystemPreset(preset.name);
-      console.log('[SystemPromptDropdown] Preset updated to:', preset.name);
       setSelectedPreset(preset.name);
       hideToolPreview();
       statusListener(false);
@@ -59,6 +55,7 @@ export default function SystemPromptDropdown({
       className={`${
         active ? 'bg-black text-white' : 'text-gray-900'
       } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
+      onMouseDown={() => handleSystemPresetClick(preset)}
       onClick={() => handleSystemPresetClick(preset)}
       onMouseEnter={e => showToolPreview(e.currentTarget, preset.hbs)}
       onMouseLeave={hideToolPreview}>
