@@ -64,7 +64,7 @@ export default function ToolDropdown({
       className={`${
         active ? 'bg-black text-white' : 'text-gray-900'
       } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
-      onClick={() => {
+      onClick={_e => {
         onItemClick(tool, false);
         hideToolPreview();
         statusListener(false);
