@@ -107,7 +107,7 @@ export default function ModelDropdown({
             setIsOpen(active);
             return (
               <>
-                <span className="inline-block truncate max-w-[10rem] text-right" dir="rtl">
+                <span className="inline-block truncate max-w-[8rem] text-right" dir="rtl">
                   {displayName == 'free' ? 'Model' : displayName} ⌘ KK
                 </span>
                 <ChevronDownIcon

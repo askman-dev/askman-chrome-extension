@@ -20,6 +20,7 @@ import {
 import QuoteDropdown from './ask-quotedropdown';
 import KeyBinding from './icons';
 import configStorage from '../shared/storages/configStorage';
+import SystemPromptDropdown from './system-prompt-dropdown';
 
 interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -535,11 +536,10 @@ function AskPanel(props: AskPanelProps) {
               />
             </div>
             <div className="flex">
+              <SystemPromptDropdown className="inline-block mr-2" />
               <ToolDropdown
                 displayName={userTools?.name || 'Frame'}
                 initOpen={isToolDropdownOpen}
-                // isOpen={isToolDropdownOpen}
-                // setIsOpen={setIsToolDropdownOpen}
                 statusListener={updateToolDropdownStatus}
                 className="inline-block"
                 onItemClick={(item, withCommand) => {
