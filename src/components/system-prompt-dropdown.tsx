@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Menu, MenuButton, MenuItems } from '@headlessui/react';
+import React, { Fragment, useEffect, useState } from 'react';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { StorageManager, SystemPresetInterface } from '../utils/StorageManager';
 import { ToolPreview } from './tool-preview';
@@ -77,10 +77,9 @@ export default function SystemPromptDropdown({ className }: SystemPromptDropdown
 
   return (
     <div className={className}>
-      <Menu>
+      <Menu as="div">
         <MenuButton
-          as="div"
-          className="inline-flex items-center rounded px-2 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none"
+          className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none min-w-0"
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={e => {
             const target = e.currentTarget;
@@ -93,58 +92,74 @@ export default function SystemPromptDropdown({ className }: SystemPromptDropdown
           <span>{selectedPreset === 'system-init' || !selectedPreset ? 'System Prompt' : selectedPreset}</span>
           <ChevronDownIcon className="ml-2 -mr-1 h-5 w-5" aria-hidden="true" />
         </MenuButton>
-        <MenuItems
-          static
-          className={`absolute left-0 mt-0 min-w-[16rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10 ${
-            isOpen ? 'block' : 'hidden'
-          }`}
-          onMouseEnter={() => {
-            setIsOpen(true);
-          }}
-          onMouseLeave={() => {
-            setIsOpen(false);
-          }}>
-          <div className="px-1 py-1">
-            {systemPresets.map(preset => {
-              const isSelected = selectedPreset === preset.name;
-              return (
-                <div
-                  key={preset.name}
-                  className={`w-full text-left px-4 py-2 text-sm hover:bg-black hover:text-white cursor-pointer ${
-                    isSelected ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-900'
-                  }`}
-                  onClick={e => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    handleSystemPresetClick(preset);
-                  }}
-                  onMouseEnter={e => {
-                    showToolPreview(e.currentTarget, preset.hbs);
-                  }}
-                  onMouseLeave={() => {
-                    hideToolPreview();
-                  }}>
-                  <span className="flex items-center justify-between w-full">
-                    <span>{preset.name}</span>
-                    {isSelected && (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-black"
-                        viewBox="0 0 20 20"
-                        fill="currentColor">
-                        <path
-                          fillRule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    )}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </MenuItems>
+        {isOpen && (
+          <Transition
+            as={Fragment}
+            show={isOpen}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95">
+            <MenuItems
+              static
+              className="absolute left-0 mt-0 min-w-[16rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10"
+              onMouseEnter={() => {
+                setIsOpen(true);
+              }}
+              onMouseLeave={() => {
+                setIsOpen(false);
+              }}>
+              <div className="px-1 py-1">
+                {systemPresets.map((preset, index) => {
+                  const isSelected = selectedPreset === preset.name;
+                  return (
+                    <MenuItem key={preset.name}>
+                      {({ active }) => (
+                        <button
+                          className={`${
+                            active ? 'bg-black text-white' : 'text-gray-900'
+                          } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
+                          onClick={e => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            handleSystemPresetClick(preset);
+                          }}
+                          onMouseEnter={e => {
+                            showToolPreview(e.currentTarget, preset.hbs);
+                          }}
+                          onMouseLeave={() => {
+                            hideToolPreview();
+                          }}>
+                          <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
+                            {index}
+                          </span>
+                          <span className="flex items-center justify-between w-full">
+                            <span>{preset.name}</span>
+                            {isSelected && (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5 text-black"
+                                viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path
+                                  fillRule="evenodd"
+                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            )}
+                          </span>
+                        </button>
+                      )}
+                    </MenuItem>
+                  );
+                })}
+              </div>
+            </MenuItems>
+          </Transition>
+        )}
       </Menu>
       {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
     </div>
