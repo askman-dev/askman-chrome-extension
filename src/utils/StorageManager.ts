@@ -35,7 +35,7 @@ export interface SystemPromptContent {
 export interface SystemPresetInterface extends ToolsPromptInterface {
   name: string;
   hbs: string;
-  template?: TemplateDelegate;
+  template: TemplateDelegate;
 }
 
 export const USER_TOOLS_KEY = 'userTools';
@@ -208,6 +208,7 @@ export const StorageManager = {
           const preset = mergedConfig[k] as ChatPresetContext;
           if (preset.system) {
             systemPresets.push({
+              id: k,
               name: k,
               hbs: preset.system,
               template: Handlebars.compileAST(preset.system),
