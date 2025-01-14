@@ -46,9 +46,7 @@ export class ChatCoreContext implements ChatCoreInterface {
   private async initSystemMessage() {
     try {
       const systemPrompt = await StorageManager.getSystemPrompt();
-      this.history.push(
-        new SystemInvisibleMessage(systemPrompt)
-      );
+      this.history.push(new SystemInvisibleMessage(systemPrompt));
     } catch (e) {
       console.error('Failed to initialize system message:', e);
     }
@@ -120,6 +118,13 @@ export class ChatCoreContext implements ChatCoreInterface {
     quotes: QuoteContext[],
     userPrompt: null | string,
   ) {
+    // Update system message before each request
+    const systemPrompt = await StorageManager.getSystemPrompt();
+    // Remove old system message if exists
+    this.history = this.history.filter(msg => !(msg instanceof SystemInvisibleMessage));
+    // Add new system message
+    this.history.unshift(new SystemInvisibleMessage(systemPrompt));
+
     if (!userPrompt) {
       userPrompt = '';
     }
