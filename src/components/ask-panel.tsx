@@ -207,7 +207,7 @@ function AskPanel(props: AskPanelProps) {
     askPanelVisible &&
       setTimeout(() => {
         // console.log('获取焦点');
-        // inputRef.current.focus();
+        inputRef.current.focus();
       }, 200);
 
     return () => {
@@ -278,7 +278,7 @@ function AskPanel(props: AskPanelProps) {
       inputRef.current
     ) {
       setTimeout(() => {
-        // inputRef.current.focus();
+        inputRef.current.focus();
       }, 33);
     }
   }, [isToolDropdownOpen, isQuoteDropdownOpen, isModelDropdownOpen, isSystemPromptDropdownOpen]);
