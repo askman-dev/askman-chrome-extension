@@ -30,6 +30,8 @@ for (const k in defaultTools) {
   }
 }
 
+export { tools };
+
 export default function ToolDropdown({
   displayName,
   className,
