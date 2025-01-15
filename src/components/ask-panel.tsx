@@ -3,7 +3,7 @@ import 'highlight.js/styles/default.min.css';
 import { QuoteAgent, QuoteContext } from '../agents/quote';
 import React, { useState, useContext, useEffect, useRef, useCallback } from 'react';
 import { ChatPopupContext } from '../chat/chat';
-import ToolDropdown from './ask-tooldropdown';
+import ToolDropdown, { tools } from './ask-tooldropdown';
 import ModelDropdown from './ask/ModelDropDown';
 import TextareaAutosize from 'react-textarea-autosize';
 import { ArrowsPointingInIcon, ArrowsPointingOutIcon, XMarkIcon } from '@heroicons/react/20/solid';
@@ -21,6 +21,8 @@ import QuoteDropdown from './ask-quotedropdown';
 import KeyBinding from './icons';
 import configStorage from '../shared/storages/configStorage';
 import SystemPromptDropdown from './system-prompt-dropdown';
+import { StorageManager } from '../utils/StorageManager';
+import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
 
 interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -157,9 +159,35 @@ function AskPanel(props: AskPanelProps) {
   };
 
   useEffect(() => {
+    // 获取当前选中的工具
+    const fetchCurrentTool = async () => {
+      try {
+        const currentToolId = await StorageManager.getCurrentTool();
+        if (currentToolId) {
+          const userToolSettings = await StorageManager.getUserTools();
+          const allToolsList = [
+            ...tools,
+            ...Object.values(userToolSettings).map(tool => ({
+              id: tool.name,
+              name: tool.name,
+              hbs: tool.hbs,
+              template: Handlebars.compileAST(tool.hbs),
+            })),
+          ];
+          const tool = allToolsList.find(t => t.id === currentToolId);
+          if (tool) {
+            setUserTools(tool);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching current tool:', error);
+      }
+    };
+
     QuoteAgent.getQuoteByDocument(window.location.href, document).then(quoteContext => {
       updatePageContext(quoteContext);
     });
+    fetchCurrentTool();
     // console.log('chatContext.history = ' + JSON.stringify(chatContext.history));
     function rerenderHistory() {
       setHistory(
