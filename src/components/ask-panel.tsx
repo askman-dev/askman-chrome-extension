@@ -576,7 +576,7 @@ function AskPanel(props: AskPanelProps) {
                 displayName={userTools?.name || 'Frame'}
                 initOpen={isToolDropdownOpen}
                 statusListener={updateToolDropdownStatus}
-                className="inline-block"
+                className="inline-block relative"
                 onItemClick={(item, withCommand) => {
                   setUserTools(item);
                   if (withCommand) {
@@ -587,7 +587,7 @@ function AskPanel(props: AskPanelProps) {
               <ModelDropdown
                 displayName={selectedModel}
                 initOpen={isModelDropdownOpen}
-                className=""
+                className="relative"
                 onItemClick={handleModelSelect}
                 statusListener={updateModelDropdownStatus}
               />

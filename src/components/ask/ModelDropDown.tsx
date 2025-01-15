@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import configStorage from '@src/shared/storages/configStorage';
 import { BaseDropdown } from '../base/BaseDropdown';
 
@@ -25,6 +25,7 @@ export default function ModelDropdown({
   statusListener,
 }: ModelDropdownProps) {
   const [models, setModels] = useState<ModelItem[]>([]);
+  const baseDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchModels = async () => {
@@ -72,18 +73,20 @@ export default function ModelDropdown({
   );
 
   return (
-    <BaseDropdown
-      displayName={displayName}
-      className={className}
-      // This is used for Enter key press
-      onItemClick={model => {
-        onItemClick(model.name, false);
-      }}
-      statusListener={statusListener}
-      initOpen={initOpen}
-      items={models}
-      shortcutKey="⌘ KK"
-      renderItem={renderModelItem}
-    />
+    <div ref={baseDropdownRef} className="relative">
+      <BaseDropdown
+        displayName={displayName}
+        className={className}
+        onItemClick={model => {
+          onItemClick(model.name, false);
+        }}
+        statusListener={statusListener}
+        initOpen={initOpen}
+        items={models}
+        shortcutKey="⌘ KK"
+        renderItem={renderModelItem}
+        align="right"
+      />
+    </div>
   );
 }

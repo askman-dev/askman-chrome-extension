@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { StorageManager, SystemPresetInterface } from '../utils/StorageManager';
 import { ToolPreview } from './tool-preview';
 import { BaseDropdown } from './base/BaseDropdown';
@@ -18,6 +18,7 @@ export default function SystemPromptDropdown({
   const [systemPresets, setSystemPresets] = useState<SystemPresetInterface[]>([]);
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const { showPreview, previewPos, previewContent, showToolPreview, hideToolPreview } = useToolPreview();
+  const baseDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchPresets = async () => {
@@ -34,10 +35,6 @@ export default function SystemPromptDropdown({
 
     fetchPresets();
   }, []);
-
-  useEffect(() => {
-    // console.log('[SystemPromptDropdown] Props changed:', { initOpen });
-  }, [initOpen]);
 
   const handleSystemPresetClick = async (preset: SystemPresetInterface) => {
     try {
@@ -57,7 +54,11 @@ export default function SystemPromptDropdown({
       } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
       onMouseDown={() => handleSystemPresetClick(preset)}
       onClick={() => handleSystemPresetClick(preset)}
-      onMouseEnter={e => showToolPreview(e.currentTarget, preset.hbs)}
+      onMouseEnter={e => {
+        if (baseDropdownRef.current) {
+          showToolPreview(e.currentTarget, baseDropdownRef.current, preset.hbs);
+        }
+      }}
       onMouseLeave={hideToolPreview}>
       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
         {index}
@@ -69,7 +70,7 @@ export default function SystemPromptDropdown({
   );
 
   return (
-    <>
+    <div ref={baseDropdownRef} className="relative">
       <BaseDropdown
         displayName={selectedPreset === 'system-init' || !selectedPreset ? 'System Prompt' : selectedPreset}
         className={className}
@@ -86,6 +87,6 @@ export default function SystemPromptDropdown({
         renderItem={renderSystemPresetItem}
       />
       {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
-    </>
+    </div>
   );
 }

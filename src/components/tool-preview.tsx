@@ -10,14 +10,12 @@ export const ToolPreview: React.FC<ToolPreviewProps> = ({ content, x, y }) => {
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log('tool preview', x, y);
     if (tooltipRef.current) {
-      console.log('tool preview 2');
       // const rect = tooltipRef.current.getBoundingClientRect();
       // const viewportWidth = window.innerWidth;
 
       // 水平位置：在右侧显示，与菜单保持一定距离
-      let finalX = x + 10;
+      let finalX = x;
 
       // 垂直位置：与菜单项垂直居中对齐，增加偏移量
       let finalY = y; // 增加偏移量以更好对齐
@@ -28,9 +26,9 @@ export const ToolPreview: React.FC<ToolPreviewProps> = ({ content, x, y }) => {
       //   finalX = x - rect.width - 10;
       // }
 
-      tooltipRef.current.style.left = `${finalX}px`;
+      tooltipRef.current.style.right = `${finalX}px`;
       tooltipRef.current.style.top = `${finalY}px`;
-      console.log('finalX = ', finalX, 'finalY = ', finalY);
+      // console.log('finalX = ', finalX, 'finalY = ', finalY);
     }
   }, [x, y]);
 

@@ -5,14 +5,18 @@ export function useToolPreview() {
   const [previewPos, setPreviewPos] = useState({ x: 0, y: 0 });
   const [previewContent, setPreviewContent] = useState('');
 
-  const showToolPreview = (element: HTMLElement, content: string) => {
+  const showToolPreview = (element: HTMLElement, baseDropdownElement: HTMLElement, content: string) => {
     const buttonRect = element.getBoundingClientRect();
-    const parentRect = element.parentElement?.getBoundingClientRect() || { left: 0, top: 0 };
-    console.log('buttonRect.top = ', buttonRect.top, 'parentRect.top = ', parentRect.top);
+    const dropdownRect = baseDropdownElement.getBoundingClientRect();
+
+    // Calculate the relative position between the menu item and dropdown
+    const relativeY = buttonRect.top - dropdownRect.top;
+
+    console.log('buttonRect', buttonRect, 'dropdownRect', dropdownRect);
 
     setPreviewPos({
-      x: buttonRect.left - parentRect.left + buttonRect.width,
-      y: buttonRect.top - buttonRect.height,
+      x: dropdownRect.width,
+      y: relativeY,
     });
     setPreviewContent(content);
     setShowPreview(true);
