@@ -113,7 +113,7 @@ export function BaseDropdown({
       <Menu as="div" className="relative" style={{ isolation: 'isolate' }}>
         <MenuButton
           ref={buttonRef}
-          className="inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
+          className="group inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
           onMouseEnter={() => {
             setIsOpen(true);
           }}
@@ -126,9 +126,17 @@ export function BaseDropdown({
             setIsOpen(active);
             return (
               <>
-                <span className="truncate max-w-[6rem] text-right" dir="rtl">
-                  {typeof displayName === 'string' ? displayName : 'Untitled'}
-                </span>
+                <div className="relative inline-block">
+                  <span
+                    className="truncate max-w-[6rem] text-right inline-block"
+                    dir="rtl"
+                    title={typeof displayName === 'string' ? displayName : 'Untitled'}>
+                    {typeof displayName === 'string' ? displayName : 'Untitled'}
+                  </span>
+                  <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none whitespace-nowrap z-20">
+                    {typeof displayName === 'string' ? displayName : 'Untitled'}
+                  </div>
+                </div>
                 {showShortcut && <span className="flex-shrink-0"> {shortcutKey}</span>}
                 <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 flex-shrink-0" />
               </>
