@@ -92,7 +92,7 @@ function AskPanel(props: AskPanelProps) {
   const [isSystemPromptDropdownOpen, setIsSystemPromptDropdownOpen] = useState(false);
 
   const showToolDropdown = () => {
-    console.log('isToolDropdownOpen = ' + isToolDropdownOpen, 'set to true');
+    // console.log('isToolDropdownOpen = ' + isToolDropdownOpen, 'set to true');
     setIsToolDropdownOpen(true);
     setIsQuoteDropdownOpen(false);
     setIsModelDropdownOpen(false);
