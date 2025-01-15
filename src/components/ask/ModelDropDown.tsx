@@ -25,6 +25,7 @@ export default function ModelDropdown({
   statusListener,
 }: ModelDropdownProps) {
   const [models, setModels] = useState<ModelItem[]>([]);
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const baseDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,6 +45,9 @@ export default function ModelDropdown({
         }
       });
       setModels(modelArray);
+
+      const currentModel = await configStorage.getCurrentModel();
+      setSelectedModel(currentModel || null);
     };
 
     fetchModels().catch(error => {
@@ -51,13 +55,19 @@ export default function ModelDropdown({
     });
   }, []);
 
+  const handleModelClick = async (model: ModelItem, isCommandPressed: boolean) => {
+    await configStorage.setCurrentModel(model.id);
+    setSelectedModel(model.id);
+    onItemClick(model.name, isCommandPressed);
+  };
+
   const renderModelItem = (model: ModelItem, index: number, active: boolean) => (
     <button
       className={`${
         active ? 'bg-black text-white' : 'text-gray-900'
       } flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none group`}
       onMouseDown={() => {
-        onItemClick(model.name, false);
+        handleModelClick(model, false);
         statusListener(false);
       }}>
       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
@@ -77,12 +87,11 @@ export default function ModelDropdown({
       <BaseDropdown
         displayName={displayName}
         className={className}
-        onItemClick={model => {
-          onItemClick(model.name, false);
-        }}
+        onItemClick={handleModelClick}
         statusListener={statusListener}
         initOpen={initOpen}
         items={models}
+        selectedId={selectedModel}
         shortcutKey="⌘ KK"
         renderItem={renderModelItem}
         align="right"

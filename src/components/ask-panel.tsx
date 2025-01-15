@@ -348,7 +348,7 @@ function AskPanel(props: AskPanelProps) {
   // 在组件加载时读取存储的模型
   useEffect(() => {
     const loadSelectedModel = async () => {
-      const savedModel = await configStorage.getSelectedModel();
+      const savedModel = await configStorage.getCurrentModel();
       setSelectedModel(savedModel);
     };
     loadSelectedModel();
