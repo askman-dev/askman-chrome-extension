@@ -19,6 +19,7 @@ export interface BaseDropdownProps {
   renderItem?: (_item: any, _index: number, _active: boolean, _isSelected?: boolean) => React.ReactElement;
   selectedId?: string;
   showShortcut?: boolean;
+  align?: 'left' | 'right';
 }
 
 export function BaseDropdown({
@@ -32,6 +33,7 @@ export function BaseDropdown({
   renderItem,
   selectedId,
   showShortcut = true,
+  align = 'left',
 }: BaseDropdownProps) {
   const [isOpened, setIsOpen] = useState(initOpen);
   const [isCommandPressed, setIsCommandPressed] = useState(false);
@@ -144,7 +146,9 @@ export function BaseDropdown({
           leaveTo="transform opacity-0 scale-95">
           <MenuItems
             static
-            className="absolute left-0 mt-0 min-w-[16rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10"
+            className={`absolute ${
+              align === 'left' ? 'left-0' : 'right-0'
+            } mt-0 min-w-[16rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10`}
             onMouseEnter={() => {
               clearTimeout(closeDropdownTimer);
               setIsOpen(true);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import defaultTools from '@assets/conf/tools.toml';
 import { ToolsPromptInterface } from '../types';
 import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
@@ -39,6 +39,7 @@ export default function ToolDropdown({
 }: ToolDropdownProps) {
   const [allTools, setAllTools] = useState<ToolsPromptInterface[]>([]);
   const { showPreview, previewPos, previewContent, showToolPreview, hideToolPreview } = useToolPreview();
+  const baseDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchTools = async () => {
@@ -74,7 +75,11 @@ export default function ToolDropdown({
         hideToolPreview();
         statusListener(false);
       }}
-      onMouseEnter={e => showToolPreview(e.currentTarget, tool.hbs)}
+      onMouseEnter={e => {
+        if (baseDropdownRef.current) {
+          showToolPreview(e.currentTarget, baseDropdownRef.current, tool.hbs);
+        }
+      }}
       onMouseLeave={hideToolPreview}>
       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
         {index}
@@ -94,7 +99,7 @@ export default function ToolDropdown({
   );
 
   return (
-    <>
+    <div ref={baseDropdownRef} className="relative">
       <BaseDropdown
         displayName={displayName}
         className={className}
@@ -105,6 +110,6 @@ export default function ToolDropdown({
         renderItem={renderToolItem}
       />
       {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
-    </>
+    </div>
   );
 }
