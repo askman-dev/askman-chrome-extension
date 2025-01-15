@@ -41,6 +41,8 @@ export function BaseDropdown({
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
   let closeDropdownTimer: any;
 
+  const selectedIndex = selectedId ? items.findIndex(item => item.id === selectedId) : 0;
+
   useEffect(() => {
     if (initOpen && !isOpened) {
       buttonRef.current?.click();
@@ -52,9 +54,10 @@ export function BaseDropdown({
   useEffect(() => {
     statusListener(isOpened);
     if (isOpened) {
-      setTimeout(() => menuItemsRef.current[0]?.focus(), 0);
+      const targetIndex = selectedIndex >= 0 ? selectedIndex : 0;
+      setTimeout(() => menuItemsRef.current[targetIndex]?.focus(), 0);
     }
-  }, [isOpened]);
+  }, [isOpened, selectedIndex]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.metaKey) {
@@ -172,7 +175,8 @@ export function BaseDropdown({
                       onClick={() => {
                         onItemClick(item, isCommandPressed);
                         statusListener(false);
-                      }}>
+                      }}
+                      autoFocus={index === selectedIndex}>
                       {renderItem
                         ? renderItem(item, index, active, item.id === selectedId)
                         : defaultRenderItem(item, index, active, item.id === selectedId)}

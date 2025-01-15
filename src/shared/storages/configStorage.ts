@@ -1,5 +1,4 @@
 import { BaseStorage, createStorage, StorageType } from '@src/shared/storages/base';
-import * as TOML from '@iarna/toml';
 import { StorageManager } from '@src/utils/StorageManager';
 
 interface Config {
@@ -8,7 +7,8 @@ interface Config {
   temperature: number;
   selectedModel?: string;
 }
-interface TomlModelConfig {
+
+export interface TomlModelConfig {
   provider: string;
   config: {
     temperature?: number;
@@ -36,7 +36,8 @@ type ConfigStorage = BaseStorage<Config> & {
   setModel: (_model: string) => Promise<void>;
   setTemperature: (_temperature: number) => Promise<void>;
   getModelConfig: () => Promise<TomlModelConfig[]>;
-  getSelectedModel: () => Promise<string>;
+  getCurrentModel: () => Promise<string | null>;
+  setCurrentModel: (_model: string) => Promise<void>;
 };
 
 const storage = createStorage<Config>('config-storage-key', defaultConfig, {
@@ -56,24 +57,15 @@ const configStorage: ConfigStorage = {
     await storage.set(prevConfig => ({ ...prevConfig, temperature }));
   },
   getModelConfig: async () => {
-    const systemConfigPath = '/assets/conf/models.toml';
-    const systemConfigResponse = await fetch(chrome.runtime.getURL(systemConfigPath));
-    const systemConfigStr = await systemConfigResponse.text();
-    // const userConfigObj = TOML.parse(userConfigStr);
-    const userConfigObj = await StorageManager.getUserModels();
-    const systemConfigObj = TOML.parse(systemConfigStr);
-    const mergedConfigObj = {
-      ...systemConfigObj,
-      ...(Array.isArray(userConfigObj) ? {} : userConfigObj), // 如果 userConfigObj 是数组，则不合并
-    } as Record<string, TomlModelConfig['config']>;
-    return Object.entries(mergedConfigObj).map(([provider, config]) => ({
-      provider,
-      config,
-    })) as TomlModelConfig[];
+    const modelConfig = await StorageManager.getModelConfig();
+    return modelConfig;
   },
-  getSelectedModel: async () => {
+  getCurrentModel: async () => {
     const config = await storage.get();
-    return config.model || 'free'; // 默认值为 'free'
+    return config.model || null;
+  },
+  setCurrentModel: async (model: string) => {
+    await storage.set(prevConfig => ({ ...prevConfig, model }));
   },
 };
 

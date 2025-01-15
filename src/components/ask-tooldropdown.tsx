@@ -38,6 +38,8 @@ export default function ToolDropdown({
   statusListener,
 }: ToolDropdownProps) {
   const [allTools, setAllTools] = useState<ToolsPromptInterface[]>([]);
+  const [selectedTool, setSelectedTool] = useState<string | null>(null);
+  const [selectedToolName, setSelectedToolName] = useState<string>(displayName);
   const { showPreview, previewPos, previewContent, showToolPreview, hideToolPreview } = useToolPreview();
   const baseDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -51,7 +53,20 @@ export default function ToolDropdown({
           hbs: tool.hbs,
           template: Handlebars.compileAST(tool.hbs),
         }));
-        setAllTools([...tools, ...userTools]);
+        const allToolsList = [...tools, ...userTools];
+        setAllTools(allToolsList);
+
+        // 获取当前选中的工具
+        const currentTool = await StorageManager.getCurrentTool();
+        setSelectedTool(currentTool || null);
+
+        // 更新按钮显示的文字
+        if (currentTool) {
+          const tool = allToolsList.find(t => t.id === currentTool);
+          if (tool) {
+            setSelectedToolName(tool.name);
+          }
+        }
       } catch (error) {
         console.error('Error fetching tools:', error);
       }
@@ -60,19 +75,25 @@ export default function ToolDropdown({
     fetchTools();
   }, []);
 
+  const handleToolClick = async (tool: ToolsPromptInterface, isCommandPressed: boolean) => {
+    await StorageManager.setCurrentTool(tool.id);
+    setSelectedTool(tool.id);
+    setSelectedToolName(tool.name);
+    onItemClick(tool, isCommandPressed);
+    hideToolPreview();
+  };
+
   const renderToolItem = (tool: ToolsPromptInterface, index: number, active: boolean) => (
     <button
       className={`${
         active ? 'bg-black text-white' : 'text-gray-900'
       } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
-      onClick={_e => {
-        onItemClick(tool, false);
-        hideToolPreview();
+      onClick={() => {
+        handleToolClick(tool, false);
         statusListener(false);
       }}
       onMouseDown={() => {
-        onItemClick(tool, false);
-        hideToolPreview();
+        handleToolClick(tool, false);
         statusListener(false);
       }}
       onMouseEnter={e => {
@@ -85,28 +106,19 @@ export default function ToolDropdown({
         {index}
       </span>
       {tool.name}
-      {active ? (
-        <>
-          <div className="grow"></div>
-          <span
-            className="inline-flex items-center justify-center w-[3rem] h-5 text-xs font-semibold"
-            title="Quick Send">
-            {navigator.platform.includes('Mac') ? '⌘ ↩︎' : 'Ctrl ↩︎'}
-          </span>
-        </>
-      ) : null}
     </button>
   );
 
   return (
     <div ref={baseDropdownRef} className="relative">
       <BaseDropdown
-        displayName={displayName}
+        displayName={selectedToolName}
         className={className}
-        onItemClick={onItemClick}
+        onItemClick={handleToolClick}
         statusListener={statusListener}
         initOpen={initOpen}
         items={allTools}
+        selectedId={selectedTool}
         renderItem={renderToolItem}
       />
       {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}

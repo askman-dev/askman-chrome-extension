@@ -4,6 +4,7 @@ import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
 import chatPresets from '@assets/conf/chat-presets.toml';
 import { ToolsPromptInterface } from '../types';
 import { TemplateDelegate } from '../../third-party/kbn-handlebars';
+import { TomlModelConfig } from '@src/shared/storages/configStorage';
 
 export interface UserToolSetting {
   name: string;
@@ -229,5 +230,32 @@ export const StorageManager = {
 
   setCurrentSystemPreset: async (presetName: string): Promise<void> => {
     return StorageManager.save(CURRENT_SYSTEM_PRESET_KEY, presetName);
+  },
+
+  // 获取当前工具
+  getCurrentTool: async () => {
+    return await StorageManager.get('current-tool');
+  },
+
+  // 设置当前工具
+  setCurrentTool: async (toolName: string) => {
+    await StorageManager.save('current-tool', toolName);
+  },
+
+  // 获取模型配置
+  getModelConfig: async () => {
+    const systemConfigPath = '/assets/conf/models.toml';
+    const systemConfigResponse = await fetch(chrome.runtime.getURL(systemConfigPath));
+    const systemConfigStr = await systemConfigResponse.text();
+    const userConfigObj = await StorageManager.getUserModels();
+    const systemConfigObj = TOML.parse(systemConfigStr);
+    const mergedConfigObj = {
+      ...systemConfigObj,
+      ...(Array.isArray(userConfigObj) ? {} : userConfigObj), // 如果 userConfigObj 是数组，则不合并
+    } as Record<string, TomlModelConfig['config']>;
+    return Object.entries(mergedConfigObj).map(([provider, config]) => ({
+      provider,
+      config,
+    })) as TomlModelConfig[];
   },
 };
