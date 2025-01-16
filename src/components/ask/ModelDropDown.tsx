@@ -66,8 +66,9 @@ export default function ModelDropdown({
       className={`${
         active ? 'bg-black text-white' : 'text-gray-900'
       } flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none group`}
-      onMouseDown={() => {
-        handleModelClick(model, false);
+      onClick={e => {
+        e.preventDefault();
+        handleModelClick(model, e.metaKey || e.ctrlKey);
         statusListener(false);
       }}>
       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">

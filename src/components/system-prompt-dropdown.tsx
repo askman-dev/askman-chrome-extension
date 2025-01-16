@@ -52,8 +52,11 @@ export default function SystemPromptDropdown({
       className={`${
         active ? 'bg-black text-white' : 'text-gray-900'
       } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
-      onMouseDown={() => handleSystemPresetClick(preset)}
-      onClick={() => handleSystemPresetClick(preset)}
+      onClick={e => {
+        e.preventDefault();
+        handleSystemPresetClick(preset);
+        statusListener(false);
+      }}
       onMouseEnter={e => {
         if (baseDropdownRef.current) {
           showToolPreview(e.currentTarget, baseDropdownRef.current, preset.hbs);
