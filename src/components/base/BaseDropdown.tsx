@@ -39,7 +39,6 @@ export function BaseDropdown({
   const [isCommandPressed, setIsCommandPressed] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
-  let closeDropdownTimer: any;
   const menuRef = useRef<HTMLDivElement>(null);
 
   const selectedIndex = selectedId ? items.findIndex(item => item.id === selectedId) : 0;
@@ -144,9 +143,7 @@ export function BaseDropdown({
             setIsOpen(true);
           }}
           onMouseLeave={() => {
-            closeDropdownTimer = setTimeout(() => {
-              setIsOpen(false);
-            }, 100);
+            setIsOpen(false);
           }}>
           {({ active }) => {
             setIsOpen(active);
@@ -159,7 +156,7 @@ export function BaseDropdown({
                     title={typeof displayName === 'string' ? displayName : 'Untitled'}>
                     {typeof displayName === 'string' ? displayName : 'Untitled'}
                   </span>
-                  <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none whitespace-nowrap z-20">
+                  <div className="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-20">
                     {typeof displayName === 'string' ? displayName : 'Untitled'}
                   </div>
                 </div>
@@ -172,10 +169,10 @@ export function BaseDropdown({
 
         <Transition
           as={Fragment}
-          enter="transition ease-out duration-100"
+          enter="transition ease-out duration-50"
           enterFrom="transform opacity-0 scale-95"
           enterTo="transform opacity-100 scale-100"
-          leave="transition ease-in duration-75"
+          leave="transition ease-in duration-35"
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95">
           <MenuItems
@@ -184,7 +181,6 @@ export function BaseDropdown({
               align === 'left' ? 'left-0' : 'right-0'
             } mt-0 min-w-[16rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10`}
             onMouseEnter={() => {
-              clearTimeout(closeDropdownTimer);
               setIsOpen(true);
             }}
             onMouseLeave={() => setIsOpen(false)}>
