@@ -40,6 +40,9 @@ interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
 //   onClick?: () => void;
 // }
 
+const SCROLLBAR_STYLES =
+  'overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-200';
+
 function AskPanel(props: AskPanelProps) {
   const { visible, quotes, onHide, ...rest } = props;
   const [isMaximized, setIsMaximized] = useState(false);
@@ -433,8 +436,7 @@ function AskPanel(props: AskPanelProps) {
           <XMarkIcon className="w-4 h-4 cursor-pointer" />
         </button>
       </div>
-      <div
-        className={classNames('py-2 overflow-x-hidden overflow-y-auto mb-2', isMaximized ? 'flex-grow' : 'max-h-80')}>
+      <div className={classNames('py-2 mb-2', SCROLLBAR_STYLES, isMaximized ? 'flex-grow' : 'max-h-80')}>
         {history.map(message => (
           <AskMessage key={message.id} {...message} />
         ))}
@@ -500,8 +502,7 @@ function AskPanel(props: AskPanelProps) {
                 ref={inputRef}
                 maxRows={5}
                 minRows={1}
-                className="flex-grow outline-none bg-white text-gray-800 text-sm inline-block font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none min-h-[3em] 
-                focus:border-black"
+                className={`flex-grow outline-none bg-white text-gray-800 text-sm inline-block font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none min-h-[3em] focus:border-black ${SCROLLBAR_STYLES}`}
                 //TODO 输入在有字/无字时会发生高度变化，需要修复
                 onKeyDown={e => {
                   // 检测 ESC 键
