@@ -109,9 +109,7 @@ export function BaseDropdown({
 
   useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
-      if (!isOpened) {
-        return;
-      }
+      if (!isOpened) return;
 
       const isClickInMenu = menuRef.current?.contains(e.target as Node);
       const isClickInButton = buttonRef.current?.contains(e.target as Node);
@@ -125,8 +123,8 @@ export function BaseDropdown({
       setIsOpen(false);
     };
 
-    document.addEventListener('mousedown', handleMouseDown, true);
-    return () => document.removeEventListener('mousedown', handleMouseDown, true);
+    document.addEventListener('mousedown', handleMouseDown, false);
+    return () => document.removeEventListener('mousedown', handleMouseDown, false);
   }, [isOpened]);
 
   return (
@@ -193,20 +191,22 @@ export function BaseDropdown({
             <div className="px-1 py-1">
               {items.map((item, index) => (
                 <MenuItem key={item.id}>
-                  {({ active }) => (
-                    <button
-                      ref={el => (menuItemsRef.current[index] = el)}
-                      className="w-full focus:outline-none"
-                      onClick={() => {
-                        onItemClick(item, isCommandPressed);
-                        statusListener(false);
-                      }}
-                      autoFocus={index === selectedIndex}>
-                      {renderItem
-                        ? renderItem(item, index, active, item.id === selectedId)
-                        : defaultRenderItem(item, index, active, item.id === selectedId)}
-                    </button>
-                  )}
+                  {({ active }) => {
+                    return (
+                      <button
+                        ref={el => (menuItemsRef.current[index] = el)}
+                        className="w-full focus:outline-none"
+                        onClick={() => {
+                          onItemClick(item, isCommandPressed);
+                          statusListener(false);
+                        }}
+                        autoFocus={index === selectedIndex}>
+                        {renderItem
+                          ? renderItem(item, index, active, item.id === selectedId)
+                          : defaultRenderItem(item, index, active, item.id === selectedId)}
+                      </button>
+                    );
+                  }}
                 </MenuItem>
               ))}
             </div>

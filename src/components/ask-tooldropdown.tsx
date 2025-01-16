@@ -85,36 +85,38 @@ export default function ToolDropdown({
     hideToolPreview();
   };
 
-  const renderToolItem = (tool: ToolsPromptInterface, index: number, active: boolean) => (
-    <button
-      className={`${
-        active ? 'bg-black text-white' : 'text-gray-900'
-      } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
-      onClick={e => {
-        e.preventDefault();
-        handleToolClick(tool, e.metaKey || e.ctrlKey);
-        statusListener(false);
-      }}
-      onMouseEnter={e => {
-        if (baseDropdownRef.current) {
-          showToolPreview(e.currentTarget, baseDropdownRef.current, tool.hbs);
-        }
-      }}
-      onMouseLeave={hideToolPreview}>
-      <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
-        {index}
-      </span>
-      <span className="whitespace-nowrap flex-1 flex justify-between items-center">
-        <span>{tool.name}</span>
-        <span
-          className={`ml-2 opacity-0 transition-all duration-100 ${active || 'group-hover:opacity-100'} ${
-            active && 'opacity-100'
-          }`}>
-          [{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + enter]
+  const renderToolItem = (tool: ToolsPromptInterface, index: number, active: boolean) => {
+    return (
+      <button
+        className={`${
+          active ? 'bg-black text-white' : 'text-gray-900'
+        } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
+        onMouseEnter={e => {
+          if (baseDropdownRef.current) {
+            showToolPreview(e.currentTarget, baseDropdownRef.current, tool.hbs);
+          }
+        }}
+        onMouseLeave={hideToolPreview}
+        onClick={e => {
+          e.preventDefault();
+          handleToolClick(tool, e.metaKey || e.ctrlKey);
+          statusListener(false);
+        }}>
+        <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
+          {index}
         </span>
-      </span>
-    </button>
-  );
+        <span className="whitespace-nowrap flex-1 flex justify-between items-center">
+          <span>{tool.name}</span>
+          <span
+            className={`ml-2 opacity-0 transition-all duration-100 ${active || 'group-hover:opacity-100'} ${
+              active && 'opacity-100'
+            }`}>
+            [{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + enter]
+          </span>
+        </span>
+      </button>
+    );
+  };
 
   return (
     <div ref={baseDropdownRef} className="relative">
