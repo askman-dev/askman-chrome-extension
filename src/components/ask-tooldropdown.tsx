@@ -90,12 +90,9 @@ export default function ToolDropdown({
       className={`${
         active ? 'bg-black text-white' : 'text-gray-900'
       } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
-      onClick={() => {
-        handleToolClick(tool, false);
-        statusListener(false);
-      }}
-      onMouseDown={() => {
-        handleToolClick(tool, false);
+      onClick={e => {
+        e.preventDefault();
+        handleToolClick(tool, e.metaKey || e.ctrlKey);
         statusListener(false);
       }}
       onMouseEnter={e => {

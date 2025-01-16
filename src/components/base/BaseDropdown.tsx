@@ -40,6 +40,7 @@ export function BaseDropdown({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
   let closeDropdownTimer: any;
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const selectedIndex = selectedId ? items.findIndex(item => item.id === selectedId) : 0;
 
@@ -106,14 +107,38 @@ export function BaseDropdown({
     </div>
   );
 
+  useEffect(() => {
+    const handleMouseDown = (e: MouseEvent) => {
+      if (!isOpened) {
+        return;
+      }
+
+      const isClickInMenu = menuRef.current?.contains(e.target as Node);
+      const isClickInButton = buttonRef.current?.contains(e.target as Node);
+
+      if (isClickInMenu || isClickInButton) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      setIsOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleMouseDown, true);
+    return () => document.removeEventListener('mousedown', handleMouseDown, true);
+  }, [isOpened]);
+
   return (
     <div
+      ref={menuRef}
       className={classNames(`${className}`)}
+      onMouseDown={e => {
+        e.stopPropagation();
+      }}
       onKeyDown={handleKeyDown}
-      onKeyUp={handleKeyUp}
-      aria-haspopup="true"
-      aria-expanded={isOpened}>
-      <Menu as="div" className="relative" style={{ isolation: 'isolate' }}>
+      onKeyUp={handleKeyUp}>
+      <Menu as="div" className="relative">
         <MenuButton
           ref={buttonRef}
           className="group inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
