@@ -106,7 +106,10 @@ export default function ToolDropdown({
       </span>
       <span className="whitespace-nowrap flex-1 flex justify-between items-center">
         <span>{tool.name}</span>
-        <span className="text-gray-400 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <span
+          className={`ml-2 opacity-0 transition-all duration-100 ${active || 'group-hover:opacity-100'} ${
+            active && 'opacity-100'
+          }`}>
           [{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + enter]
         </span>
       </span>

@@ -65,7 +65,7 @@ export default function ModelDropdown({
     <button
       className={`${
         active ? 'bg-black text-white' : 'text-gray-900'
-      } flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none group`}
+      } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
       onClick={e => {
         e.preventDefault();
         handleModelClick(model, e.metaKey || e.ctrlKey);
@@ -76,7 +76,10 @@ export default function ModelDropdown({
       </span>
       <span className="whitespace-nowrap flex-1 flex justify-between items-center">
         <span>{model.shortName}</span>
-        <span className="text-gray-400 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <span
+          className={`ml-2 opacity-0 transition-all duration-100 ${active || 'group-hover:opacity-100'} ${
+            active && 'opacity-100'
+          }`}>
           [{model.provider}]
         </span>
       </span>
