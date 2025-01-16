@@ -442,7 +442,7 @@ function AskPanel(props: AskPanelProps) {
         ))}
 
         {history.length > 0 && (
-          <div className="pt-64">
+          <div className="pt-32">
             <footer ref={messagesEndRef} />
           </div>
         )}
