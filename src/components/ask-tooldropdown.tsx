@@ -104,7 +104,12 @@ export default function ToolDropdown({
       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
         {index}
       </span>
-      {tool.name}
+      <span className="whitespace-nowrap flex-1 flex justify-between items-center">
+        <span>{tool.name}</span>
+        <span className="text-gray-400 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          [{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + enter]
+        </span>
+      </span>
     </button>
   );
 
@@ -118,6 +123,7 @@ export default function ToolDropdown({
         initOpen={initOpen}
         items={allTools}
         selectedId={selectedTool}
+        shortcutKey={navigator.platform.includes('Mac') ? '⌘ K' : 'Ctrl K'}
         renderItem={renderToolItem}
       />
       {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}

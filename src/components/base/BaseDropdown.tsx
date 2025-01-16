@@ -165,7 +165,7 @@ export function BaseDropdown({
                     {typeof displayName === 'string' ? displayName : 'Untitled'}
                   </div>
                 </div>
-                {showShortcut && <span className="flex-shrink-0"> {shortcutKey}</span>}
+                {showShortcut && <span className="flex-shrink-0 pl-1">{shortcutKey}</span>}
                 <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 flex-shrink-0" />
               </>
             );
