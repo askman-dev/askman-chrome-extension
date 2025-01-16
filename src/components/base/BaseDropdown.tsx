@@ -179,7 +179,7 @@ export function BaseDropdown({
             static
             className={`absolute ${
               align === 'left' ? 'left-0' : 'right-0'
-            } mt-0 min-w-[16rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10`}
+            } mt-0 min-w-[10rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10`}
             onMouseEnter={() => {
               setIsOpen(true);
             }}
