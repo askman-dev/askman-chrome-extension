@@ -3,6 +3,7 @@ import AskCode from './ask-code';
 import { QuoteAgent } from '../agents/quote';
 import React, { useState } from 'react';
 import CopyButton, { useCopyButton } from './base/CopyButton';
+import { SCROLLBAR_STYLES } from '../styles/common';
 
 /* eslint-disable no-unused-vars */
 export enum AskMessageType {
@@ -86,7 +87,7 @@ function AskMessage(props: AskMessageItem) {
         'font-bold',
       )}
       {...handlers}>
-      <div className={classNames('pr-8', name === 'human' ? 'max-h-16 overflow-auto' : '')}>{messageItem}</div>
+      <div className={classNames('pr-8', name === 'human' ? `max-h-16 ${SCROLLBAR_STYLES}` : '')}>{messageItem}</div>
       {isVisible && type !== AskMessageType.CODE && (
         <CopyButton text={text} className="top-[-6px] right-1 bg-gray-100 hover:bg-gray-200" />
       )}
