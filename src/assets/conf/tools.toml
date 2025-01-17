@@ -1,32 +1,25 @@
 [framework]
 name = "Simple"
 hbs = """
-{{page.selection}}
 {{chat.input}}
 """
 
 [page]
 name = "Page"
 hbs = """
-<page_info>
-{{#if page.title}}
-<title>{{page.title}}</title>
-{{/if}}
-{{#if page.url}}
-<url>{{page.url}}</url>
-{{/if}}
-{{#if page.content}}
-<content>
-{{page.content}}
-</content>
-{{/if}}
-{{#if page.selection}}
-<selection>{{page.selection}}</selection>
-{{/if}}
-</page_info>
-<user_input>
+<webpage_info>
+Below are some potentially helpful/relevant pieces of information for figuring out to respond
+
+{{#if page.title}}<title>{{page.title}}</title>{{/if}}
+{{#if page.url}}<url>{{page.url}}</url>{{/if}}
+{{#if page.content}}<content>{{page.content}}</content>{{/if}}
+{{#if page.selection}}<selection>{{page.selection}}</selection>{{/if}}
+
+</webpage_info>
+
+<user_query>
 {{chat.input}}
-</user_input>
+</user_query>
 """
 
 [explain]

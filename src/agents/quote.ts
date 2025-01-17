@@ -2,7 +2,9 @@ import { AgentContext } from '../types';
 import { BaseAgent } from './base';
 
 export class QuoteContext implements AgentContext {
-  public type: 'selection' | 'page' | 'link' | 'text' | 'title' | 'url' | 'content';
+  public type: 'page.selection' | 'page.title' | 'page.url' | 'page.content' | 'page' | 'chat.input';
+  public usageType?: 'template_var' | 'mention' | null; // 标记变量使用类型：模板变量、用户引用，或未使用
+  public key?: string; // 用于在模板中引用的实际变量名
   public name?: string;
   public selection?: string;
   public pageUrl?: string;
@@ -31,7 +33,7 @@ export class QuoteAgent implements BaseAgent {
   }
   public static getQuoteBySelection(pageUrl: string, selection: string): Promise<QuoteContext> {
     const quote = new QuoteContext();
-    quote.type = 'selection';
+    quote.type = 'page.selection';
     quote.pageUrl = pageUrl;
     quote.selection = selection;
     quote.browserLanguage = navigator.language;
@@ -64,19 +66,19 @@ export class QuoteAgent implements BaseAgent {
   public static promptQuote(quote: QuoteContext): string {
     const quotes: string[] = [];
 
-    if ((quote.type == 'selection' || quote.type == 'page') && quote.selection) {
+    if ((quote.type === 'page.selection' || quote.type === 'page') && quote.selection) {
       quotes.push(`<selection>${quote.selection}</selection>`);
     }
 
-    if ((quote.type == 'title' || quote.type == 'page') && quote.pageTitle) {
+    if ((quote.type === 'page.title' || quote.type === 'page') && quote.pageTitle) {
       quotes.push(`<title>${quote.pageTitle}</title>`);
     }
 
-    if ((quote.type == 'url' || quote.type == 'page') && quote.pageUrl) {
+    if ((quote.type === 'page.url' || quote.type === 'page') && quote.pageUrl) {
       quotes.push(`<url>${quote.pageUrl}</url>`);
     }
 
-    if ((quote.type == 'content' || quote.type == 'page') && quote.pageContent) {
+    if ((quote.type === 'page.content' || quote.type === 'page') && quote.pageContent) {
       quotes.push(`<content>${quote.pageContent}</content>`);
     }
 

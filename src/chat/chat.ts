@@ -7,6 +7,7 @@ import configStorage from '@src/shared/storages/configStorage';
 import { createContext } from 'react';
 import { ToolsPromptInterface, SystemInvisibleMessage, HumanAskMessage } from '../types';
 import { StorageManager } from '@src/utils/StorageManager';
+import { extractUsedVars } from './utils/template-utils';
 
 export interface ChatCoreInterface {
   model: ChatOpenAI;
@@ -105,6 +106,63 @@ export class ChatCoreContext implements ChatCoreInterface {
   }
 
   /**
+   * Process message with mentions and template variables.
+   * Returns the final message following the structure:
+   * <reference> (if has unused mentions)
+   * {template}
+   * {chat.input} (if not used in template)
+   */
+  private processMessage(context: any, framework: ToolsPromptInterface | null, quotes: QuoteContext[]): string {
+    // 1. 提取模板中使用的变量
+    const usedVars = framework ? extractUsedVars(framework.hbs) : new Set<string>();
+
+    // 2. 遍历引用，标记变量使用类型
+    quotes.forEach(quote => {
+      // 如果变量在模板中使用到了，标记为模板变量
+      if (usedVars.has(quote.type || '')) {
+        quote.usageType = 'template_var';
+      }
+      // selection 类型的引用，标记为 mention
+      else {
+        quote.usageType = 'mention';
+      }
+    });
+
+    // 3. 收集未使用的引用，构建 reference 块
+    const unusedMentions = quotes.filter(quote => quote.usageType === 'mention');
+    let referenceBlock = '';
+    if (unusedMentions.length > 0) {
+      const references = unusedMentions
+        .map(quote => QuoteAgent.promptQuote(quote))
+        .filter(Boolean)
+        .join('\n');
+      if (references) {
+        referenceBlock = `<reference>\nBelow are some potentially helpful/relevant pieces of information for figuring out to respond\n${references}\n</reference>`;
+      }
+    }
+
+    // 4. 渲染模板
+    let renderedTemplate = framework?.template(context) || '';
+    renderedTemplate = renderedTemplate.trim();
+
+    // 5. 检查是否需要附加用户输入
+    // 只有当模板中没有使用 chat.input 且用户有输入时，才需要附加
+    let userInput = '';
+    if (context.chat.input) {
+      // 先检查是否有用户输入
+      if (!usedVars.has('chat.input')) {
+        // 再检查模板是否使用了这个输入
+        userInput = context.chat.input;
+      }
+    }
+
+    // 6. 拼接最终消息
+    return [referenceBlock, renderedTemplate, userInput]
+      .filter(Boolean) // 移除空字符串
+      .join('\n\n');
+  }
+
+  /**
    * Asynchronously prompts the user with a specific tool, a list of quotes, and an optional user prompt.
    *
    * @param {ToolsPromptInterface} tool - the specific tool to prompt the user with
@@ -113,11 +171,11 @@ export class ChatCoreContext implements ChatCoreInterface {
    * @return {Promise<void>} a Promise that resolves when the user has responded
    */
   async askWithTool(
-    framework: ToolsPromptInterface,
-    pageContext: QuoteContext,
+    framework: ToolsPromptInterface | null,
+    pageContext: QuoteContext | null,
     quotes: QuoteContext[],
     userPrompt: null | string,
-  ) {
+  ): Promise<void> {
     // Update system message before each request
     const systemPrompt = await StorageManager.getSystemPrompt();
     // Remove old system message if exists
@@ -128,17 +186,17 @@ export class ChatCoreContext implements ChatCoreInterface {
     if (!userPrompt) {
       userPrompt = '';
     }
-    // concat framework prompt with user prompt
-    const quotesPrompts = quotes
-      .map(quote => {
-        return QuoteAgent.promptQuote(quote);
-      })
-      .filter(p => p);
-    if (quotesPrompts.length) {
-      userPrompt = quotesPrompts.join('\n') + '\n' + userPrompt;
-    }
 
-    const context = {
+    // concat framework prompt with user prompt
+    // const quotesPrompts = quotes
+    //   .map(quote => QuoteAgent.promptQuote(quote))
+    //   .filter(Boolean);
+
+    // if (quotesPrompts.length) {
+    //   userPrompt = quotesPrompts.join('\n') + '\n' + userPrompt;
+    // }
+
+    const baseContext = {
       browser: {
         language: pageContext?.browserLanguage,
       },
@@ -150,64 +208,77 @@ export class ChatCoreContext implements ChatCoreInterface {
       },
       chat: {
         language: pageContext?.browserLanguage,
-        input: userPrompt, // user mentions and user inputs
+        input: userPrompt,
       },
     };
-    let prompt = framework?.template(context) || '';
-    prompt = prompt.trim();
 
-    // Prevent users from forgetting to fill in chat.input in the framework.
-    if (userPrompt && !(framework?.hbs.indexOf('{{chat.input}}') > -1)) {
-      prompt += prompt ? '\n' + userPrompt : userPrompt;
-    }
-    if (prompt.trim() == '') {
+    // 使用新的消息处理流程
+    const prompt = this.processMessage(baseContext, framework, quotes);
+
+    if (!prompt || prompt.trim() === '') {
       console.warn('[Askman] prompt is empty, skip sending');
       return;
     }
+
     this.history.push(new HumanMessage({ content: prompt, name: 'human' }));
-    this._onDataListener && setTimeout(() => this._onDataListener(this.history));
+    if (this._onDataListener) {
+      setTimeout(() => this._onDataListener(this.history));
+    }
     return this.stream(this.history);
   }
-  async stream(history) {
-    // console.log('start stream ', new Date());
+  async stream(history: BaseMessage[]): Promise<void> {
     if (this._onDataListener == null) {
       console.warn('no this._onDataListener');
     }
-    const pendingResponse = new AIMessage({ content: 'Just Guessing ...', name: 'ai' });
+
+    const pendingResponse = new AIMessage({ content: 'Just Guessing ...', name: 'hint' });
     let hasResponse = false;
-    setTimeout(() => this.history.push(pendingResponse));
-    this._onDataListener && setTimeout(() => this._onDataListener(this.history));
+    setTimeout(() => {
+      this.history.push(pendingResponse);
+    }, 1);
+
+    if (this._onDataListener) {
+      setTimeout(() => this._onDataListener(this.history), 2);
+    }
+
     let lastError = null;
     try {
       const stream = await this.model.stream(history);
-      // 这里会等一小会
       const chunks = [];
       for await (const chunk of stream) {
         chunks.push(chunk);
-        // console.log(`${chunk.content}|`, new Date());
-        const content = chunks.reduce((acc, cur) => {
-          return acc + cur.content;
-        }, '');
-        if (content.trim() == '') continue;
+        const content = chunks.reduce((acc, cur) => acc + cur.content, '');
+        const name = chunk.name;
+        if (content.trim() === '') continue;
+
         pendingResponse.content = content;
+        pendingResponse.name = name || 'ai';
         hasResponse = true;
-        this._onDataListener && setTimeout(() => this._onDataListener(this.history));
+        if (this._onDataListener) {
+          setTimeout(() => this._onDataListener(this.history));
+        }
       }
     } catch (error) {
       lastError = error;
     }
+
     if (!hasResponse) {
       pendingResponse.content = '(Nothing to Show)';
       if (lastError) {
         pendingResponse.content += '\n' + lastError.message;
       }
-      this._onDataListener && setTimeout(() => this._onDataListener(this.history));
+      if (lastError) {
+        pendingResponse.content += '\n' + lastError.message;
+      }
+      if (this._onDataListener) {
+        setTimeout(() => this._onDataListener(this.history));
+      }
     }
   }
-  setOnDataListener(callback: (_data: BaseMessage[]) => void) {
+  setOnDataListener(callback: (_data: BaseMessage[]) => void): void {
     this._onDataListener = callback;
   }
-  removeOnDataListener() {
+  removeOnDataListener(): void {
     this._onDataListener = null;
   }
 }
