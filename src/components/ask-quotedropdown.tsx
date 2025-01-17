@@ -14,18 +14,10 @@ interface QuoteDropdownProps {
 }
 
 const getQuoteContexts = (): QuoteContext[] => [
-  { type: 'title', pageTitle: document.title, name: 'title' },
-  { type: 'url', pageUrl: window.location.href, name: 'url' },
-  { type: 'content', pageContent: document.body.innerText, name: 'content' },
-  { type: 'selection', selection: window.getSelection()?.toString().trim() || '', name: 'selection' },
-  {
-    type: 'page',
-    pageTitle: document.title,
-    pageUrl: window.location.href,
-    pageContent: document.body.innerText,
-    selection: window.getSelection()?.toString().trim() || '',
-    name: 'page',
-  },
+  { type: 'page.title', pageTitle: document.title, name: 'Page.title' },
+  { type: 'page.url', pageUrl: window.location.href, name: 'Page.url' },
+  { type: 'page.content', pageContent: document.body.innerText, name: 'Page.content' },
+  { type: 'page.selection', selection: window.getSelection()?.toString().trim() || '', name: 'Page.selection' },
 ];
 
 export default function QuoteDropdown({ className, style, onItemClick, initOpen, statusListener }: QuoteDropdownProps) {

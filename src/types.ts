@@ -39,6 +39,7 @@ export interface ChatMessageContext {
   quoteText: string;
   pageUrl: string;
   pageTitle: string;
+  mentions: MentionInfo[];
 }
 
 /* eslint-disable no-unused-vars */
@@ -65,4 +66,18 @@ export interface ToolsPromptInterface {
   name: string;
   hbs: string;
   template: any;
+}
+
+/* eslint-disable no-unused-vars */
+export enum MentionType {
+  UNPROCESSED = 'unprocessed', // mention 未被任何 tool 处理
+  TOOL_PROCESSED = 'tool_processed', // mention 已经被 tool 处理
+  REFERENCE_PROCESSED = 'reference_processed', // mention 被作为 reference 处理
+}
+
+export interface MentionInfo {
+  type: MentionType;
+  content: string;
+  quoteMark: string; // 用于标记该 mention 在文本中的位置
+  processedBy?: string; // 处理该 mention 的 tool 名称
 }
