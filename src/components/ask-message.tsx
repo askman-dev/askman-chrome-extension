@@ -18,6 +18,12 @@ interface AskMessageItem {
   name?: string;
 }
 
+function decodeEntities(text: string): string {
+  const textArea = document.createElement('textarea');
+  textArea.innerHTML = text;
+  return textArea.value;
+}
+
 function AskMessage(props: AskMessageItem) {
   const { type, text, name } = props;
   const [codeHover, setCodeHover] = useState<number | null>(null);
@@ -53,12 +59,16 @@ function AskMessage(props: AskMessageItem) {
       } else {
         return (
           <div key={`text-${index}`}>
-            {block.content.map((line, lineIndex) => (
-              <React.Fragment key={`line-${lineIndex}`}>
-                {line}
-                {lineIndex < block.content.length - 1 && <br />}
-              </React.Fragment>
-            ))}
+            {block.content.map((line, lineIndex) => {
+              // 解码 HTML 实体
+              const decodedLine = decodeEntities(line);
+              return (
+                <React.Fragment key={`line-${lineIndex}`}>
+                  {decodedLine}
+                  {lineIndex < block.content.length - 1 && <br />}
+                </React.Fragment>
+              );
+            })}
           </div>
         );
       }
