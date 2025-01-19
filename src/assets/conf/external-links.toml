@@ -1,0 +1,13 @@
+# External Links Configuration
+# This file contains all external links used in the Askman Chrome extension
+
+[docs]
+# Documentation links
+home = "https://docs.qq.com/aio/DWUxocmZJV05GQXF5?p=PaTh0e2q3XbD8s7W4xJGnb#wXyP39ceAltKZiZ02AZpR0"
+issues = "https://github.com/askman-dev/askman-chrome-extension/issues"
+discussions = "https://github.com/askman-dev/askman-chrome-extension/discussions"
+
+[social]
+# Social media links
+wechat_id = "nob301"
+wechat_qr = "https://github.com/askman-dev/askman-chrome-extension/raw/refs/heads/main/src/assets/img/askman-group.png" 

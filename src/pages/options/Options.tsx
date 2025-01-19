@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ConfigManager from '@src/components/config/ConfigManager';
 import {
   USER_TOOLS_KEY,
@@ -7,12 +7,20 @@ import {
   USER_PREFERENCES_KEY,
 } from '@src/utils/StorageManager';
 import { getVersion } from '@src/utils/version';
+import ExternalLinksManager, { ExternalLinks } from '@src/utils/ExternalLinksManager';
 
 const Options: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Models');
   const [showWechatImage, setShowWechatImage] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [links, setLinks] = useState<ExternalLinks | null>(null);
   const version = getVersion();
+
+  useEffect(() => {
+    ExternalLinksManager.loadLinks()
+      .then(setLinks)
+      .catch(error => console.error('Failed to load external links:', error));
+  }, []);
 
   const tabs = ['Models', 'System Prompt', 'Prompts', 'Preferences'];
 
@@ -63,7 +71,7 @@ const Options: React.FC = () => {
           Askman<span className="font-normal text-gray-500">(v{version})</span>
           <div className="flex items-center">
             <a
-              href="https://github.com/askman-dev/askman-chrome-extension/issues"
+              href={links?.docs.issues}
               className="ml-2 bg-black font-normal text-white px-2 py-1 text-sm rounded"
               target="_blank"
               rel="noopener noreferrer">
@@ -71,14 +79,13 @@ const Options: React.FC = () => {
             </a>
             <div className="relative ml-2 flex items-center">
               <button
-                title="WeChat ID: nob301"
                 className="bg-green-500 text-white px-2 py-1 text-sm rounded hover:bg-green-600"
                 onMouseEnter={() => setShowWechatImage(true)}
                 onMouseLeave={() => {
                   setShowWechatImage(false);
                   setImageLoaded(false);
                 }}>
-                WeChat
+                WeChat: {links?.social.wechat_id}
               </button>
               {showWechatImage && (
                 <div className="absolute left-0 top-full mt-2 z-50 w-[150px] h-[150px] bg-white rounded shadow-lg p-4">
@@ -88,7 +95,7 @@ const Options: React.FC = () => {
                     </div>
                   )}
                   <img
-                    src="https://github.com/askman-dev/askman-chrome-extension/raw/refs/heads/main/src/assets/img/askman-group.png"
+                    src={links?.social.wechat_qr}
                     alt="WeChat QR Code"
                     className={`w-full h-full object-contain rounded transition-opacity duration-300 ${
                       imageLoaded ? 'opacity-100' : 'opacity-0'
@@ -97,6 +104,13 @@ const Options: React.FC = () => {
                   />
                 </div>
               )}
+              <a
+                href={links?.docs.home}
+                className="ml-2 bg-blue-500 text-white px-2 py-1 text-sm rounded hover:bg-blue-600"
+                target="_blank"
+                rel="noopener noreferrer">
+                Docs
+              </a>
             </div>
           </div>
         </h1>
