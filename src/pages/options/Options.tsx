@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import ConfigManager from '@src/components/config/ConfigManager';
-import { USER_TOOLS_KEY, USER_MODELS_KEY, USER_CHAT_PRESETS_KEY, USER_PREFERENCES_KEY } from '@src/utils/StorageManager';
+import {
+  USER_TOOLS_KEY,
+  USER_MODELS_KEY,
+  USER_CHAT_PRESETS_KEY,
+  USER_PREFERENCES_KEY,
+} from '@src/utils/StorageManager';
 import { getVersion } from '@src/utils/version';
 
 const Options: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Models');
+  const [showWechatImage, setShowWechatImage] = useState(false);
   const version = getVersion();
 
   const tabs = ['Models', 'System Prompt', 'Prompts', 'Preferences'];
@@ -50,13 +56,32 @@ const Options: React.FC = () => {
       <header className="flex justify-between items-center p-8 pl-16 pr-16 mb-4 bg-white shadow">
         <h1 className="text-xl font-bold flex items-center">
           Askman<span className="font-normal text-gray-500">(v{version})</span>
-          <a
-            href="https://github.com/askman-dev/askman-chrome-extension/discussions"
-            className="ml-2 bg-black font-normal text-white px-2 py-1 text-sm rounded"
-            target="_blank"
-            rel="noopener noreferrer">
-            Feedback
-          </a>
+          <div className="flex items-center">
+            <a
+              href="https://github.com/askman-dev/askman-chrome-extension/issues"
+              className="ml-2 bg-black font-normal text-white px-2 py-1 text-sm rounded"
+              target="_blank"
+              rel="noopener noreferrer">
+              Roadmap
+            </a>
+            <div className="relative ml-2 flex items-center">
+              <button
+                className="bg-green-500 text-white px-2 py-1 text-sm rounded hover:bg-green-600"
+                onMouseEnter={() => setShowWechatImage(true)}
+                onMouseLeave={() => setShowWechatImage(false)}>
+                WeChat
+              </button>
+              {showWechatImage && (
+                <div className="absolute left-0 top-full mt-2 z-50">
+                  <img
+                    src="https://github.com/askman-dev/askman-chrome-extension/raw/refs/heads/main/src/assets/img/askman-group.png"
+                    alt="WeChat QR Code"
+                    className="w-48 h-48 object-contain shadow-lg rounded"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
         </h1>
       </header>
 
