@@ -19,7 +19,6 @@ import {
 } from '../types';
 import QuoteDropdown from './ask-quotedropdown';
 import KeyBinding from './icons';
-import configStorage from '../shared/storages/configStorage';
 import SystemPromptDropdown from './system-prompt-dropdown';
 import { StorageManager } from '../utils/StorageManager';
 import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
@@ -88,7 +87,6 @@ function AskPanel(props: AskPanelProps) {
   const [userTools, setUserTools] = useState<ToolsPromptInterface>();
   const [isToolDropdownOpen, setIsToolDropdownOpen] = useState(false);
   const [isQuoteDropdownOpen, setIsQuoteDropdownOpen] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('free'); // 添加状态来跟踪选中的模型
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ left: 0, top: 0 });
   const [hoveredQuoteIndex, setHoveredQuoteIndex] = useState<number | null>(null);
@@ -316,15 +314,20 @@ function AskPanel(props: AskPanelProps) {
     setInitQuotes(prevQuotes => [...prevQuotes, newQuote]);
   };
 
-  async function onSend(overrideTool?: ToolsPromptInterface) {
-    await chatContext.updateModelByName(selectedModel);
+  async function onSend(overrideTool?: ToolsPromptInterface, overrideSystem?: string, overrideModel?: string) {
     // Use overrideTool if provided, otherwise fall back to userTools state
     const toolToUse = overrideTool || userTools;
 
     if (toolToUse) {
-      chatContext.askWithTool(toolToUse, pageContext, initQuotes, userInput.trim());
+      chatContext.askWithTool(toolToUse, pageContext, initQuotes, userInput.trim(), {
+        overrideSystem,
+        overrideModel,
+      });
     } else {
-      chatContext.askWithQuotes(initQuotes!, userInput.trim());
+      chatContext.askWithQuotes(initQuotes!, userInput.trim(), {
+        overrideSystem,
+        overrideModel,
+      });
     }
 
     if (messagesEndRef.current) {
@@ -373,21 +376,6 @@ function AskPanel(props: AskPanelProps) {
     // 设置下拉菜单位置
     setDropdownPosition({ left, top });
   }
-
-  // 在组件加载时读取存储的模型
-  useEffect(() => {
-    const loadSelectedModel = async () => {
-      const savedModel = await configStorage.getCurrentModel();
-      setSelectedModel(savedModel);
-    };
-    loadSelectedModel();
-  }, []);
-
-  // 修改模型选择的处理函数
-  const handleModelSelect = async (model: string) => {
-    setSelectedModel(model);
-    await configStorage.setModel(model);
-  };
 
   // myObject.test('你是谁');
   // console.log('history = ' + JSON.stringify(history));
@@ -598,24 +586,31 @@ function AskPanel(props: AskPanelProps) {
                 className="relative inline-block text-left"
                 statusListener={updateSystemPromptDropdownStatus}
                 initOpen={isSystemPromptDropdownOpen}
+                onItemClick={(preset, withCommand) => {
+                  if (withCommand) {
+                    onSend(undefined, preset.hbs); // 按了 Command 键直接发送，使用 hbs 作为临时系统提示词
+                  }
+                }}
               />
               <ToolDropdown
-                displayName={userTools?.name || 'Frame'}
                 initOpen={isToolDropdownOpen}
                 statusListener={updateToolDropdownStatus}
                 className="inline-block relative"
                 onItemClick={(item, withCommand) => {
                   setUserTools(item);
                   if (withCommand) {
-                    onSend(item);
+                    onSend(item); // 按了 Command 键直接发送，使用临时工具
                   }
                 }}
               />
               <ModelDropdown
-                displayName={selectedModel}
                 initOpen={isModelDropdownOpen}
                 className="relative"
-                onItemClick={handleModelSelect}
+                onItemClick={(model, withCommand) => {
+                  if (withCommand) {
+                    onSend(undefined, undefined, model); // 直接传递 model，不再包装成对象
+                  }
+                }}
                 statusListener={updateModelDropdownStatus}
               />
               <div className="grow"></div>

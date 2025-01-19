@@ -60,13 +60,26 @@ export function BaseDropdown({
   }, [isOpened, selectedIndex]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.metaKey) {
+    // Command 或 Ctrl 按下
+    if (e.metaKey || e.ctrlKey) {
       setIsCommandPressed(true);
+    }
+
+    // Enter 时直接发送
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      const selectedItemIndex = selectedIndex >= 0 ? selectedIndex : 0;
+      const selectedItem = items[selectedItemIndex];
+      if (selectedItem) {
+        onItemClick(selectedItem, isCommandPressed);
+        statusListener(false);
+      }
     }
   };
 
   const handleKeyUp = (e: React.KeyboardEvent) => {
-    if (!e.metaKey) {
+    if (!e.metaKey && !e.ctrlKey) {
       setIsCommandPressed(false);
     }
   };

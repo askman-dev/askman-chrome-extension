@@ -8,7 +8,6 @@ import { BaseDropdown } from './base/BaseDropdown';
 import { useToolPreview } from '@src/shared/hooks/useToolPreview';
 
 interface ToolDropdownProps {
-  displayName: string;
   className: string;
   onItemClick: (_tool: ToolsPromptInterface, _withCommand?: boolean) => void;
   statusListener: (_status: boolean) => void;
@@ -32,16 +31,10 @@ for (const k in defaultTools) {
 
 export { tools };
 
-export default function ToolDropdown({
-  displayName,
-  className,
-  onItemClick,
-  initOpen,
-  statusListener,
-}: ToolDropdownProps) {
+export default function ToolDropdown({ className, onItemClick, initOpen, statusListener }: ToolDropdownProps) {
   const [allTools, setAllTools] = useState<ToolsPromptInterface[]>([]);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
-  const [selectedToolName, setSelectedToolName] = useState<string>(displayName);
+  const [selectedToolName, setSelectedToolName] = useState<string>('Frame'); // 默认显示 Frame
   const { showPreview, previewPos, previewContent, showToolPreview, hideToolPreview } = useToolPreview();
   const baseDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -78,9 +71,12 @@ export default function ToolDropdown({
   }, []);
 
   const handleToolClick = async (tool: ToolsPromptInterface, isCommandPressed: boolean) => {
-    await StorageManager.setCurrentTool(tool.id);
-    setSelectedTool(tool.id);
-    setSelectedToolName(tool.name);
+    // Command+Enter 不保存设置
+    if (!isCommandPressed) {
+      await StorageManager.setCurrentTool(tool.id);
+      setSelectedTool(tool.id);
+      setSelectedToolName(tool.name);
+    }
     onItemClick(tool, isCommandPressed);
     hideToolPreview();
   };
