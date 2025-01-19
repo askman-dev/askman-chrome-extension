@@ -3,9 +3,8 @@ import configStorage from '@src/shared/storages/configStorage';
 import { BaseDropdown } from '../base/BaseDropdown';
 
 interface ModelDropdownProps {
-  displayName: string;
   className?: string;
-  onItemClick: (_model: string, _isCommandPressed: boolean) => void;
+  onItemClick: (_model: string, _withCommand?: boolean) => void;
   statusListener: (_status: boolean) => void;
   initOpen: boolean;
 }
@@ -17,15 +16,10 @@ interface ModelItem {
   provider: string;
 }
 
-export default function ModelDropdown({
-  displayName,
-  initOpen,
-  className,
-  onItemClick,
-  statusListener,
-}: ModelDropdownProps) {
+export default function ModelDropdown({ className, onItemClick, statusListener, initOpen }: ModelDropdownProps) {
   const [models, setModels] = useState<ModelItem[]>([]);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [selectedModelName, setSelectedModelName] = useState<string>('free'); // 默认显示 free
   const baseDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,7 +41,13 @@ export default function ModelDropdown({
       setModels(modelArray);
 
       const currentModel = await configStorage.getCurrentModel();
-      setSelectedModel(currentModel || null);
+      if (currentModel) {
+        setSelectedModel(currentModel);
+        const model = modelArray.find(m => m.id === currentModel);
+        if (model) {
+          setSelectedModelName(model.name);
+        }
+      }
     };
 
     fetchModels().catch(error => {
@@ -56,8 +56,12 @@ export default function ModelDropdown({
   }, []);
 
   const handleModelClick = async (model: ModelItem, isCommandPressed: boolean) => {
-    await configStorage.setCurrentModel(model.id);
-    setSelectedModel(model.id);
+    // Command+Enter 不保存设置
+    if (!isCommandPressed) {
+      await configStorage.setCurrentModel(model.id);
+      setSelectedModel(model.id);
+      setSelectedModelName(model.name);
+    }
     onItemClick(model.name, isCommandPressed);
   };
 
@@ -89,7 +93,7 @@ export default function ModelDropdown({
   return (
     <div ref={baseDropdownRef} className="relative">
       <BaseDropdown
-        displayName={displayName}
+        displayName={selectedModelName}
         className={className}
         onItemClick={handleModelClick}
         statusListener={statusListener}

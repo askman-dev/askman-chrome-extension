@@ -8,12 +8,14 @@ interface SystemPromptDropdownProps {
   className: string;
   statusListener?: (_status: boolean) => void;
   initOpen?: boolean;
+  onItemClick?: (_preset: SystemPresetInterface, _withCommand?: boolean) => void;
 }
 
 export default function SystemPromptDropdown({
   className,
   statusListener = () => {},
   initOpen = false,
+  onItemClick = () => {},
 }: SystemPromptDropdownProps) {
   const [systemPresets, setSystemPresets] = useState<SystemPresetInterface[]>([]);
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
@@ -36,12 +38,16 @@ export default function SystemPromptDropdown({
     fetchPresets();
   }, []);
 
-  const handleSystemPresetClick = async (preset: SystemPresetInterface) => {
+  const handleSystemPresetClick = async (preset: SystemPresetInterface, isCommandPressed?: boolean) => {
     try {
-      await StorageManager.setCurrentSystemPreset(preset.name);
-      setSelectedPreset(preset.name);
+      // Command+Enter 不保存设置
+      if (!isCommandPressed) {
+        await StorageManager.setCurrentSystemPreset(preset.name);
+        setSelectedPreset(preset.name);
+      }
       hideToolPreview();
       statusListener(false);
+      onItemClick(preset, isCommandPressed);
     } catch (error) {
       console.error('Error setting system preset:', error);
     }
@@ -54,7 +60,7 @@ export default function SystemPromptDropdown({
       } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
       onClick={e => {
         e.preventDefault();
-        handleSystemPresetClick(preset);
+        handleSystemPresetClick(preset, e.metaKey || e.ctrlKey);
         statusListener(false);
       }}
       onMouseEnter={e => {

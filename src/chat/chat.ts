@@ -9,16 +9,22 @@ import { ToolsPromptInterface, SystemInvisibleMessage, HumanAskMessage } from '.
 import { StorageManager } from '@src/utils/StorageManager';
 import { extractUsedVars } from './utils/template-utils';
 
+export interface SendOptions {
+  overrideSystem?: string;
+  overrideModel?: string;
+}
+
 export interface ChatCoreInterface {
   model: ChatOpenAI;
   history: BaseMessage[];
   init(): void;
-  askWithQuotes(_quotes: QuoteContext[], _userPrompt: null | string): Promise<void>;
+  askWithQuotes(_quotes: QuoteContext[], _userPrompt: null | string, _options?: SendOptions): Promise<void>;
   askWithTool(
     _tool: ToolsPromptInterface,
     _pageContext: QuoteContext,
     _quotes: QuoteContext[],
     _userPrompt: null | string,
+    _options?: SendOptions,
   ): Promise<void>;
   setOnDataListener(_callback: (_data: BaseMessage[]) => void): void;
   removeOnDataListener(): void;
@@ -65,11 +71,11 @@ export class ChatCoreContext implements ChatCoreInterface {
     return this;
   }
   /**
-   * 根据模型名称更新模型
+   * 根据模型名称创建对应的模型客户端
    * @param modelName 模型名称 {provider}/{model} 如：openai/gpt-3.5-turbo
    * @returns
    */
-  async updateModelByName(modelName: string) {
+  async createModelClient(modelName: string) {
     // split by '/'
     const [provider, ...rest] = modelName.split('/');
     const model = rest.join('/');
@@ -101,8 +107,8 @@ export class ChatCoreContext implements ChatCoreInterface {
     }
     return this;
   }
-  async askWithQuotes(quotes: QuoteContext[], userPrompt: null | string) {
-    return this.askWithTool(null, null, quotes, userPrompt);
+  async askWithQuotes(quotes: QuoteContext[], userPrompt: null | string, options?: SendOptions) {
+    return this.askWithTool(null, null, quotes, userPrompt, options);
   }
 
   /**
@@ -175,9 +181,14 @@ export class ChatCoreContext implements ChatCoreInterface {
     pageContext: QuoteContext | null,
     quotes: QuoteContext[],
     userPrompt: null | string,
+    options?: SendOptions,
   ): Promise<void> {
-    // Update system message before each request
-    const systemPrompt = await StorageManager.getSystemPrompt();
+    // 1. 更新当前模型：使用临时模型或存储的模型
+    const currentModel = options?.overrideModel || (await configStorage.getCurrentModel());
+    await this.createModelClient(currentModel);
+
+    // 2. 系统提示词：临时提示词优先于存储的提示词
+    const systemPrompt = options?.overrideSystem || (await StorageManager.getSystemPrompt());
     // Remove old system message if exists
     this.history = this.history.filter(msg => !(msg instanceof SystemInvisibleMessage));
     // Add new system message
@@ -186,15 +197,6 @@ export class ChatCoreContext implements ChatCoreInterface {
     if (!userPrompt) {
       userPrompt = '';
     }
-
-    // concat framework prompt with user prompt
-    // const quotesPrompts = quotes
-    //   .map(quote => QuoteAgent.promptQuote(quote))
-    //   .filter(Boolean);
-
-    // if (quotesPrompts.length) {
-    //   userPrompt = quotesPrompts.join('\n') + '\n' + userPrompt;
-    // }
 
     const baseContext = {
       browser: {
