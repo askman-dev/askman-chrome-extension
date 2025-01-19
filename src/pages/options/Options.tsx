@@ -11,9 +11,14 @@ import { getVersion } from '@src/utils/version';
 const Options: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Models');
   const [showWechatImage, setShowWechatImage] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const version = getVersion();
 
   const tabs = ['Models', 'System Prompt', 'Prompts', 'Preferences'];
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
 
   const getConfigProps = () => {
     switch (activeTab) {
@@ -66,17 +71,29 @@ const Options: React.FC = () => {
             </a>
             <div className="relative ml-2 flex items-center">
               <button
+                title="WeChat ID: nob301"
                 className="bg-green-500 text-white px-2 py-1 text-sm rounded hover:bg-green-600"
                 onMouseEnter={() => setShowWechatImage(true)}
-                onMouseLeave={() => setShowWechatImage(false)}>
+                onMouseLeave={() => {
+                  setShowWechatImage(false);
+                  setImageLoaded(false);
+                }}>
                 WeChat
               </button>
               {showWechatImage && (
-                <div className="absolute left-0 top-full mt-2 z-50">
+                <div className="absolute left-0 top-full mt-2 z-50 w-[150px] h-[150px] bg-white rounded shadow-lg p-4">
+                  {!imageLoaded && (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-2 border-green-500 border-t-transparent"></div>
+                    </div>
+                  )}
                   <img
                     src="https://github.com/askman-dev/askman-chrome-extension/raw/refs/heads/main/src/assets/img/askman-group.png"
                     alt="WeChat QR Code"
-                    className="w-48 h-48 object-contain shadow-lg rounded"
+                    className={`w-full h-full object-contain rounded transition-opacity duration-300 ${
+                      imageLoaded ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    onLoad={handleImageLoad}
                   />
                 </div>
               )}
