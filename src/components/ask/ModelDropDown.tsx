@@ -22,6 +22,14 @@ export default function ModelDropdown({ className, onItemClick, statusListener, 
   const [selectedModelName, setSelectedModelName] = useState<string>('free'); // 默认显示 free
   const baseDropdownRef = useRef<HTMLDivElement>(null);
 
+  // 辅助函数：简化模型名称显示
+  const simplifyModelName = (name: string): string => {
+    if (!name) return name;
+    const parts = name.split('/').filter(part => part.trim() !== '');
+    if (parts.length === 0) return name;
+    return parts[parts.length - 1] || parts[parts.length - 2] || name;
+  };
+
   useEffect(() => {
     const fetchModels = async () => {
       const userModels = (await configStorage.getModelConfig()) || [];
@@ -93,7 +101,7 @@ export default function ModelDropdown({ className, onItemClick, statusListener, 
   return (
     <div ref={baseDropdownRef} className="relative">
       <BaseDropdown
-        displayName={selectedModelName}
+        displayName={simplifyModelName(selectedModelName)}
         className={className}
         onItemClick={handleModelClick}
         statusListener={statusListener}
