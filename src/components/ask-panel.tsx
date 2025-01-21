@@ -267,19 +267,19 @@ function AskPanel(props: AskPanelProps) {
           e.stopPropagation();
 
           if (e.key === 'ArrowRight') {
-            if (isToolDropdownOpen) {
+            if (isSystemPromptDropdownOpen) {
               showModelDropdown();
             } else if (isModelDropdownOpen) {
-              showSystemPromptDropdown();
-            } else if (isSystemPromptDropdownOpen) {
               showToolDropdown();
+            } else if (isToolDropdownOpen) {
+              showSystemPromptDropdown();
             }
           } else if (e.key === 'ArrowLeft') {
-            if (isToolDropdownOpen) {
-              showSystemPromptDropdown();
-            } else if (isModelDropdownOpen) {
+            if (isSystemPromptDropdownOpen) {
               showToolDropdown();
-            } else if (isSystemPromptDropdownOpen) {
+            } else if (isModelDropdownOpen) {
+              showSystemPromptDropdown();
+            } else if (isToolDropdownOpen) {
               showModelDropdown();
             }
           }
@@ -538,17 +538,26 @@ function AskPanel(props: AskPanelProps) {
                   }
                   // 检测左右方向键
                   if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                    if (isToolDropdownOpen || isModelDropdownOpen) {
+                    if (isToolDropdownOpen || isModelDropdownOpen || isSystemPromptDropdownOpen) {
                       e.preventDefault();
                       e.stopPropagation();
-                      if (isToolDropdownOpen && e.key === 'ArrowRight') {
-                        showModelDropdown();
-                      } else if (isModelDropdownOpen && e.key === 'ArrowRight') {
-                        showToolDropdown();
-                      } else if (isToolDropdownOpen && e.key === 'ArrowLeft') {
-                        showModelDropdown();
-                      } else if (isModelDropdownOpen && e.key === 'ArrowLeft') {
-                        showToolDropdown();
+
+                      if (e.key === 'ArrowRight') {
+                        if (isSystemPromptDropdownOpen) {
+                          showModelDropdown();
+                        } else if (isModelDropdownOpen) {
+                          showToolDropdown();
+                        } else if (isToolDropdownOpen) {
+                          showSystemPromptDropdown();
+                        }
+                      } else if (e.key === 'ArrowLeft') {
+                        if (isSystemPromptDropdownOpen) {
+                          showToolDropdown();
+                        } else if (isModelDropdownOpen) {
+                          showSystemPromptDropdown();
+                        } else if (isToolDropdownOpen) {
+                          showModelDropdown();
+                        }
                       }
                       return;
                     }
