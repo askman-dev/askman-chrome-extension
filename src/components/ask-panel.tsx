@@ -92,7 +92,6 @@ function AskPanel(props: AskPanelProps) {
   const [isSystemPromptDropdownOpen, setIsSystemPromptDropdownOpen] = useState(false);
 
   const showToolDropdown = () => {
-    // console.log('isToolDropdownOpen = ' + isToolDropdownOpen, 'set to true');
     setIsToolDropdownOpen(true);
     setIsQuoteDropdownOpen(false);
     setIsModelDropdownOpen(false);
@@ -388,6 +387,21 @@ function AskPanel(props: AskPanelProps) {
           : 'w-[473px] min-w-80 max-w-lg min-h-[155px]',
         `${askPanelVisible ? 'visible' : 'invisible'}`,
       )}
+      onKeyDown={e => {
+        if (
+          e.key === 'Escape' &&
+          (isQuoteDropdownOpen || isToolDropdownOpen || isModelDropdownOpen || isSystemPromptDropdownOpen)
+        ) {
+          setIsQuoteDropdownOpen(false);
+          setIsToolDropdownOpen(false);
+          setIsModelDropdownOpen(false);
+          setIsSystemPromptDropdownOpen(false);
+          inputRef.current?.focus();
+          e.stopPropagation();
+          e.preventDefault();
+        }
+      }}
+      tabIndex={-1}
       {...rest}>
       <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between">
         <span>
@@ -492,7 +506,28 @@ function AskPanel(props: AskPanelProps) {
                 onKeyDown={e => {
                   // 检测 ESC 键
                   if (e.key === 'Escape') {
-                    if (isQuoteDropdownOpen || isToolDropdownOpen || isModelDropdownOpen) {
+                    console.log('ESC key detected in textarea', {
+                      isQuoteDropdownOpen,
+                      isToolDropdownOpen,
+                      isModelDropdownOpen,
+                      isSystemPromptDropdownOpen,
+                    });
+                    if (
+                      isQuoteDropdownOpen ||
+                      isToolDropdownOpen ||
+                      isModelDropdownOpen ||
+                      isSystemPromptDropdownOpen
+                    ) {
+                      setIsQuoteDropdownOpen(false);
+                      setIsToolDropdownOpen(false);
+                      setIsModelDropdownOpen(false);
+                      setIsSystemPromptDropdownOpen(false);
+                      e.stopPropagation();
+                      e.preventDefault();
+                      return;
+                    } else {
+                      setAskPanelVisible(false);
+                      onHide();
                       e.stopPropagation();
                       e.preventDefault();
                       return;

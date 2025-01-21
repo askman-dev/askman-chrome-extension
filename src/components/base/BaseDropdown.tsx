@@ -67,6 +67,15 @@ export function BaseDropdown({
       setIsCommandPressed(true);
     }
 
+    // ESC 键处理
+    if (e.key === 'Escape' && isOpened) {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsOpen(false);
+      statusListener(false);
+      return;
+    }
+
     // Enter 时直接发送
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -199,6 +208,14 @@ export function BaseDropdown({
             className={`absolute ${
               align === 'left' ? 'left-0' : 'right-0'
             } mt-0 min-w-[10rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10`}
+            onKeyDown={e => {
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsOpen(false);
+                statusListener(false);
+              }
+            }}
             onMouseEnter={() => {
               setIsOpen(true);
             }}
