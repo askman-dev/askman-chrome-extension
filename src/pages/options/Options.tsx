@@ -109,7 +109,7 @@ const Options: React.FC = () => {
                 className="ml-2 bg-blue-500 text-white px-2 py-1 text-sm rounded hover:bg-blue-600"
                 target="_blank"
                 rel="noopener noreferrer">
-                Docs
+                文档
               </a>
             </div>
           </div>
