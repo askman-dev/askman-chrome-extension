@@ -22,6 +22,7 @@ import SystemPromptDropdown from './system-prompt-dropdown';
 import { StorageManager } from '../utils/StorageManager';
 import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
 import { SCROLLBAR_STYLES_HIDDEN_X } from '../styles/common';
+import { HumanMessage } from '@langchain/core/messages';
 
 interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -77,7 +78,7 @@ function AskPanel(props: AskPanelProps) {
   const [userInput, setUserInput] = useState<string>('');
   const [askPanelVisible, setAskPanelVisible] = useState<boolean>(visible);
   //TODO 需要定义一个可渲染、可序列号的类型，疑似是 StoredMessage
-  const [history, setHistory] = useState<{ id: string; name: string; type: string; text: string }[]>([]);
+  const [history, setHistory] = useState<{ id: string; role: string; type: string; text: string }[]>([]);
   const [initQuotes, setInitQuotes] = useState<Array<QuoteContext>>([]);
   const [pageContext, setPageContext] = useState<QuoteContext>(new QuoteContext());
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -198,15 +199,25 @@ function AskPanel(props: AskPanelProps) {
               ),
           )
           .map((message, idx) => {
+            let role = 'assistant';
+            if (message instanceof HumanMessage) {
+              role = 'user';
+            }
             if (message instanceof HumanAskMessage) {
-              return { type: 'text', id: `history-${idx}`, text: message.rendered, name: message.name };
+              return {
+                type: 'text',
+                id: `history-${idx}`,
+                text: message.rendered,
+                role: role,
+                name: 'HumanAskMessage',
+              };
             } else if (typeof message.content == 'string') {
-              return { type: 'text', id: `history-${idx}`, text: message.content, name: message.name };
+              return { type: 'text', id: `history-${idx}`, text: message.content, role: role, name: 'AIMessage' };
             } else if (message.content instanceof Array) {
               return {
                 type: 'text',
                 id: `history-${idx}`,
-                name: message.name,
+                role: role,
                 text: message.content.reduce((acc, cur) => {
                   if (cur.type == 'text') {
                     return acc + '\n' + cur.text;
@@ -436,9 +447,9 @@ function AskPanel(props: AskPanelProps) {
         </button>
       </div>
       <div className={classNames('py-2 mb-2', SCROLLBAR_STYLES_HIDDEN_X, isMaximized ? 'flex-grow' : 'max-h-80')}>
-        {history.map(message => (
-          <AskMessage key={message.id} {...message} />
-        ))}
+        {history.map(message => {
+          return <AskMessage key={message.id} {...message} />;
+        })}
 
         {history.length > 0 && (
           <div className="pt-32">

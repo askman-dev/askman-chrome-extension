@@ -53,7 +53,7 @@ export class ChatCoreContext implements ChatCoreInterface {
   private async initSystemMessage() {
     try {
       const systemPrompt = await StorageManager.getSystemPrompt();
-      this.history.push(new SystemInvisibleMessage(systemPrompt));
+      this.history.push(new SystemInvisibleMessage(systemPrompt.content));
     } catch (e) {
       console.error('Failed to initialize system message:', e);
     }
@@ -188,7 +188,7 @@ export class ChatCoreContext implements ChatCoreInterface {
     await this.createModelClient(currentModel);
 
     // 2. 系统提示词：临时提示词优先于存储的提示词
-    const systemPrompt = options?.overrideSystem || (await StorageManager.getSystemPrompt());
+    const systemPrompt = options?.overrideSystem || (await StorageManager.getSystemPrompt()).content;
     // Remove old system message if exists
     this.history = this.history.filter(msg => !(msg instanceof SystemInvisibleMessage));
     // Add new system message
@@ -222,7 +222,7 @@ export class ChatCoreContext implements ChatCoreInterface {
       return;
     }
 
-    this.history.push(new HumanMessage({ content: prompt, name: 'human' }));
+    this.history.push(new HumanMessage({ content: prompt }));
     if (this._onDataListener) {
       setTimeout(() => this._onDataListener(this.history));
     }
@@ -233,7 +233,7 @@ export class ChatCoreContext implements ChatCoreInterface {
       console.warn('no this._onDataListener');
     }
 
-    const pendingResponse = new AIMessage({ content: 'Just Guessing ...', name: 'hint' });
+    const pendingResponse = new AIMessage({ content: 'Thinking ...' });
     let hasResponse = false;
     setTimeout(() => {
       this.history.push(pendingResponse);
@@ -250,11 +250,11 @@ export class ChatCoreContext implements ChatCoreInterface {
       for await (const chunk of stream) {
         chunks.push(chunk);
         const content = chunks.reduce((acc, cur) => acc + cur.content, '');
-        const name = chunk.name;
+        // const name = chunk.name;
         if (content.trim() === '') continue;
 
         pendingResponse.content = content;
-        pendingResponse.name = name || 'ai';
+        // pendingResponse.name = name || 'ai';
         hasResponse = true;
         if (this._onDataListener) {
           setTimeout(() => this._onDataListener(this.history));
