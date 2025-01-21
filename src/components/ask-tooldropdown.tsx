@@ -12,6 +12,7 @@ interface ToolDropdownProps {
   onItemClick: (_tool: ToolsPromptInterface, _withCommand?: boolean) => void;
   statusListener: (_status: boolean) => void;
   initOpen: boolean;
+  buttonDisplay?: string;
 }
 
 const tools: ToolsPromptInterface[] = [];
@@ -31,7 +32,13 @@ for (const k in defaultTools) {
 
 export { tools };
 
-export default function ToolDropdown({ className, onItemClick, initOpen, statusListener }: ToolDropdownProps) {
+export default function ToolDropdown({
+  className,
+  onItemClick,
+  initOpen,
+  statusListener,
+  buttonDisplay,
+}: ToolDropdownProps) {
   const [allTools, setAllTools] = useState<ToolsPromptInterface[]>([]);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [selectedToolName, setSelectedToolName] = useState<string>('Frame'); // 默认显示 Frame
@@ -71,8 +78,8 @@ export default function ToolDropdown({ className, onItemClick, initOpen, statusL
   }, []);
 
   const handleToolClick = async (tool: ToolsPromptInterface, isCommandPressed: boolean) => {
-    // Command+Enter 不保存设置
-    if (!isCommandPressed) {
+    // TODO: Use cmd to pin the tool, it's not working now
+    if (isCommandPressed) {
       await StorageManager.setCurrentTool(tool.id);
       setSelectedTool(tool.id);
       setSelectedToolName(tool.name);
@@ -107,7 +114,7 @@ export default function ToolDropdown({ className, onItemClick, initOpen, statusL
             className={`ml-2 opacity-0 transition-all duration-100 ${active || 'group-hover:opacity-100'} ${
               active && 'opacity-100'
             }`}>
-            [{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + enter]
+            [{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Enter to Pin]
           </span>
         </span>
       </button>
@@ -126,6 +133,8 @@ export default function ToolDropdown({ className, onItemClick, initOpen, statusL
         selectedId={selectedTool}
         shortcutKey={navigator.platform.includes('Mac') ? '⌘ K' : 'Ctrl K'}
         renderItem={renderToolItem}
+        align="right"
+        buttonDisplay={buttonDisplay}
       />
       {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
     </div>

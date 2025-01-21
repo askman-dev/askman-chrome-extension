@@ -20,6 +20,7 @@ export interface BaseDropdownProps {
   selectedId?: string;
   showShortcut?: boolean;
   align?: 'left' | 'right';
+  buttonDisplay?: string;
 }
 
 export function BaseDropdown({
@@ -34,6 +35,7 @@ export function BaseDropdown({
   selectedId,
   showShortcut = true,
   align = 'left',
+  buttonDisplay,
 }: BaseDropdownProps) {
   const [isOpened, setIsOpen] = useState(initOpen);
   const [isCommandPressed, setIsCommandPressed] = useState(false);
@@ -174,7 +176,11 @@ export function BaseDropdown({
                   </div>
                 </div>
                 {showShortcut && <span className="flex-shrink-0 pl-1">{shortcutKey}</span>}
-                <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 flex-shrink-0" />
+                {buttonDisplay ? (
+                  <span className="-mr-1 h-5 w-5 ml-1 text-violet-200 flex-shrink-0">{buttonDisplay}</span>
+                ) : (
+                  <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 flex-shrink-0" />
+                )}
               </>
             );
           }}

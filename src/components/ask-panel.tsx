@@ -8,7 +8,6 @@ import ModelDropdown from './ask/ModelDropDown';
 import TextareaAutosize from 'react-textarea-autosize';
 import { ArrowsPointingInIcon, ArrowsPointingOutIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import AskMessage from './ask-message';
-import AskButton from './ask-button';
 import {
   ToolsPromptInterface,
   AIInvisibleMessage,
@@ -592,17 +591,6 @@ function AskPanel(props: AskPanelProps) {
                   }
                 }}
               />
-              <ToolDropdown
-                initOpen={isToolDropdownOpen}
-                statusListener={updateToolDropdownStatus}
-                className="inline-block relative"
-                onItemClick={(item, withCommand) => {
-                  setUserTools(item);
-                  if (withCommand) {
-                    onSend(item); // 按了 Command 键直接发送，使用临时工具
-                  }
-                }}
-              />
               <ModelDropdown
                 initOpen={isModelDropdownOpen}
                 className="relative"
@@ -614,20 +602,17 @@ function AskPanel(props: AskPanelProps) {
                 statusListener={updateModelDropdownStatus}
               />
               <div className="grow"></div>
-              <AskButton
-                primary
-                disabled={!(userInput || initQuotes.length)}
-                onClick={() => {
-                  onSend();
+              <div className="w-px h-6 bg-gray-200 mx-2 my-auto"></div>
+              <ToolDropdown
+                initOpen={isToolDropdownOpen}
+                statusListener={updateToolDropdownStatus}
+                className="inline-block relative"
+                onItemClick={(_item, _withCommand) => {
+                  setUserTools(_item);
+                  onSend(_item); // 直接发送，不需要修改按钮文字
                 }}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
-                    e.preventDefault();
-                    onSend();
-                  }
-                }}>
-                ➔
-              </AskButton>
+                buttonDisplay="➔"
+              />
             </div>
           </div>
         </div>
