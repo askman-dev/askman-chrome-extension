@@ -6,7 +6,7 @@ import { ChatPopupContext } from '../chat/chat';
 import ToolDropdown, { tools } from './ask-tooldropdown';
 import ModelDropdown from './ask/ModelDropDown';
 import TextareaAutosize from 'react-textarea-autosize';
-import { ArrowsPointingInIcon, ArrowsPointingOutIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import { ArrowsPointingInIcon, ArrowsPointingOutIcon, XMarkIcon, PlusIcon } from '@heroicons/react/20/solid';
 import AskMessage from './ask-message';
 import {
   ToolsPromptInterface,
@@ -386,6 +386,17 @@ function AskPanel(props: AskPanelProps) {
     setDropdownPosition({ left, top });
   }
 
+  // 清空历史记录和输入框
+  const clearHistory = () => {
+    // 保留系统消息
+    const systemMessages = chatContext.history.filter(message => message instanceof SystemInvisibleMessage);
+    chatContext.history = systemMessages;
+    // 清空可见消息
+    setHistory([]);
+    // 清空输入框
+    setUserInput('');
+  };
+
   // myObject.test('你是谁');
   // console.log('history = ' + JSON.stringify(history));
   return (
@@ -426,6 +437,21 @@ function AskPanel(props: AskPanelProps) {
         </span>
 
         <div className="grow"></div>
+
+        <button
+          title="New Chat"
+          aria-label="Start a new chat"
+          className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2 transition-colors duration-200"
+          onClick={() => {
+            clearHistory();
+            setUserTools(null);
+            // 将焦点设置到输入框
+            setTimeout(() => {
+              inputRef.current?.focus();
+            }, 100);
+          }}>
+          <PlusIcon className="w-4 h-4 cursor-pointer" aria-hidden="true" />
+        </button>
 
         <button
           className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2"
