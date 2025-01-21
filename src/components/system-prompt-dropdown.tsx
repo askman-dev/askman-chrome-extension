@@ -65,7 +65,7 @@ export default function SystemPromptDropdown({
       }}
       onMouseEnter={e => {
         if (baseDropdownRef.current) {
-          showToolPreview(e.currentTarget, baseDropdownRef.current, preset.hbs);
+          showToolPreview(e.currentTarget, baseDropdownRef.current, 'left', preset.hbs);
         }
       }}
       onMouseLeave={hideToolPreview}>

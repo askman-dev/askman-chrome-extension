@@ -95,8 +95,10 @@ export default function ToolDropdown({
           active ? 'bg-black text-white' : 'text-gray-900'
         } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
         onMouseEnter={e => {
+          // e.current is any item of dropdown menu
+          // baseDropdownRef is the outsite button of the dropdown menu
           if (baseDropdownRef.current) {
-            showToolPreview(e.currentTarget, baseDropdownRef.current, tool.hbs);
+            showToolPreview(e.currentTarget, baseDropdownRef.current, 'right', tool.hbs);
           }
         }}
         onMouseLeave={hideToolPreview}
