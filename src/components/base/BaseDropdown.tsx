@@ -21,6 +21,7 @@ export interface BaseDropdownProps {
   showShortcut?: boolean;
   align?: 'left' | 'right';
   buttonDisplay?: string;
+  onMainButtonClick?: (_e: React.MouseEvent) => void;
 }
 
 export function BaseDropdown({
@@ -36,6 +37,7 @@ export function BaseDropdown({
   showShortcut = true,
   align = 'left',
   buttonDisplay,
+  onMainButtonClick,
 }: BaseDropdownProps) {
   const [isOpened, setIsOpen] = useState(initOpen);
   const [isCommandPressed, setIsCommandPressed] = useState(false);
@@ -52,7 +54,6 @@ export function BaseDropdown({
       buttonRef.current?.click();
     }
   }, [initOpen, isOpened]);
-
   useEffect(() => {
     statusListener(isOpened);
     if (isOpened) {
@@ -163,6 +164,17 @@ export function BaseDropdown({
         <MenuButton
           ref={buttonRef}
           className="group inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
+          onClick={e => {
+            e.stopPropagation();
+            // const target = e.target as Element;
+            // const currentTarget = e.currentTarget as Element;
+            // 区分真实点击和虚拟点击
+            if (e.isTrusted) {
+              // console.log('[BaseDropdown] MenuButton real click - target:', target.tagName, 'currentTarget:', currentTarget.tagName);
+              // 调用外部传入的点击处理函数
+              onMainButtonClick?.(e);
+            }
+          }}
           onMouseEnter={() => {
             setIsOpen(true);
           }}

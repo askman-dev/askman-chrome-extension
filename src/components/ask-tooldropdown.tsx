@@ -45,6 +45,16 @@ export default function ToolDropdown({
   const { showPreview, previewPos, previewContent, showToolPreview, hideToolPreview } = useToolPreview();
   const baseDropdownRef = useRef<HTMLDivElement>(null);
 
+  const handleMainButtonClick = (_e: React.MouseEvent) => {
+    // 直接使用当前选中的工具或第一个工具
+    const targetTool = selectedTool ? allTools.find(t => t.id === selectedTool) : allTools[0];
+
+    if (targetTool) {
+      console.log('[AskToolDropdown] main button clicked, sending tool:', targetTool.name);
+      handleToolClick(targetTool, _e.metaKey || _e.ctrlKey);
+    }
+  };
+
   useEffect(() => {
     const fetchTools = async () => {
       try {
@@ -137,6 +147,7 @@ export default function ToolDropdown({
         renderItem={renderToolItem}
         align="right"
         buttonDisplay={buttonDisplay}
+        onMainButtonClick={handleMainButtonClick}
       />
       {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
     </div>

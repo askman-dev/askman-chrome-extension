@@ -61,7 +61,7 @@ export const StorageManager = {
   },
   get: (key: string) => {
     return chrome.storage.local.get([key]).then(result => {
-      logger.debug(`Value for ${key} is`, result[key]);
+      // logger.debug(`Value for ${key} is`, result[key]);
       return result[key];
     });
   },
@@ -114,20 +114,20 @@ export const StorageManager = {
       const systemConfigPath = chrome.runtime.getURL('assets/conf/preferences.toml');
       const systemConfigResponse = await fetch(systemConfigPath);
       const systemConfigStr = await systemConfigResponse.text();
-      logger.debug('Loaded preferences.toml:', systemConfigStr);
+      // logger.debug('Loaded preferences.toml:', systemConfigStr);
 
       const parsedConfig = TOML.parse(systemConfigStr);
-      logger.debug('Parsed config:', parsedConfig);
+      // logger.debug('Parsed config:', parsedConfig);
 
       const defaultPreferences: UserPreferences = {
         USER_LANGUAGE: parsedConfig.USER_LANGUAGE as string,
         ASK_BUTTON: parsedConfig.ASK_BUTTON as boolean,
         ASK_BUTTON_BLOCK_PAGE: parsedConfig.ASK_BUTTON_BLOCK_PAGE as string[],
       };
-      logger.debug('Default preferences:', defaultPreferences);
+      // logger.debug('Default preferences:', defaultPreferences);
 
       const preferences = await StorageManager.get(USER_PREFERENCES_KEY);
-      logger.debug('Stored preferences:', preferences);
+      // logger.debug('Stored preferences:', preferences);
 
       if (preferences) {
         const mergedPreferences = {
@@ -138,7 +138,7 @@ export const StorageManager = {
             ASK_BUTTON_BLOCK_PAGE: preferences.ASK_BUTTON_BLOCK_PAGE,
           }),
         };
-        logger.debug('Merged preferences:', mergedPreferences);
+        // logger.debug('Merged preferences:', mergedPreferences);
         return mergedPreferences;
       }
       return defaultPreferences;
