@@ -16,7 +16,7 @@ https://chromewebstore.google.com/detail/askman-connect-ai-to-page/gpopfjaknekkf
 - Side Panel for Persistent Conversations: Keep your chat session fixed, even when switching pages, ensuring data is retained and your flow remains uninterrupted.
 - Custom Prompts: Easily set up common prompts that use page-specific elements, like titles and selected text, for a personalized experience.
 
-| ![screenshot](.github/public/CleanShot 2025-01-23 at 19.34.23@2x.png)|![screenshot](.github/public/114shots_so.png) | ![screenshot](.github/public/715shots_so.png) |
+| ![screenshot](.github/public/0.0.12.png) | ![screenshot](.github/public/114shots_so.png) | ![screenshot](.github/public/715shots_so.png) |
 |:---:|:---:|:---:|
 
 
