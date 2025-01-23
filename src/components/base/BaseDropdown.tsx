@@ -20,6 +20,8 @@ export interface BaseDropdownProps {
   selectedId?: string;
   showShortcut?: boolean;
   align?: 'left' | 'right';
+  buttonDisplay?: string;
+  onMainButtonClick?: (_e: React.MouseEvent) => void;
 }
 
 export function BaseDropdown({
@@ -34,6 +36,8 @@ export function BaseDropdown({
   selectedId,
   showShortcut = true,
   align = 'left',
+  buttonDisplay,
+  onMainButtonClick,
 }: BaseDropdownProps) {
   const [isOpened, setIsOpen] = useState(initOpen);
   const [isCommandPressed, setIsCommandPressed] = useState(false);
@@ -50,7 +54,6 @@ export function BaseDropdown({
       buttonRef.current?.click();
     }
   }, [initOpen, isOpened]);
-
   useEffect(() => {
     statusListener(isOpened);
     if (isOpened) {
@@ -63,6 +66,15 @@ export function BaseDropdown({
     // Command 或 Ctrl 按下
     if (e.metaKey || e.ctrlKey) {
       setIsCommandPressed(true);
+    }
+
+    // ESC 键处理
+    if (e.key === 'Escape' && isOpened) {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsOpen(false);
+      statusListener(false);
+      return;
     }
 
     // Enter 时直接发送
@@ -152,6 +164,17 @@ export function BaseDropdown({
         <MenuButton
           ref={buttonRef}
           className="group inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
+          onClick={e => {
+            e.stopPropagation();
+            // const target = e.target as Element;
+            // const currentTarget = e.currentTarget as Element;
+            // 区分真实点击和虚拟点击
+            if (e.isTrusted) {
+              // console.log('[BaseDropdown] MenuButton real click - target:', target.tagName, 'currentTarget:', currentTarget.tagName);
+              // 调用外部传入的点击处理函数
+              onMainButtonClick?.(e);
+            }
+          }}
           onMouseEnter={() => {
             setIsOpen(true);
           }}
@@ -174,7 +197,11 @@ export function BaseDropdown({
                   </div>
                 </div>
                 {showShortcut && <span className="flex-shrink-0 pl-1">{shortcutKey}</span>}
-                <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 flex-shrink-0" />
+                {buttonDisplay ? (
+                  <span className="-mr-1 h-5 w-5 ml-1 text-violet-200 flex-shrink-0">{buttonDisplay}</span>
+                ) : (
+                  <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 flex-shrink-0" />
+                )}
               </>
             );
           }}
@@ -193,6 +220,14 @@ export function BaseDropdown({
             className={`absolute ${
               align === 'left' ? 'left-0' : 'right-0'
             } mt-0 min-w-[10rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10`}
+            onKeyDown={e => {
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsOpen(false);
+                statusListener(false);
+              }
+            }}
             onMouseEnter={() => {
               setIsOpen(true);
             }}

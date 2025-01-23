@@ -15,7 +15,7 @@ export enum AskMessageType {
 interface AskMessageItem {
   type: AskMessageType | string;
   text: string;
-  name?: string;
+  role?: string;
 }
 
 function decodeEntities(text: string): string {
@@ -25,7 +25,7 @@ function decodeEntities(text: string): string {
 }
 
 function AskMessage(props: AskMessageItem) {
-  const { type, text, name } = props;
+  const { type, text, role } = props;
   const [codeHover, setCodeHover] = useState<number | null>(null);
   const { isVisible, handlers } = useCopyButton(type !== AskMessageType.CODE);
   let messageItem = <div>{text}</div>;
@@ -93,11 +93,11 @@ function AskMessage(props: AskMessageItem) {
     <div
       className={classNames(
         'relative',
-        name === 'ai' ? 'text-gray-800 mb-3 leading-relaxed' : 'text-sky-600 mb-1 leading-relaxed max-h-16',
+        role === 'assistant' ? 'text-gray-800 mb-3 leading-relaxed' : 'text-sky-600 mb-1 leading-relaxed max-h-16',
         'font-bold',
       )}
       {...handlers}>
-      <div className={classNames('pr-8', name === 'human' ? `max-h-16 ${SCROLLBAR_STYLES}` : '')}>{messageItem}</div>
+      <div className={classNames('pr-8', role === 'user' ? `max-h-16 ${SCROLLBAR_STYLES}` : '')}>{messageItem}</div>
       {isVisible && type !== AskMessageType.CODE && (
         <CopyButton text={text} className="top-[-6px] right-1 bg-gray-100 hover:bg-gray-200" />
       )}

@@ -12,6 +12,7 @@ interface ToolDropdownProps {
   onItemClick: (_tool: ToolsPromptInterface, _withCommand?: boolean) => void;
   statusListener: (_status: boolean) => void;
   initOpen: boolean;
+  buttonDisplay?: string;
 }
 
 const tools: ToolsPromptInterface[] = [];
@@ -31,12 +32,28 @@ for (const k in defaultTools) {
 
 export { tools };
 
-export default function ToolDropdown({ className, onItemClick, initOpen, statusListener }: ToolDropdownProps) {
+export default function ToolDropdown({
+  className,
+  onItemClick,
+  initOpen,
+  statusListener,
+  buttonDisplay,
+}: ToolDropdownProps) {
   const [allTools, setAllTools] = useState<ToolsPromptInterface[]>([]);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [selectedToolName, setSelectedToolName] = useState<string>('Frame'); // 默认显示 Frame
   const { showPreview, previewPos, previewContent, showToolPreview, hideToolPreview } = useToolPreview();
   const baseDropdownRef = useRef<HTMLDivElement>(null);
+
+  const handleMainButtonClick = (_e: React.MouseEvent) => {
+    // 直接使用当前选中的工具或第一个工具
+    const targetTool = selectedTool ? allTools.find(t => t.id === selectedTool) : allTools[0];
+
+    if (targetTool) {
+      console.log('[AskToolDropdown] main button clicked, sending tool:', targetTool.name);
+      handleToolClick(targetTool, _e.metaKey || _e.ctrlKey);
+    }
+  };
 
   useEffect(() => {
     const fetchTools = async () => {
@@ -71,8 +88,8 @@ export default function ToolDropdown({ className, onItemClick, initOpen, statusL
   }, []);
 
   const handleToolClick = async (tool: ToolsPromptInterface, isCommandPressed: boolean) => {
-    // Command+Enter 不保存设置
-    if (!isCommandPressed) {
+    // TODO: Use cmd to pin the tool, it's not working now
+    if (isCommandPressed) {
       await StorageManager.setCurrentTool(tool.id);
       setSelectedTool(tool.id);
       setSelectedToolName(tool.name);
@@ -88,8 +105,10 @@ export default function ToolDropdown({ className, onItemClick, initOpen, statusL
           active ? 'bg-black text-white' : 'text-gray-900'
         } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
         onMouseEnter={e => {
+          // e.current is any item of dropdown menu
+          // baseDropdownRef is the outsite button of the dropdown menu
           if (baseDropdownRef.current) {
-            showToolPreview(e.currentTarget, baseDropdownRef.current, tool.hbs);
+            showToolPreview(e.currentTarget, baseDropdownRef.current, 'right', tool.hbs);
           }
         }}
         onMouseLeave={hideToolPreview}
@@ -107,7 +126,7 @@ export default function ToolDropdown({ className, onItemClick, initOpen, statusL
             className={`ml-2 opacity-0 transition-all duration-100 ${active || 'group-hover:opacity-100'} ${
               active && 'opacity-100'
             }`}>
-            [{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + enter]
+            [{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Enter to Pin]
           </span>
         </span>
       </button>
@@ -126,6 +145,9 @@ export default function ToolDropdown({ className, onItemClick, initOpen, statusL
         selectedId={selectedTool}
         shortcutKey={navigator.platform.includes('Mac') ? '⌘ K' : 'Ctrl K'}
         renderItem={renderToolItem}
+        align="right"
+        buttonDisplay={buttonDisplay}
+        onMainButtonClick={handleMainButtonClick}
       />
       {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
     </div>

@@ -6,9 +6,8 @@ import { ChatPopupContext } from '../chat/chat';
 import ToolDropdown, { tools } from './ask-tooldropdown';
 import ModelDropdown from './ask/ModelDropDown';
 import TextareaAutosize from 'react-textarea-autosize';
-import { ArrowsPointingInIcon, ArrowsPointingOutIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import { ArrowsPointingInIcon, ArrowsPointingOutIcon, XMarkIcon, PlusIcon } from '@heroicons/react/20/solid';
 import AskMessage from './ask-message';
-import AskButton from './ask-button';
 import {
   ToolsPromptInterface,
   AIInvisibleMessage,
@@ -23,6 +22,7 @@ import SystemPromptDropdown from './system-prompt-dropdown';
 import { StorageManager } from '../utils/StorageManager';
 import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
 import { SCROLLBAR_STYLES_HIDDEN_X } from '../styles/common';
+import { HumanMessage } from '@langchain/core/messages';
 
 interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -78,7 +78,7 @@ function AskPanel(props: AskPanelProps) {
   const [userInput, setUserInput] = useState<string>('');
   const [askPanelVisible, setAskPanelVisible] = useState<boolean>(visible);
   //TODO 需要定义一个可渲染、可序列号的类型，疑似是 StoredMessage
-  const [history, setHistory] = useState<{ id: string; name: string; type: string; text: string }[]>([]);
+  const [history, setHistory] = useState<{ id: string; role: string; type: string; text: string }[]>([]);
   const [initQuotes, setInitQuotes] = useState<Array<QuoteContext>>([]);
   const [pageContext, setPageContext] = useState<QuoteContext>(new QuoteContext());
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -93,7 +93,6 @@ function AskPanel(props: AskPanelProps) {
   const [isSystemPromptDropdownOpen, setIsSystemPromptDropdownOpen] = useState(false);
 
   const showToolDropdown = () => {
-    // console.log('isToolDropdownOpen = ' + isToolDropdownOpen, 'set to true');
     setIsToolDropdownOpen(true);
     setIsQuoteDropdownOpen(false);
     setIsModelDropdownOpen(false);
@@ -200,15 +199,25 @@ function AskPanel(props: AskPanelProps) {
               ),
           )
           .map((message, idx) => {
+            let role = 'assistant';
+            if (message instanceof HumanMessage) {
+              role = 'user';
+            }
             if (message instanceof HumanAskMessage) {
-              return { type: 'text', id: `history-${idx}`, text: message.rendered, name: message.name };
+              return {
+                type: 'text',
+                id: `history-${idx}`,
+                text: message.rendered,
+                role: role,
+                name: 'HumanAskMessage',
+              };
             } else if (typeof message.content == 'string') {
-              return { type: 'text', id: `history-${idx}`, text: message.content, name: message.name };
+              return { type: 'text', id: `history-${idx}`, text: message.content, role: role, name: 'AIMessage' };
             } else if (message.content instanceof Array) {
               return {
                 type: 'text',
                 id: `history-${idx}`,
-                name: message.name,
+                role: role,
                 text: message.content.reduce((acc, cur) => {
                   if (cur.type == 'text') {
                     return acc + '\n' + cur.text;
@@ -268,19 +277,19 @@ function AskPanel(props: AskPanelProps) {
           e.stopPropagation();
 
           if (e.key === 'ArrowRight') {
-            if (isToolDropdownOpen) {
+            if (isSystemPromptDropdownOpen) {
               showModelDropdown();
             } else if (isModelDropdownOpen) {
-              showSystemPromptDropdown();
-            } else if (isSystemPromptDropdownOpen) {
               showToolDropdown();
+            } else if (isToolDropdownOpen) {
+              showSystemPromptDropdown();
             }
           } else if (e.key === 'ArrowLeft') {
-            if (isToolDropdownOpen) {
-              showSystemPromptDropdown();
-            } else if (isModelDropdownOpen) {
+            if (isSystemPromptDropdownOpen) {
               showToolDropdown();
-            } else if (isSystemPromptDropdownOpen) {
+            } else if (isModelDropdownOpen) {
+              showSystemPromptDropdown();
+            } else if (isToolDropdownOpen) {
               showModelDropdown();
             }
           }
@@ -377,6 +386,17 @@ function AskPanel(props: AskPanelProps) {
     setDropdownPosition({ left, top });
   }
 
+  // 清空历史记录和输入框
+  const clearHistory = () => {
+    // 保留系统消息
+    const systemMessages = chatContext.history.filter(message => message instanceof SystemInvisibleMessage);
+    chatContext.history = systemMessages;
+    // 清空可见消息
+    setHistory([]);
+    // 清空输入框
+    setUserInput('');
+  };
+
   // myObject.test('你是谁');
   // console.log('history = ' + JSON.stringify(history));
   return (
@@ -389,6 +409,21 @@ function AskPanel(props: AskPanelProps) {
           : 'w-[473px] min-w-80 max-w-lg min-h-[155px]',
         `${askPanelVisible ? 'visible' : 'invisible'}`,
       )}
+      onKeyDown={e => {
+        if (
+          e.key === 'Escape' &&
+          (isQuoteDropdownOpen || isToolDropdownOpen || isModelDropdownOpen || isSystemPromptDropdownOpen)
+        ) {
+          setIsQuoteDropdownOpen(false);
+          setIsToolDropdownOpen(false);
+          setIsModelDropdownOpen(false);
+          setIsSystemPromptDropdownOpen(false);
+          inputRef.current?.focus();
+          e.stopPropagation();
+          e.preventDefault();
+        }
+      }}
+      tabIndex={-1}
       {...rest}>
       <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between">
         <span>
@@ -402,6 +437,21 @@ function AskPanel(props: AskPanelProps) {
         </span>
 
         <div className="grow"></div>
+
+        <button
+          title="New Chat"
+          aria-label="Start a new chat"
+          className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2 transition-colors duration-200"
+          onClick={() => {
+            clearHistory();
+            setUserTools(null);
+            // 将焦点设置到输入框
+            setTimeout(() => {
+              inputRef.current?.focus();
+            }, 100);
+          }}>
+          <PlusIcon className="w-4 h-4 cursor-pointer" aria-hidden="true" />
+        </button>
 
         <button
           className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2"
@@ -423,9 +473,9 @@ function AskPanel(props: AskPanelProps) {
         </button>
       </div>
       <div className={classNames('py-2 mb-2', SCROLLBAR_STYLES_HIDDEN_X, isMaximized ? 'flex-grow' : 'max-h-80')}>
-        {history.map(message => (
-          <AskMessage key={message.id} {...message} />
-        ))}
+        {history.map(message => {
+          return <AskMessage key={message.id} {...message} />;
+        })}
 
         {history.length > 0 && (
           <div className="pt-32">
@@ -493,7 +543,28 @@ function AskPanel(props: AskPanelProps) {
                 onKeyDown={e => {
                   // 检测 ESC 键
                   if (e.key === 'Escape') {
-                    if (isQuoteDropdownOpen || isToolDropdownOpen || isModelDropdownOpen) {
+                    console.log('ESC key detected in textarea', {
+                      isQuoteDropdownOpen,
+                      isToolDropdownOpen,
+                      isModelDropdownOpen,
+                      isSystemPromptDropdownOpen,
+                    });
+                    if (
+                      isQuoteDropdownOpen ||
+                      isToolDropdownOpen ||
+                      isModelDropdownOpen ||
+                      isSystemPromptDropdownOpen
+                    ) {
+                      setIsQuoteDropdownOpen(false);
+                      setIsToolDropdownOpen(false);
+                      setIsModelDropdownOpen(false);
+                      setIsSystemPromptDropdownOpen(false);
+                      e.stopPropagation();
+                      e.preventDefault();
+                      return;
+                    } else {
+                      setAskPanelVisible(false);
+                      onHide();
                       e.stopPropagation();
                       e.preventDefault();
                       return;
@@ -539,17 +610,26 @@ function AskPanel(props: AskPanelProps) {
                   }
                   // 检测左右方向键
                   if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                    if (isToolDropdownOpen || isModelDropdownOpen) {
+                    if (isToolDropdownOpen || isModelDropdownOpen || isSystemPromptDropdownOpen) {
                       e.preventDefault();
                       e.stopPropagation();
-                      if (isToolDropdownOpen && e.key === 'ArrowRight') {
-                        showModelDropdown();
-                      } else if (isModelDropdownOpen && e.key === 'ArrowRight') {
-                        showToolDropdown();
-                      } else if (isToolDropdownOpen && e.key === 'ArrowLeft') {
-                        showModelDropdown();
-                      } else if (isModelDropdownOpen && e.key === 'ArrowLeft') {
-                        showToolDropdown();
+
+                      if (e.key === 'ArrowRight') {
+                        if (isSystemPromptDropdownOpen) {
+                          showModelDropdown();
+                        } else if (isModelDropdownOpen) {
+                          showToolDropdown();
+                        } else if (isToolDropdownOpen) {
+                          showSystemPromptDropdown();
+                        }
+                      } else if (e.key === 'ArrowLeft') {
+                        if (isSystemPromptDropdownOpen) {
+                          showToolDropdown();
+                        } else if (isModelDropdownOpen) {
+                          showSystemPromptDropdown();
+                        } else if (isToolDropdownOpen) {
+                          showModelDropdown();
+                        }
                       }
                       return;
                     }
@@ -592,17 +672,6 @@ function AskPanel(props: AskPanelProps) {
                   }
                 }}
               />
-              <ToolDropdown
-                initOpen={isToolDropdownOpen}
-                statusListener={updateToolDropdownStatus}
-                className="inline-block relative"
-                onItemClick={(item, withCommand) => {
-                  setUserTools(item);
-                  if (withCommand) {
-                    onSend(item); // 按了 Command 键直接发送，使用临时工具
-                  }
-                }}
-              />
               <ModelDropdown
                 initOpen={isModelDropdownOpen}
                 className="relative"
@@ -614,20 +683,17 @@ function AskPanel(props: AskPanelProps) {
                 statusListener={updateModelDropdownStatus}
               />
               <div className="grow"></div>
-              <AskButton
-                primary
-                disabled={!(userInput || initQuotes.length)}
-                onClick={() => {
-                  onSend();
+              <div className="w-px h-6 bg-gray-200 mx-2 my-auto"></div>
+              <ToolDropdown
+                initOpen={isToolDropdownOpen}
+                statusListener={updateToolDropdownStatus}
+                className="inline-block relative"
+                onItemClick={(_item, _withCommand) => {
+                  setUserTools(_item);
+                  onSend(_item); // 直接发送，不需要修改按钮文字
                 }}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
-                    e.preventDefault();
-                    onSend();
-                  }
-                }}>
-                ➔
-              </AskButton>
+                buttonDisplay="➔"
+              />
             </div>
           </div>
         </div>
