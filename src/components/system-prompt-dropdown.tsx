@@ -92,7 +92,8 @@ export default function SystemPromptDropdown({
           ...preset,
         }))}
         selectedId={selectedPreset || undefined}
-        showShortcut={false}
+        showShortcut={true}
+        shortcutKey="⌘ KK"
         renderItem={renderSystemPresetItem}
       />
       {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}

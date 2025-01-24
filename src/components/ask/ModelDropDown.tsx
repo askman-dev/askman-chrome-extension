@@ -108,7 +108,7 @@ export default function ModelDropdown({ className, onItemClick, statusListener, 
         initOpen={initOpen}
         items={models}
         selectedId={selectedModel}
-        shortcutKey="⌘ KK"
+        showShortcut={false}
         renderItem={renderModelItem}
         align="right"
       />

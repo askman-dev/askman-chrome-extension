@@ -259,10 +259,10 @@ function AskPanel(props: AskPanelProps) {
         if (!isToolDropdownOpen && !isModelDropdownOpen && !isSystemPromptDropdownOpen) {
           showToolDropdown();
         } else if (isToolDropdownOpen) {
-          showModelDropdown();
-        } else if (isModelDropdownOpen) {
           showSystemPromptDropdown();
         } else if (isSystemPromptDropdownOpen) {
+          showModelDropdown();
+        } else if (isModelDropdownOpen) {
           showToolDropdown();
         }
 
