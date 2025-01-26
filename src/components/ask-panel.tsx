@@ -255,7 +255,7 @@ function AskPanel(props: AskPanelProps) {
     function handleKeyDown(e: KeyboardEvent) {
       // 检测 Command+K (Mac) 或 Ctrl+K (Windows/Linux)
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        // e.preventDefault();
+        e.preventDefault();
         if (!isToolDropdownOpen && !isModelDropdownOpen && !isSystemPromptDropdownOpen) {
           showToolDropdown();
         } else if (isToolDropdownOpen) {
