@@ -37,5 +37,19 @@ ASK_BUTTON_BLOCK_PAGE = [
     "docs.google.com",
     "drive.google.com",
     "feishu.cn",
-    "feishu.com"
+    "feishu.com",
+    "feishu.cn/wiki/*",
+]
+
+#-----------------------------------------------
+# Keyboard Shortcut Settings
+#-----------------------------------------------
+# SHORTCUT_DISABLED_PAGES: List of URLs or URL patterns where keyboard shortcuts
+# should be disabled to avoid conflicts with website's own shortcuts.
+# This is particularly useful for document editing websites.
+# Format: Same as ASK_BUTTON_BLOCK_PAGE above
+SHORTCUT_DISABLED_PAGES = [
+    # Feishu blocks keyboard shortcuts to avoid conflicts with document editing
+    "feishu.cn",
+    "feishu.cn/wiki/*",
 ] 
