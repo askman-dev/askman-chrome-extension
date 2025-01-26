@@ -163,7 +163,10 @@ export function BaseDropdown({
       <Menu as="div" className="relative">
         <MenuButton
           ref={buttonRef}
-          className="group inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-600 bg-white px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none"
+          className={classNames(
+            'group inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-600 px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none',
+            { 'bg-black/10': initOpen || isOpened },
+          )}
           onClick={e => {
             e.stopPropagation();
             // const target = e.target as Element;
@@ -182,12 +185,13 @@ export function BaseDropdown({
             setIsOpen(false);
           }}>
           {({ active }) => {
+            console.log('[BaseDropdown] Menu.Button render with active:', active, 'current isOpened:', isOpened);
             setIsOpen(active);
             return (
               <>
                 <div className="relative inline-block">
                   <span
-                    className="truncate max-w-[6rem] text-right inline-block"
+                    className="truncate max-w-[6rem] text-right inline-flex items-center"
                     dir="rtl"
                     title={typeof displayName === 'string' ? displayName : 'Untitled'}>
                     {typeof displayName === 'string' ? displayName : 'Untitled'}
