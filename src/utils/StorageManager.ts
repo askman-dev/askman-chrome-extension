@@ -26,6 +26,7 @@ export interface UserPreferences {
   USER_LANGUAGE: string;
   ASK_BUTTON: boolean;
   ASK_BUTTON_BLOCK_PAGE: string[];
+  SHORTCUT_DISABLED_PAGES: string[]; // 在这些页面上禁用快捷键以避免冲突
 }
 
 export interface SystemPromptContent {
@@ -123,6 +124,7 @@ export const StorageManager = {
         USER_LANGUAGE: parsedConfig.USER_LANGUAGE as string,
         ASK_BUTTON: parsedConfig.ASK_BUTTON as boolean,
         ASK_BUTTON_BLOCK_PAGE: parsedConfig.ASK_BUTTON_BLOCK_PAGE as string[],
+        SHORTCUT_DISABLED_PAGES: parsedConfig.SHORTCUT_DISABLED_PAGES as string[],
       };
       // logger.debug('Default preferences:', defaultPreferences);
 
@@ -137,6 +139,9 @@ export const StorageManager = {
           ...(preferences.ASK_BUTTON_BLOCK_PAGE !== undefined && {
             ASK_BUTTON_BLOCK_PAGE: preferences.ASK_BUTTON_BLOCK_PAGE,
           }),
+          ...(preferences.SHORTCUT_DISABLED_PAGES !== undefined && {
+            SHORTCUT_DISABLED_PAGES: preferences.SHORTCUT_DISABLED_PAGES,
+          }),
         };
         // logger.debug('Merged preferences:', mergedPreferences);
         return mergedPreferences;
@@ -148,6 +153,7 @@ export const StorageManager = {
         USER_LANGUAGE: 'en',
         ASK_BUTTON: false,
         ASK_BUTTON_BLOCK_PAGE: [],
+        SHORTCUT_DISABLED_PAGES: [],
       };
     }
   },
