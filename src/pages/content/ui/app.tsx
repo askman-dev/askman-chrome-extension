@@ -11,19 +11,51 @@ import { createPortal } from 'react-dom';
 import { PageStackoverflowAgent } from '@root/src/agents/page-stackoverflow/script';
 import PageStackoverflowToolDropdown from '@root/src/agents/page-stackoverflow/component';
 import { StorageManager } from '@src/utils/StorageManager';
+import { BlockConfig } from '@src/utils/BlockConfig';
+import Notification from '@src/components/base/Notification';
 
 const ASK_BUTTON_OFFSET_X = 5; // 按钮距离左侧的偏移量
 
 const tabChatContext = new ChatCoreContext();
 
+// 模拟键盘事件
+function simulateKeyPress(key: string, ctrlKey = false, metaKey = false) {
+  const event = new KeyboardEvent('keydown', {
+    key,
+    code: 'Key' + key.toUpperCase(),
+    keyCode: key.toUpperCase().charCodeAt(0),
+    which: key.toUpperCase().charCodeAt(0),
+    ctrlKey,
+    metaKey,
+    bubbles: true,
+    composed: true, // 允许事件穿过 Shadow DOM 边界
+    cancelable: true,
+  });
+
+  // 直接向活动元素发送事件
+  const target = document.activeElement || document.body;
+  target.dispatchEvent(event);
+}
+
 export default function App() {
   const [askButtonVisible, setAskButtonVisible] = useState<boolean>(false);
   const [askPanelVisible, setAskPanelVisible] = useState<boolean>(false);
+  const [showDoubleClickHint, setShowDoubleClickHint] = useState<boolean>(false);
   const targetDom = useRef<HTMLElement>(null);
   const [pageActionButton, setPageActionButton] = useState<HTMLDivElement>(null);
   const [preferences, setPreferences] = useState({ ASK_BUTTON: false, ASK_BUTTON_BLOCK_PAGE: [] });
   const [askPanelQuotes, setAskPanelQuotes] = useState<Promise<QuoteContext>[]>([]);
   const [parentRect, setParentRect] = useState<DOMRect>();
+  const blockConfig = useRef<BlockConfig>(null);
+
+  // 初始化配置
+  useEffect(() => {
+    const initBlockConfig = async () => {
+      blockConfig.current = BlockConfig.getInstance();
+      await blockConfig.current.initialize();
+    };
+    initBlockConfig();
+  }, []);
 
   // 加载用户偏好设置
   useEffect(() => {
@@ -36,7 +68,7 @@ export default function App() {
   const isCurrentPageBlocked = () => {
     const currentUrl = window.location.href;
     const currentDomain = window.location.hostname;
-    
+
     return preferences.ASK_BUTTON_BLOCK_PAGE.some(pattern => {
       // 检查完整 URL 匹配
       if (pattern.startsWith('http') && currentUrl.startsWith(pattern)) {
@@ -66,7 +98,7 @@ export default function App() {
       const domEl: HTMLElement = (e.target as HTMLElement).closest('pre');
       const highlightEl: HTMLElement = (e.target as HTMLElement).closest('div.highlight');
       const btnEl: HTMLElement = (e.target as HTMLElement).closest('#askman-chrome-extension-content-view-root');
-      
+
       if (domEl?.tagName === 'PRE' || domEl?.contentEditable === 'true' || highlightEl) {
         if (domEl) targetDom.current = domEl;
         else if (highlightEl) targetDom.current = highlightEl;
@@ -126,14 +158,24 @@ export default function App() {
 
   const onBackgroundMessage = function (message: TabMessage, _sender, _sendResponse) {
     if (message.cmd === CommandType.ChatPopupDisplay) {
-      if (askPanelVisible) {
-        setAskPanelVisible(false);
+      const currentUrl = window.location.href;
+      const fromShortcut = message.fromShortcut || false;
+
+      // 在黑名单中的网站，快捷键触发时才需要特殊处理
+      if (fromShortcut && blockConfig.current?.isShortcutDisabled(currentUrl)) {
+        // 只有快捷键触发时才发送模拟按键
+        const isMac = navigator.platform.includes('Mac');
+        simulateKeyPress('i', !isMac, isMac);
         return;
       }
-      console.log('onBackgroundMessage:', message);
-      const selection = document.getSelection()?.toString().trim() || '';
-      showChat(selection);
-      return;
+
+      // 其他情况（鼠标点击或非黑名单网站）正常显示对话框
+      if (askPanelVisible) {
+        setAskPanelVisible(false);
+      } else {
+        const selection = document.getSelection()?.toString().trim() || '';
+        showChat(selection);
+      }
     }
   };
 
@@ -180,6 +222,14 @@ export default function App() {
 
   return (
     <>
+      {!askPanelVisible && showDoubleClickHint && (
+        <Notification
+          message="Press Command+I/Ctrl+I again within 1s to open AskMan"
+          onClose={() => {
+            setShowDoubleClickHint(false);
+          }}
+        />
+      )}
       {PageStackoverflowAgent.isSupport(window.location.href) &&
         pageActionButton &&
         createPortal(

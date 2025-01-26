@@ -34,22 +34,19 @@ function onCommandMessageListener(command) {
   console.log('background received message', command);
   switch (command) {
     case 'ChatPopupDisplay':
-      chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
+      chrome.tabs.query({ active: true, lastFocusedWindow: true }, async ([tab]) => {
         if (chrome.runtime.lastError) console.error(chrome.runtime.lastError);
-        // `tab` will either be a `tabs.Tab` instance or `undefined`.
         if (tab) {
-          chrome.tabs
-            .sendMessage<TabMessage>(tab.id, { cmd: CommandType.ChatPopupDisplay, pageUrl: tab.url })
-            .catch(error => {
-              console.error(error);
-              // TODO fix 弹不出来
-              // chrome.notifications.create(
-              //     'basic', {
-              //         iconUrl: '/icon-128.png', type: 'basic',
-              //         message: '请刷新页面后重试', title: error.message
-              //     }
-              // )
+          try {
+            // 快捷键触发，设置 fromShortcut 为 true
+            chrome.tabs.sendMessage<TabMessage>(tab.id, {
+              cmd: CommandType.ChatPopupDisplay,
+              pageUrl: tab.url,
+              fromShortcut: true, // 标记为快捷键触发
             });
+          } catch (error) {
+            console.error('Failed to handle command:', error);
+          }
         }
       });
       break;

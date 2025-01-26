@@ -23,6 +23,7 @@ import { StorageManager } from '../utils/StorageManager';
 import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
 import { SCROLLBAR_STYLES_HIDDEN_X } from '../styles/common';
 import { HumanMessage } from '@langchain/core/messages';
+import { BlockConfig } from '../utils/BlockConfig';
 
 interface AskPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   code: string;
@@ -397,6 +398,17 @@ function AskPanel(props: AskPanelProps) {
     setUserInput('');
   };
 
+  const blockConfigRef = useRef<BlockConfig>(null);
+
+  // 初始化配置
+  useEffect(() => {
+    const initBlockConfig = async () => {
+      blockConfigRef.current = BlockConfig.getInstance();
+      await blockConfigRef.current.initialize();
+    };
+    initBlockConfig();
+  }, []);
+
   // myObject.test('你是谁');
   // console.log('history = ' + JSON.stringify(history));
   return (
@@ -427,7 +439,16 @@ function AskPanel(props: AskPanelProps) {
       {...rest}>
       <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between">
         <span>
-          Askman <KeyBinding text="⌘ I"></KeyBinding>{' '}
+          Askman{' '}
+          {blockConfigRef.current?.isShortcutDisabled(window.location.href) ? (
+            <KeyBinding text="⌘ I" className="relative group opacity-50 cursor-not-allowed">
+              <div className="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-20">
+                This shortcut will not work on this site to avoid conflicts with website's functionality.
+              </div>
+            </KeyBinding>
+          ) : (
+            <KeyBinding text="⌘ I" className="cursor-pointer" />
+          )}{' '}
           <KeyBinding
             text="Setting"
             className="hover:bg-gray-300 cursor-pointer"
