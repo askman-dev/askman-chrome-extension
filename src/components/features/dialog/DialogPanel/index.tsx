@@ -18,7 +18,7 @@ import {
 import KeyBinding from '@src/components/common/Icons';
 import { StorageManager } from '@src/utils/StorageManager';
 import { Handlebars } from '@src/../third-party/kbn-handlebars/src/handlebars';
-import { SCROLLBAR_STYLES_HIDDEN_X } from '@src/styles/common';
+import { SCROLLBAR_STYLES_THIN_X } from '@src/styles/common';
 import { HumanMessage } from '@langchain/core/messages';
 import { BlockConfig } from '@src/utils/BlockConfig';
 import classNames from 'classnames';
@@ -491,7 +491,7 @@ export function DialogPanel(props: DialogPanelProps) {
           <XMarkIcon className="w-4 h-4 cursor-pointer" />
         </button>
       </div>
-      <div className={classNames('py-2 mb-2', SCROLLBAR_STYLES_HIDDEN_X, isMaximized ? 'flex-grow' : 'max-h-80')}>
+      <div className={classNames('py-2 mb-2', SCROLLBAR_STYLES_THIN_X, isMaximized ? 'flex-grow' : 'max-h-80')}>
         {history.map(message => {
           return <MessageItem key={message.id} {...message} />;
         })}
@@ -557,7 +557,7 @@ export function DialogPanel(props: DialogPanelProps) {
                 ref={inputRef}
                 maxRows={5}
                 minRows={1}
-                className={`flex-grow outline-none bg-white text-gray-800 text-sm inline-block font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none min-h-[3em] focus:border-black ${SCROLLBAR_STYLES_HIDDEN_X}`}
+                className={`flex-grow outline-none bg-white text-gray-800 text-sm inline-block font-normal tracking-[0] leading-[normal] p-2 h-6 resize-none min-h-[3em] focus:border-black ${SCROLLBAR_STYLES_THIN_X}`}
                 //TODO 输入在有字/无字时会发生高度变化，需要修复
                 onKeyDown={e => {
                   // 检测 ESC 键
