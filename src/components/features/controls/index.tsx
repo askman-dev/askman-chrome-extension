@@ -67,40 +67,55 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
     });
   }, []);
 
-  const handleModelClick = async (model: ModelItem, isCommandPressed: boolean) => {
-    // Command+Enter 不保存设置
-    if (!isCommandPressed) {
-      await configStorage.setCurrentModel(model.id);
-      setSelectedModel(model.id);
-      setSelectedModelName(model.name);
+  // 修改以符合BaseDropdown期望的类型
+  const handleModelClick = (item: Record<string, unknown>, isCommandPressed: boolean) => {
+    // 安全地访问属性
+    const id = item.id as string;
+    const name = item.name as string;
+
+    if (id && name) {
+      if (!isCommandPressed) {
+        configStorage.setCurrentModel(id).then(() => {
+          setSelectedModel(id);
+          setSelectedModelName(name);
+        });
+      }
+      onItemClick(name, isCommandPressed);
+      statusListener(false);
     }
-    onItemClick(model.name, isCommandPressed);
-    statusListener(false);
   };
 
-  const renderModelItem = (model: ModelItem, index: number, active: boolean) => (
-    <button
-      className={`${
-        active ? 'bg-black text-white' : 'text-gray-900'
-      } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
-      onClick={e => {
-        e.preventDefault();
-        handleModelClick(model, e.metaKey || e.ctrlKey);
-      }}>
-      <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
-        {index}
-      </span>
-      <span className="whitespace-nowrap flex-1 flex justify-between items-center">
-        <span>{model.shortName}</span>
-        <span
-          className={`ml-2 opacity-0 transition-all duration-100 ${active || 'group-hover:opacity-100'} ${
-            active && 'opacity-100'
-          }`}>
-          [{model.provider}]
+  // 修改以符合BaseDropdown期望的类型
+  const renderModelItem = (item: Record<string, unknown>, index: number, active: boolean) => {
+    const shortName = item.shortName as string;
+    const provider = item.provider as string;
+
+    if (!shortName) return <div>Invalid model</div>;
+
+    return (
+      <button
+        className={`${
+          active ? 'bg-black text-white' : 'text-gray-900'
+        } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
+        onClick={e => {
+          e.preventDefault();
+          handleModelClick(item, e.metaKey || e.ctrlKey);
+        }}>
+        <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
+          {index}
         </span>
-      </span>
-    </button>
-  );
+        <span className="whitespace-nowrap flex-1 flex justify-between items-center">
+          <span>{shortName}</span>
+          <span
+            className={`ml-2 opacity-0 transition-all duration-100 ${active || 'group-hover:opacity-100'} ${
+              active && 'opacity-100'
+            }`}>
+            [{provider}]
+          </span>
+        </span>
+      </button>
+    );
+  };
 
   return (
     <div ref={baseDropdownRef} className="relative">
