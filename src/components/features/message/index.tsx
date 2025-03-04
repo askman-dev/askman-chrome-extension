@@ -95,7 +95,7 @@ export function MessageItem(props: MessageItemProps) {
       className={classNames(
         'relative',
         role === 'assistant'
-          ? 'text-gray-800 mb-3 leading-relaxed text-base'
+          ? 'text-black mb-3 leading-relaxed text-base'
           : 'text-sky-600 mb-1 leading-relaxed max-h-16 font-bold',
       )}
       {...handlers}>

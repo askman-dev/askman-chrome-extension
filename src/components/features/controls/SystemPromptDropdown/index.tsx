@@ -42,15 +42,25 @@ export function SystemPromptDropdown({
   }, []);
 
   // 处理预设点击事件
-  const handlePresetClick = async (preset: SystemPresetInterface, isCommandPressed?: boolean) => {
+  const handlePresetClick = (item: Record<string, unknown>, isCommandPressed?: boolean) => {
     try {
+      // 通过类型保护确保必要属性存在
+      if (!('name' in item && 'hbs' in item && 'template' in item && 'id' in item)) {
+        return;
+      }
+
+      const presetName = String(item.name);
+
       // 只有在非Command点击时才保存设置
       if (!isCommandPressed) {
-        await StorageManager.setCurrentSystemPreset(preset.name);
-        setSelectedPreset(preset.name);
+        StorageManager.setCurrentSystemPreset(presetName).then(() => {
+          setSelectedPreset(presetName);
+        });
       }
       hideToolPreview();
       statusListener(false);
+      // 使用类型断言前先转为unknown
+      const preset = item as unknown as SystemPresetInterface;
       onItemClick(preset, isCommandPressed);
     } catch (error) {
       console.error('Error setting system preset:', error);
@@ -58,30 +68,43 @@ export function SystemPromptDropdown({
   };
 
   // 渲染预设项
-  const renderPresetItem = (preset: SystemPresetInterface, index: number, active: boolean) => (
-    <button
-      className={`${
-        active ? 'bg-black text-white' : 'text-gray-900'
-      } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
-      onClick={e => {
-        e.preventDefault();
-        handlePresetClick(preset, e.metaKey || e.ctrlKey);
-        statusListener(false);
-      }}
-      onMouseEnter={e => {
-        if (dropdownRef.current) {
-          showToolPreview(e.currentTarget, dropdownRef.current, 'left', preset.hbs);
-        }
-      }}
-      onMouseLeave={hideToolPreview}>
-      <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
-        {index}
-      </span>
-      <span className="flex items-center justify-between w-full">
-        <span>{preset.name}</span>
-      </span>
-    </button>
-  );
+  const renderPresetItem = (item: Record<string, unknown>, index: number, active: boolean) => {
+    // 通过类型保护确保必要属性存在
+    if (!('name' in item)) {
+      return <div>Invalid preset</div>;
+    }
+
+    const presetName = String(item.name);
+
+    return (
+      <button
+        className={`${
+          active ? 'bg-black text-white' : 'text-gray-900'
+        } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
+        onClick={e => {
+          e.preventDefault();
+          handlePresetClick(item, e.metaKey || e.ctrlKey);
+          statusListener(false);
+        }}
+        onMouseEnter={e => {
+          if (
+            Object.prototype.hasOwnProperty.call(item, 'hbs') &&
+            typeof item.hbs === 'string' &&
+            dropdownRef.current
+          ) {
+            showToolPreview(e.currentTarget, dropdownRef.current, 'left', item.hbs as string);
+          }
+        }}
+        onMouseLeave={hideToolPreview}>
+        <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
+          {index + 1}
+        </span>
+        <span className="flex items-center justify-between w-full">
+          <span>{presetName}</span>
+        </span>
+      </button>
+    );
+  };
 
   return (
     <div ref={dropdownRef} className="relative">

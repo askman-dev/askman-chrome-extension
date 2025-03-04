@@ -9,7 +9,7 @@ import { useToolPreview } from '@src/shared/hooks/useToolPreview';
 
 interface ToolDropdownProps {
   className: string;
-  onItemClick: (_tool: ToolsPromptInterface, _withCommand?: boolean) => void;
+  onItemClick: (_tool: Record<string, unknown>, _withCommand?: boolean) => void;
   statusListener: (_status: boolean) => void;
   initOpen: boolean;
   buttonDisplay?: string;
@@ -45,7 +45,8 @@ export function ToolDropdown({ className, onItemClick, initOpen, statusListener,
 
     if (targetTool) {
       console.log('[AskToolDropdown] main button clicked, sending tool:', targetTool.name);
-      handleToolClick(targetTool, _e.metaKey || _e.ctrlKey);
+      // 将 ToolsPromptInterface 转为 Record<string, unknown> 以匹配参数类型
+      handleToolClick(targetTool as unknown as Record<string, unknown>, _e.metaKey || _e.ctrlKey);
     }
   };
 
@@ -81,39 +82,60 @@ export function ToolDropdown({ className, onItemClick, initOpen, statusListener,
     fetchTools();
   }, []);
 
-  const handleToolClick = async (tool: ToolsPromptInterface, isCommandPressed: boolean) => {
+  const handleToolClick = (item: Record<string, unknown>, isCommandPressed: boolean) => {
+    // 通过类型保护确保必要属性存在
+    if (!('id' in item && 'name' in item && 'hbs' in item && 'template' in item)) {
+      return;
+    }
+
+    const toolId = String(item.id);
+    const toolName = String(item.name);
+
     // TODO: Use cmd to pin the tool, it's not working now
     if (isCommandPressed) {
-      await StorageManager.setCurrentTool(tool.id);
-      setSelectedTool(tool.id);
-      setSelectedToolName(tool.name);
+      StorageManager.setCurrentTool(toolId).then(() => {
+        setSelectedTool(toolId);
+        setSelectedToolName(toolName);
+      });
     }
-    onItemClick(tool, isCommandPressed);
+
+    onItemClick(item, isCommandPressed);
     hideToolPreview();
     statusListener(false); // Explicitly notify parent of status change
   };
 
-  const renderToolItem = (tool: ToolsPromptInterface, index: number, active: boolean) => {
+  const renderToolItem = (item: Record<string, unknown>, index: number, active: boolean) => {
+    // 通过类型保护确保必要属性存在
+    if (!('name' in item)) {
+      return <div>Invalid tool</div>;
+    }
+
+    const toolName = String(item.name);
+
     return (
       <button
         className={`${
           active ? 'bg-black text-white' : 'text-gray-900'
         } group flex w-full items-center rounded-md px-2 py-2 text-sm focus:outline-none`}
-        onMouseEnter={e => {
-          if (dropdownRef.current) {
-            showToolPreview(e.currentTarget, dropdownRef.current, 'right', tool.hbs);
-          }
-        }}
-        onMouseLeave={hideToolPreview}
         onClick={e => {
           e.preventDefault();
-          handleToolClick(tool, e.metaKey || e.ctrlKey);
-        }}>
+          handleToolClick(item, e.metaKey || e.ctrlKey);
+        }}
+        onMouseEnter={e => {
+          if (
+            Object.prototype.hasOwnProperty.call(item, 'hbs') &&
+            typeof item.hbs === 'string' &&
+            dropdownRef.current
+          ) {
+            showToolPreview(e.currentTarget, dropdownRef.current, 'right', item.hbs as string);
+          }
+        }}
+        onMouseLeave={hideToolPreview}>
         <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
-          {index}
+          {index + 1}
         </span>
         <span className="whitespace-nowrap flex-1 flex justify-between items-center">
-          <span>{tool.name}</span>
+          <span>{toolName}</span>
           <span
             className={`ml-2 opacity-0 transition-all duration-100 ${active || 'group-hover:opacity-100'} ${
               active && 'opacity-100'
@@ -131,7 +153,7 @@ export function ToolDropdown({ className, onItemClick, initOpen, statusListener,
       <Dropdown
         displayName={selectedTool ? selectedToolName : '工具'}
         className={className}
-        onItemClick={(tool, isCommandPressed) => handleToolClick(tool, isCommandPressed)}
+        onItemClick={handleToolClick}
         statusListener={statusListener}
         initOpen={initOpen}
         items={allTools}
