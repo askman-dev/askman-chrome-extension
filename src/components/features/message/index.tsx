@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { CodeBlock } from '@src/components/features/message/CodeBlock';
 import { QuoteAgent } from '@src/agents/quote';
 import CopyButton, { useCopyButton } from '@src/components/common/CopyButton';
-import { SCROLLBAR_STYLES } from '@src/styles/common';
+import { SCROLLBAR_STYLES_THIN_X } from '@src/styles/common';
 
 /* eslint-disable no-unused-vars */
 export enum MessageType {
@@ -99,7 +99,9 @@ export function MessageItem(props: MessageItemProps) {
           : 'text-sky-600 mb-1 leading-relaxed max-h-16 font-bold',
       )}
       {...handlers}>
-      <div className={classNames('pr-8', role === 'user' ? `max-h-16 ${SCROLLBAR_STYLES}` : '')}>{messageItem}</div>
+      <div className={classNames('pr-8', role === 'user' ? `max-h-16 ${SCROLLBAR_STYLES_THIN_X}` : '')}>
+        {messageItem}
+      </div>
       {isVisible && type !== MessageType.CODE && (
         <CopyButton text={text} className="top-[-6px] right-1 bg-gray-100 hover:bg-gray-200" />
       )}
