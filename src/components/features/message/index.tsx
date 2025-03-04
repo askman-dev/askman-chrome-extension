@@ -94,8 +94,9 @@ export function MessageItem(props: MessageItemProps) {
     <div
       className={classNames(
         'relative',
-        role === 'assistant' ? 'text-gray-800 mb-3 leading-relaxed' : 'text-sky-600 mb-1 leading-relaxed max-h-16',
-        'font-bold',
+        role === 'assistant'
+          ? 'text-gray-800 mb-3 leading-relaxed text-base'
+          : 'text-sky-600 mb-1 leading-relaxed max-h-16 font-bold',
       )}
       {...handlers}>
       <div className={classNames('pr-8', role === 'user' ? `max-h-16 ${SCROLLBAR_STYLES}` : '')}>{messageItem}</div>
