@@ -1,6 +1,6 @@
 {
   "name": "askman-chrome-extension",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "Askman is an open-source browser extension that connects AI to web pages",
   "license": "GPL-3.0-only",
   "repository": {
