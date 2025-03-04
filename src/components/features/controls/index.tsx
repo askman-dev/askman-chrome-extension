@@ -1,8 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import configStorage from '@src/shared/storages/configStorage';
-import { BaseDropdown } from '../base/BaseDropdown';
+import { BaseDropdown } from '@src/components/common/Dropdown';
+import { QuoteDropdown } from './QuoteDropdown';
+import { SystemPromptDropdown } from './SystemPromptDropdown';
+import { ToolDropdown } from './ToolDropdown';
+import { ToolPreview } from './ToolPreview';
 
-interface ModelDropdownProps {
+interface ModelSelectorProps {
   className?: string;
   onItemClick: (_model: string, _withCommand?: boolean) => void;
   statusListener: (_status: boolean) => void;
@@ -16,7 +20,7 @@ interface ModelItem {
   provider: string;
 }
 
-export default function ModelDropdown({ className, onItemClick, statusListener, initOpen }: ModelDropdownProps) {
+export function ModelSelector({ className, onItemClick, statusListener, initOpen }: ModelSelectorProps) {
   const [models, setModels] = useState<ModelItem[]>([]);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [selectedModelName, setSelectedModelName] = useState<string>('free'); // 默认显示 free
@@ -71,6 +75,7 @@ export default function ModelDropdown({ className, onItemClick, statusListener, 
       setSelectedModelName(model.name);
     }
     onItemClick(model.name, isCommandPressed);
+    statusListener(false);
   };
 
   const renderModelItem = (model: ModelItem, index: number, active: boolean) => (
@@ -81,7 +86,6 @@ export default function ModelDropdown({ className, onItemClick, statusListener, 
       onClick={e => {
         e.preventDefault();
         handleModelClick(model, e.metaKey || e.ctrlKey);
-        statusListener(false);
       }}>
       <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
         {index}
@@ -115,3 +119,9 @@ export default function ModelDropdown({ className, onItemClick, statusListener, 
     </div>
   );
 }
+
+// 导出所有控件组件
+export { QuoteDropdown, SystemPromptDropdown, ToolDropdown, ToolPreview };
+
+// 为了兼容旧的导入方式，提供默认导出
+export default ModelSelector;

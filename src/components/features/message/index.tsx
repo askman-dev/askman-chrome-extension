@@ -1,21 +1,22 @@
-import classNames from 'classnames';
-import AskCode from './ask-code';
-import { QuoteAgent } from '../agents/quote';
 import React, { useState } from 'react';
-import CopyButton, { useCopyButton } from './base/CopyButton';
-import { SCROLLBAR_STYLES } from '../styles/common';
+import classNames from 'classnames';
+import { CodeBlock } from '@src/components/features/message/CodeBlock';
+import { QuoteAgent } from '@src/agents/quote';
+import CopyButton, { useCopyButton } from '@src/components/common/CopyButton';
+import { SCROLLBAR_STYLES } from '@src/styles/common';
 
 /* eslint-disable no-unused-vars */
-export enum AskMessageType {
+export enum MessageType {
   TEXT = 'text',
   IMAGE = 'image',
   CODE = 'code',
 }
 
-interface AskMessageItem {
-  type: AskMessageType | string;
+export interface MessageItemProps {
+  type: MessageType | string;
   text: string;
   role?: string;
+  id?: string;
 }
 
 function decodeEntities(text: string): string {
@@ -24,10 +25,10 @@ function decodeEntities(text: string): string {
   return textArea.value;
 }
 
-function AskMessage(props: AskMessageItem) {
+export function MessageItem(props: MessageItemProps) {
   const { type, text, role } = props;
   const [codeHover, setCodeHover] = useState<number | null>(null);
-  const { isVisible, handlers } = useCopyButton(type !== AskMessageType.CODE);
+  const { isVisible, handlers } = useCopyButton(type !== MessageType.CODE);
   let messageItem = <div>{text}</div>;
 
   const TextWithLineBreaks = text => {
@@ -79,11 +80,11 @@ function AskMessage(props: AskMessageItem) {
 
   // 根据不同的类型，渲染不同的内容
   switch (type) {
-    case AskMessageType.TEXT:
+    case MessageType.TEXT:
       messageItem = <>{TextWithLineBreaks(text)}</>;
       break;
-    case AskMessageType.CODE:
-      messageItem = <AskCode code={text} />;
+    case MessageType.CODE:
+      messageItem = <CodeBlock code={text} />;
       break;
     default:
       break;
@@ -98,11 +99,14 @@ function AskMessage(props: AskMessageItem) {
       )}
       {...handlers}>
       <div className={classNames('pr-8', role === 'user' ? `max-h-16 ${SCROLLBAR_STYLES}` : '')}>{messageItem}</div>
-      {isVisible && type !== AskMessageType.CODE && (
+      {isVisible && type !== MessageType.CODE && (
         <CopyButton text={text} className="top-[-6px] right-1 bg-gray-100 hover:bg-gray-200" />
       )}
     </div>
   );
 }
 
-export default AskMessage;
+// 为了兼容性，保留旧的枚举名称
+export const AskMessageType = MessageType;
+
+export default MessageItem;

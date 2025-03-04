@@ -1,0 +1,63 @@
+module.exports = {
+  root: true,
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    ecmaFeatures: {
+      jsx: true,
+    },
+  },
+  plugins: ['@typescript-eslint'],
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
+  ],
+  rules: {
+    'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        varsIgnorePattern: '^_',
+        argsIgnorePattern: '^_',
+        ignoreRestSiblings: true,
+        args: 'none',
+      },
+    ],
+  },
+  globals: {
+    console: 'readonly',
+    setTimeout: 'readonly',
+    process: 'readonly',
+    chrome: 'readonly',
+    navigator: 'readonly',
+    document: 'readonly',
+    window: 'readonly',
+    HTMLElement: 'readonly',
+    Element: 'readonly',
+    HTMLDivElement: 'readonly',
+    HTMLButtonElement: 'readonly',
+    MouseEvent: 'readonly',
+    MutationObserver: 'readonly',
+    React: 'readonly',
+    Document: 'readonly',
+    Node: 'readonly',
+    HTMLTextAreaElement: 'readonly',
+    KeyboardEvent: 'readonly',
+    Text: 'readonly',
+    fetch: 'readonly',
+    SVGSVGElement: 'readonly',
+    DOMRect: 'readonly',
+    requestAnimationFrame: 'readonly',
+    clearTimeout: 'readonly',
+    global: 'readonly',
+    __dirname: 'readonly',
+  },
+  settings: {
+    react: {
+      version: 'detect',
+    },
+  },
+}; 

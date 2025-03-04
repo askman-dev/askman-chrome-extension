@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { useDebounceFn } from 'ahooks';
-import AskButton from '@src/components/ask-button';
-import AskPanel from '@root/src/components/ask-panel';
+import AskButton from '@src/components/features/dialog/DialogTrigger';
+import AskPanel from '@src/components/features/dialog/DialogPanel';
 import { CommandType, TabMessage } from '@root/src/types';
 import { QuoteAgent, QuoteContext } from '@root/src/agents/quote';
 import { ChatCoreContext, ChatPopupContext } from '@root/src/chat/chat';
@@ -12,7 +12,7 @@ import { PageStackoverflowAgent } from '@root/src/agents/page-stackoverflow/scri
 import PageStackoverflowToolDropdown from '@root/src/agents/page-stackoverflow/component';
 import { StorageManager } from '@src/utils/StorageManager';
 import { BlockConfig } from '@src/utils/BlockConfig';
-import Notification from '@src/components/base/Notification';
+import Notification from '@src/components/common/Notification';
 
 const ASK_BUTTON_OFFSET_X = 5; // 按钮距离左侧的偏移量
 
