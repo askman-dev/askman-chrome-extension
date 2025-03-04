@@ -3,7 +3,31 @@ import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/r
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import { usePreventOverflowHidden } from '@src/shared/hooks/usePreventOverflowHidden';
-import { DropdownProps, BaseDropdownProps } from './types';
+
+export interface DropdownProps {
+  displayName: string;
+  className?: string;
+  onItemClick: (_item: Record<string, unknown>, _isCommandPressed: boolean) => void;
+  statusListener: (_status: boolean) => void;
+  initOpen: boolean;
+  items: Array<{
+    id: string;
+    name: string;
+    shortName?: string;
+  }>;
+  shortcutKey?: string;
+  renderItem?: (
+    _item: Record<string, unknown>,
+    _index: number,
+    _active: boolean,
+    _isSelected?: boolean,
+  ) => React.ReactElement;
+  selectedId?: string;
+  showShortcut?: boolean;
+  align?: 'left' | 'right';
+  buttonDisplay?: string;
+  onMainButtonClick?: (_e: React.MouseEvent) => void;
+}
 
 export function Dropdown({
   displayName,
@@ -35,13 +59,14 @@ export function Dropdown({
       buttonRef.current?.click();
     }
   }, [initOpen, isOpened]);
+
   useEffect(() => {
     statusListener(isOpened);
     if (isOpened) {
       const targetIndex = selectedIndex >= 0 ? selectedIndex : 0;
       setTimeout(() => menuItemsRef.current[targetIndex]?.focus(), 0);
     }
-  }, [isOpened, selectedIndex]);
+  }, [isOpened, selectedIndex, statusListener]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Command 或 Ctrl 按下
@@ -79,7 +104,7 @@ export function Dropdown({
 
   usePreventOverflowHidden();
 
-  const defaultRenderItem = (item: any, index: number, active: boolean, isSelected?: boolean) => (
+  const defaultRenderItem = (item: Record<string, unknown>, index: number, active: boolean, isSelected?: boolean) => (
     <div
       className={`${
         active ? 'bg-black text-white' : 'text-gray-900'
@@ -88,7 +113,7 @@ export function Dropdown({
         {index}
       </span>
       <span className="flex items-center justify-between w-full">
-        <span>{item.name}</span>
+        <span>{typeof item.name === 'string' ? item.name : 'Untitled'}</span>
         {isSelected ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -228,8 +253,7 @@ export function Dropdown({
                         onClick={() => {
                           onItemClick(item, isCommandPressed);
                           statusListener(false);
-                        }}
-                        autoFocus={index === selectedIndex}>
+                        }}>
                         {renderItem
                           ? renderItem(item, index, active, item.id === selectedId)
                           : defaultRenderItem(item, index, active, item.id === selectedId)}
@@ -246,7 +270,7 @@ export function Dropdown({
   );
 }
 
-// 为了保持向后兼容，导出旧名称
+// 导出兼容性的BaseDropdown别名
 export const BaseDropdown = Dropdown;
 
-export default Dropdown; 
+export default Dropdown;

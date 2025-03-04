@@ -1,13 +1,14 @@
+import React from 'react';
 import classNames from 'classnames';
 
-interface AskButtonProps extends React.DOMAttributes<HTMLButtonElement>, React.HTMLAttributes<HTMLButtonElement> {
+interface DialogTriggerProps extends React.DOMAttributes<HTMLButtonElement>, React.HTMLAttributes<HTMLButtonElement> {
   visible?: boolean;
   primary?: boolean;
   disabled?: boolean;
   children?: React.ReactNode | string;
 }
 
-function AskButton(props: AskButtonProps) {
+export function DialogTrigger(props: DialogTriggerProps) {
   const { visible = true, primary = false, className, disabled = false, children, ...rest } = props;
 
   return (
@@ -18,7 +19,7 @@ function AskButton(props: AskButtonProps) {
         primary && 'cursor-pointer',
         disabled && 'cursor-not-allowed opacity-50',
         className,
-        'hover:bg-gray-300'
+        'hover:bg-gray-300',
       )}
       {...rest}>
       {children}
@@ -26,4 +27,6 @@ function AskButton(props: AskButtonProps) {
   );
 }
 
-export default AskButton;
+// For backwards compatibility
+export const AskButton = DialogTrigger;
+export default DialogTrigger;

@@ -1,42 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import { ToolPreview } from '@src/components/features/controls/ToolPreview';
 
-interface ToolPreviewProps {
-  content: string;
-  x: number;
-  y: number;
-}
-
-export const ToolPreview: React.FC<ToolPreviewProps> = ({ content, x, y }) => {
-  const tooltipRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (tooltipRef.current) {
-      // const rect = tooltipRef.current.getBoundingClientRect();
-      // const viewportWidth = window.innerWidth;
-
-      // 水平位置：在右侧显示，与菜单保持一定距离
-      let finalX = x;
-
-      // 垂直位置：与菜单项垂直居中对齐，增加偏移量
-      let finalY = y; // 增加偏移量以更好对齐
-
-      // 如果右侧空间不足，则显示在左侧
-      // TODO fix 这里计算有错误
-      // if (finalX + rect.width > viewportWidth - 20) {
-      //   finalX = x - rect.width - 10;
-      // }
-
-      tooltipRef.current.style.right = `${finalX}px`;
-      tooltipRef.current.style.top = `${finalY}px`;
-      // console.log('finalX = ', finalX, 'finalY = ', finalY);
-    }
-  }, [x, y]);
-
-  return (
-    <div
-      ref={tooltipRef}
-      className="absolute z-50 p-2 bg-black text-white text-sm text-left rounded shadow-lg min-w-[200px] max-w-[300px] max-h-[200px] overflow-hidden">
-      <pre className="text-xs whitespace-pre-wrap line-clamp-[12]">{content}</pre>
-    </div>
-  );
-};
+// This is a compatibility wrapper for backwards compatibility
+// All functionality has been moved to the features/controls/ToolPreview component
+export { ToolPreview };
+export default ToolPreview;

@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface KeyBindingProps {
   text: string;
   className?: string;
@@ -5,7 +7,7 @@ interface KeyBindingProps {
   children?: React.ReactNode;
 }
 
-function KeyBinding({ text, className = '', onClick, children }: KeyBindingProps) {
+export function KeyBinding({ text, className = '', onClick, children }: KeyBindingProps) {
   return (
     <b
       className={`bg-gray-100 rounded-md py-1 px-2 font-medium text-sm text-black text-opacity-50 ${className}`}

@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { NotificationProps } from './types';
+
+interface NotificationProps {
+  message: string;
+  duration?: number;
+  onClose?: () => void;
+}
 
 export function Notification({ message, duration = 3000, onClose }: NotificationProps) {
   const [isVisible, setIsVisible] = useState(true);
@@ -24,4 +29,4 @@ export function Notification({ message, duration = 3000, onClose }: Notification
   );
 }
 
-export default Notification; 
+export default Notification;

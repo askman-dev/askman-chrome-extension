@@ -33,7 +33,7 @@ export const useCopyButton = (showTrigger = true) => {
   };
 };
 
-export default function CopyButton({
+export function CopyButton({
   text,
   onCopied,
   onCopyFailed,
@@ -93,3 +93,5 @@ export default function CopyButton({
     </button>
   );
 }
+
+export default CopyButton;
