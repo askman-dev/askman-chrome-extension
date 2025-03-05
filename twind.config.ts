@@ -27,6 +27,22 @@ const defaultConfig = defineConfig({
       60: '15rem',
       lg: '32rem',
     },
+    fontFamily: {
+      'system-ui': [
+        'system-ui',
+        '-apple-system',
+        'BlinkMacSystemFont',
+        '"Segoe UI"',
+        'Roboto',
+        'Oxygen',
+        'Ubuntu',
+        'Cantarell',
+        '"Fira Sans"',
+        '"Droid Sans"',
+        '"Helvetica Neue"',
+        'sans-serif',
+      ],
+    },
   },
 });
 // console.log(defaultConfig.theme)

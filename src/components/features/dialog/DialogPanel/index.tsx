@@ -413,7 +413,7 @@ export function DialogPanel(props: DialogPanelProps) {
     <div
       ref={panelRef}
       className={classNames(
-        'antialiased bg-white text-black text-left fixed border-1 border-solid border-gray-200 drop-shadow-lg text-sm rounded-lg p-4',
+        'antialiased bg-white text-black text-left fixed border-1 border-solid border-gray-200 drop-shadow-lg text-sm rounded-lg p-4 font-system-ui',
         isMaximized
           ? 'w-[80%] h-[80%] top-[10%] right-[10px] flex flex-col'
           : 'w-[473px] min-w-80 max-w-lg min-h-[155px]',
