@@ -92,25 +92,26 @@ export class QuoteAgent implements BaseAgent {
     let currentBlock = null;
 
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+      const line = lines[i];
+      const trimmedLine = line.trim();
 
-      if (line === '> [!QUOTE]') {
+      if (trimmedLine === '> [!QUOTE]') {
         if (currentBlock) {
           blocks.push(currentBlock);
         }
         currentBlock = { type: 'quote', content: [] };
-      } else if (line.startsWith('```')) {
+      } else if (trimmedLine.startsWith('```')) {
         if (currentBlock) {
           blocks.push(currentBlock);
         }
-        currentBlock = { type: 'code', language: line.slice(3).trim(), content: [] };
+        currentBlock = { type: 'code', language: trimmedLine.slice(3).trim(), content: [] };
         i++; // Skip the opening ```
         while (i < lines.length && !lines[i].trim().startsWith('```')) {
           currentBlock.content.push(lines[i]);
           i++;
         }
-      } else if (currentBlock && currentBlock.type === 'quote' && line.startsWith('>')) {
-        currentBlock.content.push(line.slice(1).trim());
+      } else if (currentBlock && currentBlock.type === 'quote' && trimmedLine.startsWith('>')) {
+        currentBlock.content.push(trimmedLine.slice(1).trim());
       } else {
         if (currentBlock && currentBlock.type !== 'text') {
           blocks.push(currentBlock);
@@ -119,9 +120,8 @@ export class QuoteAgent implements BaseAgent {
         if (!currentBlock) {
           currentBlock = { type: 'text', content: [] };
         }
-        if (line !== '') {
-          currentBlock.content.push(line);
-        }
+        // 对于文本块，保留空行，不做过滤
+        currentBlock.content.push(line);
       }
     }
 
