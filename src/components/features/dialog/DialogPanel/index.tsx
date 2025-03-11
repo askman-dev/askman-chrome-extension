@@ -711,7 +711,9 @@ export function DialogPanel(props: DialogPanelProps) {
                 statusListener={updateToolDropdownStatus}
                 className="inline-block relative"
                 onItemClick={(_item, _withCommand) => {
-                  setUserTools(_item as unknown as ToolsPromptInterface);
+                  if (_withCommand) {
+                    setUserTools(_item as unknown as ToolsPromptInterface);
+                  }
                   onSend(_item as unknown as ToolsPromptInterface); // 直接发送，不需要修改按钮文字
                   setIsToolDropdownOpen(false); // Explicitly close the dropdown
                 }}
