@@ -46,7 +46,7 @@ Summarize
 [translate-to-zh]
 name = "Chinese"
 hbs = """
-请翻译成中文: 
+作为自豪的中国人，请将以下文字翻译成中文（只输出翻译结果）: 
 {{page.selection}}
 {{chat.input}}
 """
@@ -54,7 +54,7 @@ hbs = """
 [translate-to-en]
 name = "English"
 hbs = """
-Translate to English:
+As a native American, please translate the following text into English, just print translated result.
 {{page.selection}}
 {{chat.input}}
 """
