@@ -1,5 +1,157 @@
 import { AgentContext } from '../types';
 import { BaseAgent } from './base';
+import { parseBlocks as parseXmlBlocks } from './utils/parseXmlBlock';
+
+interface Block {
+  type: string;
+  content: string;
+  metadata?: {
+    tag?: string;
+    [key: string]: string | undefined;
+  };
+}
+
+interface ParseResult {
+  block: Block;
+  remainingText: string;
+}
+
+/**
+ * 解析引用块
+ * @param text 要解析的文本
+ * @returns 解析结果，包含解析出的块和剩余文本；如果不是引用块则返回 null
+ */
+function parseQuoteBlock(text: string): ParseResult | null {
+  const lines = text.split('\n');
+  const quoteLines: string[] = [];
+  let remainingLines: string[] = [];
+  let isInQuote = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (line.startsWith('> [!QUOTE]')) {
+      isInQuote = true;
+      continue;
+    }
+
+    if (isInQuote) {
+      if (line.startsWith('> ')) {
+        quoteLines.push(line.slice(2)); // 去掉 '> '
+      } else {
+        remainingLines = lines.slice(i);
+        break;
+      }
+    } else {
+      return null; // 不是引用块
+    }
+  }
+
+  if (!isInQuote || quoteLines.length === 0) {
+    return null;
+  }
+
+  return {
+    block: {
+      type: 'quote',
+      content: quoteLines.join('\n'),
+    },
+    remainingText: remainingLines.join('\n'),
+  };
+}
+
+/**
+ * 解析代码块
+ * @param text 要解析的文本
+ * @returns 解析结果，包含解析出的块和剩余文本；如果不是代码块则返回 null
+ */
+function parseCodeBlock(text: string): ParseResult | null {
+  const lines = text.split('\n');
+  const codeLines: string[] = [];
+  let remainingLines: string[] = [];
+  let isInCode = false;
+  let language = '';
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (line.startsWith('```')) {
+      if (!isInCode) {
+        isInCode = true;
+        language = line.slice(3).trim();
+      } else {
+        remainingLines = lines.slice(i + 1);
+        break;
+      }
+      continue;
+    }
+
+    if (isInCode) {
+      codeLines.push(line);
+    } else {
+      return null; // 不是代码块
+    }
+  }
+
+  if (!isInCode || codeLines.length === 0) {
+    return null;
+  }
+
+  return {
+    block: {
+      type: 'code',
+      content: codeLines.join('\n'),
+      metadata: { language },
+    },
+    remainingText: remainingLines.join('\n'),
+  };
+}
+
+/**
+ * 解析文本为一系列块，包括引用块、代码块、XML 块和普通文本块
+ * @param text 要解析的文本
+ * @returns 解析结果，包含解析出的所有块
+ */
+function parseBlocks(text: string): Block[] {
+  const blocks: Block[] = [];
+  let remainingText = text;
+
+  while (remainingText) {
+    // 1. 尝试解析引用块
+    const quoteResult = parseQuoteBlock(remainingText);
+    if (quoteResult) {
+      blocks.push(quoteResult.block);
+      remainingText = quoteResult.remainingText;
+      continue;
+    }
+
+    // 2. 尝试解析代码块
+    const codeResult = parseCodeBlock(remainingText);
+    if (codeResult) {
+      blocks.push(codeResult.block);
+      remainingText = codeResult.remainingText;
+      continue;
+    }
+
+    // 3. 尝试解析 XML 块
+    const xmlBlocks = parseXmlBlocks(remainingText);
+    if (xmlBlocks.length > 0) {
+      blocks.push(...xmlBlocks);
+      break;
+    }
+
+    // 4. 如果都不是特殊块，作为文本块处理
+    if (remainingText.trim()) {
+      blocks.push({
+        type: 'text',
+        content: remainingText.trim(),
+      });
+    }
+    break;
+  }
+
+  return blocks;
+}
 
 export class QuoteContext implements AgentContext {
   public type: 'page.selection' | 'page.title' | 'page.url' | 'page.content' | 'page' | 'chat.input';
@@ -15,11 +167,13 @@ export class QuoteContext implements AgentContext {
   public text?: string;
   public browserLanguage?: string;
 }
+
 export class QuoteAgent implements BaseAgent {
   public static getQuoteByPageUrl(_pageUrl: string): Promise<QuoteContext> {
     // TODO：异步更新，可以在对话框中显示 加载中
     return Promise.resolve(new QuoteContext());
   }
+
   public static getQuoteByDocument(pageUrl: string, document: Document): Promise<QuoteContext> {
     const quote = new QuoteContext();
     quote.type = 'page';
@@ -31,6 +185,7 @@ export class QuoteAgent implements BaseAgent {
     // console.log('getQuoteByDocument:', quote);
     return Promise.resolve(quote);
   }
+
   public static getQuoteBySelection(pageUrl: string, selection: string): Promise<QuoteContext> {
     const quote = new QuoteContext();
     quote.type = 'page.selection';
@@ -85,51 +240,5 @@ export class QuoteAgent implements BaseAgent {
     return quotes.join('\n');
   }
 
-  public static parseBlocks(text) {
-    // console.info('INPUT:', text);
-    const lines = text.split('\n');
-    const blocks = [];
-    let currentBlock = null;
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const trimmedLine = line.trim();
-
-      if (trimmedLine === '> [!QUOTE]') {
-        if (currentBlock) {
-          blocks.push(currentBlock);
-        }
-        currentBlock = { type: 'quote', content: [] };
-      } else if (trimmedLine.startsWith('```')) {
-        if (currentBlock) {
-          blocks.push(currentBlock);
-        }
-        currentBlock = { type: 'code', language: trimmedLine.slice(3).trim(), content: [] };
-        i++; // Skip the opening ```
-        while (i < lines.length && !lines[i].trim().startsWith('```')) {
-          currentBlock.content.push(lines[i]);
-          i++;
-        }
-      } else if (currentBlock && currentBlock.type === 'quote' && trimmedLine.startsWith('>')) {
-        currentBlock.content.push(trimmedLine.slice(1).trim());
-      } else {
-        if (currentBlock && currentBlock.type !== 'text') {
-          blocks.push(currentBlock);
-          currentBlock = null;
-        }
-        if (!currentBlock) {
-          currentBlock = { type: 'text', content: [] };
-        }
-        // 对于文本块，保留空行，不做过滤
-        currentBlock.content.push(line);
-      }
-    }
-
-    if (currentBlock) {
-      blocks.push(currentBlock);
-    }
-
-    // console.info('OUTPUT:', blocks);
-    return blocks;
-  }
+  public static parseBlocks = parseBlocks;
 }
