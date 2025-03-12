@@ -6,7 +6,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
-    include: ['tests/**/*.{test,spec}.{ts,tsx}'],
+    include: ['tests/**/*.{test,spec}.{ts,tsx}', 'src/**/*.{test,spec}.{ts,tsx}', 'src/**/__tests__/**/*.{ts,tsx}'],
     exclude: ['**/third-party/**', '**/node_modules/**', '**/dist/**'],
     coverage: {
       provider: 'v8',
@@ -17,10 +17,12 @@ export default defineConfig({
     deps: {
       optimizer: {
         web: {
-          include: ['**/*.toml'], // Changed from /\.toml$/ to '**/*.toml'
+          include: ['**/*.toml'],
         },
       },
     },
+    testTimeout: 10000,
+    hookTimeout: 10000,
   },
   resolve: {
     alias: {
