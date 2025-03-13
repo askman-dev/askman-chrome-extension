@@ -20,9 +20,9 @@ base_url = "https://extapi.askman.dev/v1/"
 sdk = "openai"
 send_api_key = true
 models = [
-  { max_tokens = 32786, name = "meta-llama/llama-3.1-405b-instruct:free" },
-  { max_tokens = 32786, name = "qwen/qwen-2-7b-instruct:free" },
-  { max_tokens = 32786, name = "google/gemma-2-9b-it:free" }
+  { max_tokens = 32786, name = "deepseek/deepseek-r1:free" },
+  { max_tokens = 32786, name = "qwen/qwq-32b:free" },
+  { max_tokens = 32786, name = "google/gemma-3-27b-it:free" }
 ]
 
 # [openai]

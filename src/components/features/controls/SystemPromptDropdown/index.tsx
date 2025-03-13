@@ -100,7 +100,7 @@ export function SystemPromptDropdown({
           {index + 1}
         </span>
         <span className="flex items-center justify-between w-full">
-          <span>{presetName}</span>
+          <span className="truncate whitespace-nowrap overflow-hidden">{presetName}</span>
         </span>
       </button>
     );
