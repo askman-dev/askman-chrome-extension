@@ -118,7 +118,15 @@ export class ChatCoreContext implements ChatCoreInterface {
    * {template}
    * {chat.input} (if not used in template)
    */
-  private processMessage(context: any, framework: ToolsPromptInterface | null, quotes: QuoteContext[]): string {
+  private processMessage(
+    context: {
+      browser?: { language?: string };
+      page?: { url?: string; title?: string; content?: string; selection?: string };
+      chat?: { language?: string; input?: string };
+    },
+    framework: ToolsPromptInterface | null,
+    quotes: QuoteContext[],
+  ): string {
     // 1. 提取模板中使用的变量
     const usedVars = framework ? extractUsedVars(framework.hbs) : new Set<string>();
 
@@ -165,7 +173,7 @@ export class ChatCoreContext implements ChatCoreInterface {
     // 6. 拼接最终消息
     return [referenceBlock, renderedTemplate, userInput]
       .filter(Boolean) // 移除空字符串
-      .join('\n\n');
+      .join('\n');
   }
 
   /**

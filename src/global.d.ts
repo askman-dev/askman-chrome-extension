@@ -51,3 +51,9 @@ declare module '*/models.toml' {
 declare module 'monaco-editor/esm/vs/editor/editor.api' {
   export * from 'monaco-editor';
 }
+
+// 为测试环境中的global对象添加chrome属性类型定义
+declare global {
+  // eslint-disable-next-line no-var
+  var chrome: typeof chrome;
+}
