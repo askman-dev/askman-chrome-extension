@@ -85,34 +85,31 @@ export function parseBlocks(text: string): Block[] {
   let textBlock: Block | null = null;
   let depth = 0;
   const allLines: string[] = []; // Store all lines for handling malformed XML cases
+  let currentTag = ''; // 记录当前处理的标签名
 
   lines.forEach(line => {
     allLines.push(line);
     const startTagMatch = line.match(/^<(?<tag>webpage_info|title|url|reference|content)>/);
     const endTagMatch = line.match(/^<\/(?<tag>webpage_info|title|url|reference|content)>$/);
 
-    if (startTagMatch) {
+    if (startTagMatch && depth === 0) {
       if (textBlock) {
         blocks.push(textBlock);
         textBlock = null;
       }
-      if (depth === 0) {
-        currentBlock = {
-          type: startTagMatch.groups.tag,
-          content: '',
-          metadata: { tag: startTagMatch.groups.tag },
-        };
-      } else if (currentBlock) {
-        currentBlock.content += (currentBlock.content ? '\n' : '') + line;
-      }
-      depth++;
-    } else if (endTagMatch) {
-      depth--;
-      if (depth === 0 && currentBlock) {
+      currentBlock = {
+        type: startTagMatch.groups.tag,
+        content: '',
+        metadata: { tag: startTagMatch.groups.tag },
+      };
+      currentTag = startTagMatch.groups.tag; // 记录当前标签名
+      depth = 1;
+    } else if (endTagMatch && depth === 1 && endTagMatch.groups.tag === currentTag) {
+      // 只有当结束标签与当前处理的标签名匹配时，才减少深度
+      depth = 0;
+      if (currentBlock) {
         blocks.push(currentBlock);
         currentBlock = null;
-      } else if (currentBlock) {
-        currentBlock.content += (currentBlock.content ? '\n' : '') + line;
       }
     } else if (currentBlock && depth > 0) {
       currentBlock.content += (currentBlock.content ? '\n' : '') + line;

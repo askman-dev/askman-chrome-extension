@@ -130,4 +130,59 @@ Book a demo
       },
     ]);
   });
+
+  it('should parse multiple blocks correctly', () => {
+    const input = `<reference>
+Below are some potentially helpful/relevant pieces of information for figuring out to respond
+<content>Example Domain
+
+This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
+
+More information...</content>
+</reference>
+
+333`;
+
+    const result = parseBlocks(input);
+    expect(result).toHaveLength(2);
+    expect(result[0]).toEqual({
+      type: 'reference',
+      content:
+        'Below are some potentially helpful/relevant pieces of information for figuring out to respond\n<content>Example Domain\n\nThis domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.\n\nMore information...</content>',
+      metadata: {
+        tag: 'reference',
+      },
+    });
+    expect(result[1]).toEqual({
+      type: 'text',
+      content: '\n333',
+    });
+  });
+
+  it('should skip inner content tags', () => {
+    const input = `<reference>
+Below are some potentially 
+<content>
+Example Domain
+
+This domain is 
+</content>
+</reference>
+
+333`;
+
+    const result = parseBlocks(input);
+    expect(result).toHaveLength(2);
+    expect(result[0]).toEqual({
+      type: 'reference',
+      content: 'Below are some potentially \n<content>\nExample Domain\n\nThis domain is \n</content>',
+      metadata: {
+        tag: 'reference',
+      },
+    });
+    expect(result[1]).toEqual({
+      type: 'text',
+      content: '\n333',
+    });
+  });
 });
