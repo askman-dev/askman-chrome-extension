@@ -39,7 +39,14 @@ export function MessageItem(props: MessageItemProps) {
           <div
             key={index}
             className="bg-gray-100 border-l-4 border-blue-500 p-2 mr-4 mb-2 overflow-hidden whitespace-nowrap text-ellipsis">
-            <span className="font-bold mr-2">{block.content.join(', ')}</span>
+            <span className="font-bold mr-2">{block.content}</span>
+          </div>
+        );
+      } else if (block.type === 'reference') {
+        return (
+          <div key={`reference-${index}`} className="inline-flex items-center gap-2">
+            <span className="px-2 py-1 rounded-full bg-blue-500 text-white text-sm">reference</span>
+            <span>REF</span>
           </div>
         );
       } else if (block.type === 'code') {
@@ -50,23 +57,23 @@ export function MessageItem(props: MessageItemProps) {
             onMouseEnter={() => setCodeHover(index)}
             onMouseLeave={() => setCodeHover(null)}>
             <pre className="bg-gray-800 text-white p-4 rounded mb-2 overflow-x-auto">
-              <code>{block.content.join('\n')}</code>
+              <code>{block.content}</code>
             </pre>
             {codeHover === index && (
-              <CopyButton text={block.content.join('\n')} className="top-2 right-2 bg-white hover:bg-gray-100" />
+              <CopyButton text={block.content} className="top-2 right-2 bg-white hover:bg-gray-100" />
             )}
           </div>
         );
       } else {
         return (
           <div key={`text-${index}`}>
-            {block.content.map((line, lineIndex) => {
+            {block.content.split('\n').map((line, lineIndex, lines) => {
               // 解码 HTML 实体
               const decodedLine = decodeEntities(line);
               return (
                 <React.Fragment key={`line-${lineIndex}`}>
                   {decodedLine}
-                  {lineIndex < block.content.length - 1 && <br />}
+                  {lineIndex < lines.length - 1 && <br />}
                 </React.Fragment>
               );
             })}
