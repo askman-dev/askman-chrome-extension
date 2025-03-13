@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import App from '@pages/content/ui/app';
 import refreshOnUpdate from 'virtual:reload-on-update-in-view';
 import injectedStyle from './injected.css?inline';
+import monokaiStyle from 'highlight.js/styles/monokai.min.css?inline';
 import { attachTwindStyle } from '@root/src/shared/style/twind';
 
 refreshOnUpdate('pages/content');
@@ -28,6 +29,11 @@ const styleElement = document.createElement('style');
 styleElement.innerHTML = injectedStyle;
 shadowRoot.appendChild(styleElement);
 
+/** Inject monokai highlight.js styles into shadow dom */
+const monokaiStyleElement = document.createElement('style');
+monokaiStyleElement.innerHTML = monokaiStyle;
+shadowRoot.appendChild(monokaiStyleElement);
+
 attachTwindStyle(rootIntoShadow, shadowRoot);
 
 // 会在某些网站插入唤起按钮，对按钮启用 twind 支持
@@ -37,6 +43,11 @@ const observer = new MutationObserver(function (mutationsList) {
       for (const node of mutation.addedNodes) {
         if (node instanceof window.Element && node.tagName === 'ASKMAN-CHROME-EXTENSION-CONTENT-ACTION-BUTTON-WRAP') {
           attachTwindStyle(node.shadowRoot.getElementById('shadow-root'), node.shadowRoot);
+
+          // 同样为按钮的 Shadow DOM 注入 monokai 样式
+          const btnMonokaiStyleElement = document.createElement('style');
+          btnMonokaiStyleElement.innerHTML = monokaiStyle;
+          node.shadowRoot.appendChild(btnMonokaiStyleElement);
         }
       }
     }
