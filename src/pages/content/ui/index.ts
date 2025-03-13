@@ -8,4 +8,5 @@
  *
  */
 import('@pages/content/ui/root');
-import('highlight.js/styles/monokai.min.css')
+// 移除全局导入，改为在 root.tsx 中通过 Shadow DOM 注入
+// import('highlight.js/styles/monokai.min.css')
