@@ -44,8 +44,12 @@ export function MessageItem(props: MessageItemProps) {
         );
       } else if (block.type === 'reference') {
         return (
-          <div key={`reference-${index}`} className="inline-flex items-center gap-2">
-            <span className="px-2 py-1 rounded-full bg-blue-500 text-white text-sm">reference</span>
+          <div key={`reference-${index}`} className="inline-flex relative ">
+            <span
+              className="rounded-md p-1 bg-gray-100 text-gray-700 text-sm hover:bg-gray-200 cursor-pointer"
+              title={block.content}>
+              reference
+            </span>
           </div>
         );
       } else if (block.type === 'code') {
