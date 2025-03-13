@@ -46,7 +46,6 @@ export function MessageItem(props: MessageItemProps) {
         return (
           <div key={`reference-${index}`} className="inline-flex items-center gap-2">
             <span className="px-2 py-1 rounded-full bg-blue-500 text-white text-sm">reference</span>
-            <span>REF</span>
           </div>
         );
       } else if (block.type === 'code') {
@@ -67,16 +66,19 @@ export function MessageItem(props: MessageItemProps) {
       } else {
         return (
           <div key={`text-${index}`}>
-            {block.content.split('\n').map((line, lineIndex, lines) => {
-              // 解码 HTML 实体
-              const decodedLine = decodeEntities(line);
-              return (
-                <React.Fragment key={`line-${lineIndex}`}>
-                  {decodedLine}
-                  {lineIndex < lines.length - 1 && <br />}
-                </React.Fragment>
-              );
-            })}
+            {block.content
+              .trim()
+              .split('\n')
+              .map((line, lineIndex, lines) => {
+                // 解码 HTML 实体
+                const decodedLine = decodeEntities(line);
+                return (
+                  <React.Fragment key={`line-${lineIndex}`}>
+                    {decodedLine}
+                    {lineIndex < lines.length - 1 && <br />}
+                  </React.Fragment>
+                );
+              })}
           </div>
         );
       }

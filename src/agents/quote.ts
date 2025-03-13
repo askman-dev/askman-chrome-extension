@@ -107,52 +107,6 @@ function parseCodeBlock(text: string): ParseResult | null {
   };
 }
 
-/**
- * 解析文本为一系列块，包括引用块、代码块、XML 块和普通文本块
- * @param text 要解析的文本
- * @returns 解析结果，包含解析出的所有块
- */
-function parseBlocks(text: string): Block[] {
-  const blocks: Block[] = [];
-  let remainingText = text;
-
-  while (remainingText) {
-    // 1. 尝试解析引用块
-    const quoteResult = parseQuoteBlock(remainingText);
-    if (quoteResult) {
-      blocks.push(quoteResult.block);
-      remainingText = quoteResult.remainingText;
-      continue;
-    }
-
-    // 2. 尝试解析代码块
-    const codeResult = parseCodeBlock(remainingText);
-    if (codeResult) {
-      blocks.push(codeResult.block);
-      remainingText = codeResult.remainingText;
-      continue;
-    }
-
-    // 3. 尝试解析 XML 块
-    const xmlBlocks = parseXmlBlocks(remainingText);
-    if (xmlBlocks.length > 0) {
-      blocks.push(...xmlBlocks);
-      break;
-    }
-
-    // 4. 如果都不是特殊块，作为文本块处理
-    if (remainingText.trim()) {
-      blocks.push({
-        type: 'text',
-        content: remainingText.trim(),
-      });
-    }
-    break;
-  }
-
-  return blocks;
-}
-
 export class QuoteContext implements AgentContext {
   public type: 'page.selection' | 'page.title' | 'page.url' | 'page.content' | 'page' | 'chat.input';
   public usageType?: 'template_var' | 'mention' | null; // 标记变量使用类型：模板变量、用户引用，或未使用
@@ -240,5 +194,49 @@ export class QuoteAgent implements BaseAgent {
     return quotes.join('\n');
   }
 
-  public static parseBlocks = parseBlocks;
+  /**
+   * 解析文本为一系列块，包括引用块、代码块、XML 块和普通文本块
+   * @param text 要解析的文本
+   * @returns 解析结果，包含解析出的所有块
+   */
+  public static parseBlocks(text: string): Block[] {
+    const blocks: Block[] = [];
+    let remainingText = text;
+
+    while (remainingText) {
+      // 1. 尝试解析引用块
+      const quoteResult = parseQuoteBlock(remainingText);
+      if (quoteResult) {
+        blocks.push(quoteResult.block);
+        remainingText = quoteResult.remainingText;
+        continue;
+      }
+
+      // 2. 尝试解析代码块
+      const codeResult = parseCodeBlock(remainingText);
+      if (codeResult) {
+        blocks.push(codeResult.block);
+        remainingText = codeResult.remainingText;
+        continue;
+      }
+
+      // 3. 尝试解析 XML 块
+      const xmlBlocks = parseXmlBlocks(remainingText);
+      if (xmlBlocks.length > 0) {
+        blocks.push(...xmlBlocks);
+        break;
+      }
+
+      // 4. 如果都不是特殊块，作为文本块处理
+      if (remainingText.trim()) {
+        blocks.push({
+          type: 'text',
+          content: remainingText.trim(),
+        });
+      }
+      break;
+    }
+
+    return blocks;
+  }
 }

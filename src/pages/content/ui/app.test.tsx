@@ -64,7 +64,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  delete (global as any).chrome;
+  delete global.chrome;
 });
 
 // vi.mock('@assets/conf/chat-presets.toml', () => ({
