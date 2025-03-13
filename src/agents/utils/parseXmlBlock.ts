@@ -89,8 +89,8 @@ export function parseBlocks(text: string): Block[] {
 
   lines.forEach(line => {
     allLines.push(line);
-    const startTagMatch = line.match(/^<(?<tag>webpage_info|title|url|reference|content)>/);
-    const endTagMatch = line.match(/^<\/(?<tag>webpage_info|title|url|reference|content)>$/);
+    const startTagMatch = line.match(/^<(?<tag>webpage_info|webpage_content|title|url|reference|content)>/);
+    const endTagMatch = line.match(/^<\/(?<tag>webpage_info|webpage_content|title|url|reference|content)>$/);
 
     if (startTagMatch && depth === 0) {
       if (textBlock) {
