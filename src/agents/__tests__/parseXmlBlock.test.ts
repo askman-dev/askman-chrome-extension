@@ -185,4 +185,27 @@ This domain is
       content: '\n333',
     });
   });
+
+  it('should skip inner content tags', () => {
+    const input = `You are an user input.
+
+Here's the content you need to summarize:
+
+<webpage_content>
+1. 简介
+2. 前言：AI4SE 的 2024 趋势
+3. 前言：AI4SE 的 2024 总结
+4. 第 1 部分：AI4SE 体系设计命名来看，可能与某种特定的评审或分析任务相关。
+</webpage_content>
+
+<user_input>
+333
+</user_input>
+
+Instructions:
+1. Carefully `;
+
+    const result = parseBlocks(input);
+    expect(result).toHaveLength(3);
+  });
 });

@@ -42,13 +42,20 @@ export function MessageItem(props: MessageItemProps) {
             <span className="font-bold mr-2">{block.content}</span>
           </div>
         );
-      } else if (block.type === 'reference') {
+      } else if (
+        block.type === 'reference' ||
+        block.type === 'webpage_info' ||
+        block.type === 'webpage_content' ||
+        block.type === 'content' ||
+        block.type === 'title' ||
+        block.type === 'url'
+      ) {
         return (
           <div key={`reference-${index}`} className="inline-flex relative ">
             <span
               className="rounded-md p-1 bg-gray-100 text-gray-700 text-sm hover:bg-gray-200 cursor-pointer"
               title={block.content}>
-              reference
+              {block.type}
             </span>
           </div>
         );
