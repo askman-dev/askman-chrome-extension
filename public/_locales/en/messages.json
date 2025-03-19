@@ -1,11 +1,11 @@
 {
   "extensionDescription": {
     "description": "Extension description",
-    "message": "An tool that allows users to easily connect AI to their webpages, providing chat and information retrieval capabilities."
+    "message": "Askman is a tool that lets you interact directly with webpage content. Read, ask questions, and understand everything right on the page, without needing to leave."
   },
   "extensionName": {
     "description": "Extension name",
-    "message": "Askman - Connect AI to pages"
+    "message": "Askman - Read, Ask, and Understand Right Here"
   },
   "extensionCommandChatPopupDisplay": {
     "description": "Command to display the popup",
