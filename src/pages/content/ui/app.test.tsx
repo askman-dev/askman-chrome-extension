@@ -9,7 +9,33 @@ const mockStorageData = {
   },
 };
 
+// Mock preferences data
+const mockPreferencesToml = `
+USER_LANGUAGE = "en"
+ASK_BUTTON = true
+ASK_BUTTON_BLOCK_PAGE = ["google.com", "facebook.com"]
+SHORTCUT_DISABLED_PAGES = ["youtube.com"]
+`;
+
 beforeAll(() => {
+  // Mock fetch
+  global.fetch = vi.fn(url => {
+    console.log('[TEST] fetch called with:', url);
+
+    // Return mock content based on URL
+    if (url.includes('preferences.toml')) {
+      return Promise.resolve({
+        ok: true,
+        text: () => Promise.resolve(mockPreferencesToml),
+      });
+    }
+
+    return Promise.resolve({
+      ok: true,
+      text: () => Promise.resolve(''),
+    });
+  }) as unknown as typeof fetch;
+
   // 创建完整的 chrome API mock
   global.chrome = {
     runtime: {
@@ -17,6 +43,10 @@ beforeAll(() => {
         addListener: vi.fn(),
         removeListener: vi.fn(),
       },
+      getURL: vi.fn(path => {
+        console.log('[TEST] getURL called with:', path);
+        return `chrome-extension://fake-id/${path}`;
+      }),
     },
     storage: {
       local: {
