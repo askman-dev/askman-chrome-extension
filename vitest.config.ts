@@ -1,7 +1,8 @@
 import { defineConfig } from 'vitest/config';
 import path from 'path';
-
+import { ViteToml } from 'vite-plugin-toml';
 export default defineConfig({
+  plugins: [ViteToml()],
   test: {
     globals: true,
     environment: 'jsdom',
