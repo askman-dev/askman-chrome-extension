@@ -116,10 +116,10 @@ export function MessageItem(props: MessageItemProps) {
         'relative',
         role === 'assistant'
           ? 'text-black mb-3 leading-relaxed text-base font-medium'
-          : 'text-sky-600 mb-1 leading-relaxed max-h-16  text-base font-medium',
+          : 'text-sky-600 mb-1 leading-relaxed max-h-32  text-base font-medium',
       )}
       {...handlers}>
-      <div className={classNames('pr-8', role === 'user' ? `max-h-16 ${SCROLLBAR_STYLES_THIN_X}` : '')}>
+      <div className={classNames('pr-8', role === 'user' ? `max-h-32 ${SCROLLBAR_STYLES_THIN_X}` : '')}>
         {messageItem}
       </div>
       {isVisible && type !== MessageType.CODE && (
