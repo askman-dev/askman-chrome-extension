@@ -35,7 +35,7 @@
     "@shikijs/core": "^1.15.1",
     "@shikijs/monaco": "^1.15.1",
     "@types/prop-types": "^15.7.12",
-    "ahooks": "^3.7.9",
+    "ahooks": "^3.8.5",
     "classnames": "^2.5.1",
     "construct-style-sheets-polyfill": "3.1.0",
     "dom-types": "^1.1.2",
