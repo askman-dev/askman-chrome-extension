@@ -66,7 +66,7 @@ export interface ToolsPromptInterface {
   id: string;
   name: string;
   hbs: string;
-  template: any;
+  template: unknown;
 }
 
 /* eslint-disable no-unused-vars */

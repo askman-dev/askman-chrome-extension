@@ -23,4 +23,17 @@ public/manifest.json
 .shire
 .vscode
 .cursor
+.cursorrules.crush/
+.crush/
+
+# IDE configurations
 .cursorrules
+.fastRequest/
+
+# Personal directories
+journals/
+whiteboards/
+
+# Temporary files
+temp/
+*.zainb

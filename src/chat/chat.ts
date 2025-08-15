@@ -156,7 +156,7 @@ export class ChatCoreContext implements ChatCoreInterface {
     }
 
     // 4. 渲染模板
-    let renderedTemplate = framework?.template(context) || '';
+    let renderedTemplate = (framework?.template as (..._args: unknown[]) => string)?.(context) || '';
     renderedTemplate = renderedTemplate.trim();
 
     // 5. 检查是否需要附加用户输入

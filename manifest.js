@@ -35,7 +35,7 @@ const manifest = {
     default_icon: 'icon-128.png',
   },
   // chrome_url_overrides: {
-  //   newtab: 'src/pages/newtab/index.html',
+  //   newtab: 'src/pages/thought-prism/index.html',
   // },
   icons: {
     128: 'icon-128.png',

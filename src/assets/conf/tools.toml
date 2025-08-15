@@ -1,8 +1,6 @@
 [framework]
 name = "Simple"
-hbs = """
-{{chat.input}}
-"""
+hbs = "{{chat.input}}"
 
 [page]
 name = "Page"

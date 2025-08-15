@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Import the same base styles as the main app */
+@import "@src/assets/style/tailwind.css";
+
+/* Ensure all Dialog Panel styles are included */
+.dialog-panel-styles {
+  /* This class forces Tailwind to include all the classes we use */
+}
