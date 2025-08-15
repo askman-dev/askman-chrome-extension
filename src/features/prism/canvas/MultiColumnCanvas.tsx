@@ -4,7 +4,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { TransformWrapper, TransformComponent, ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
-import ChatColumn from '@src/features/prism/PrismColumn';
+import ChatColumn from '@src/features/prism/conversation/PrismColumn';
 import ColumnPositionWrapper from './ColumnPositionWrapper';
 // import { calculateColumnY } from './ColumnYCalculator';
 import { LayoutCalculator } from './LayoutCalculator';
