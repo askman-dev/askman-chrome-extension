@@ -49,6 +49,7 @@ export function Dropdown({
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
   const menuRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout>();
+  const isClosingRef = useRef(false); // 防止关闭后立即重新打开
 
   const selectedIndex = selectedId ? items.findIndex(item => item.id === selectedId) : 0;
 
@@ -113,6 +114,23 @@ export function Dropdown({
     if (e.key === 'Enter') {
       e.preventDefault();
       e.stopPropagation();
+
+      // 清除悬停定时器，防止冲突
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+
+      // 设置关闭标志，防止其他事件重新打开菜单
+      isClosingRef.current = true;
+
+      // 先关闭菜单，防止闪烁
+      statusListener(false);
+
+      // 延迟重置关闭标志
+      setTimeout(() => {
+        isClosingRef.current = false;
+      }, 100);
+
       const selectedItemIndex = selectedIndex >= 0 ? selectedIndex : 0;
       const selectedItem = items[selectedItemIndex];
       if (selectedItem) {
@@ -200,12 +218,20 @@ export function Dropdown({
                   if (hoverTimeoutRef.current) {
                     clearTimeout(hoverTimeoutRef.current);
                   }
+                  // 如果正在关闭过程中，不要重新打开
+                  if (isClosingRef.current) {
+                    return;
+                  }
                   // 悬停时自动打开菜单
                   if (!initOpen) {
                     statusListener(true);
                   }
                 }}
                 onFocus={() => {
+                  // 如果正在关闭过程中，不要重新打开
+                  if (isClosingRef.current) {
+                    return;
+                  }
                   // 获得焦点时自动打开菜单
                   if (!initOpen) {
                     statusListener(true);
@@ -255,6 +281,10 @@ export function Dropdown({
                   if (hoverTimeoutRef.current) {
                     clearTimeout(hoverTimeoutRef.current);
                   }
+                  // 如果正在关闭过程中，不要干预
+                  if (isClosingRef.current) {
+                    return;
+                  }
                 }}
                 onMouseLeave={() => {
                   // 鼠标离开菜单区域时，延迟关闭
@@ -275,8 +305,18 @@ export function Dropdown({
                               if (hoverTimeoutRef.current) {
                                 clearTimeout(hoverTimeoutRef.current);
                               }
+
+                              // 设置关闭标志，防止hover事件重新打开菜单
+                              isClosingRef.current = true;
+
                               // 通知父组件关闭菜单
                               statusListener(false);
+
+                              // 延迟重置关闭标志，给足够时间完成关闭操作
+                              setTimeout(() => {
+                                isClosingRef.current = false;
+                              }, 100);
+
                               // 从实际的鼠标事件检测Command/Ctrl键
                               const actualCommandPressed = e.metaKey || e.ctrlKey;
                               onItemClick(item, actualCommandPressed);

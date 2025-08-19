@@ -6,7 +6,7 @@
 /* eslint-disable react/prop-types */
 import React, { useRef, useCallback, useImperativeHandle } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
-import { ToolDropdown, SystemPromptDropdown, ModelSelector } from '@src/components/input';
+import { ToolDropdown, SystemPromptDropdown, ModelSelector } from '@src/components/controls';
 import type { ToolsPromptInterface, SystemPresetInterface } from '@src/components/input';
 
 export interface PrismInputProps {
