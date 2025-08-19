@@ -119,6 +119,9 @@ export class PageChatService implements PageChatInterface {
       const humanMessage = new HumanMessage(userPrompt);
       this.history.push(humanMessage);
 
+      // Immediately update UI to show user message
+      this._onDataListener?.(this.history);
+
       // Build context from quotes
       let contextString = '';
       if (quotes && quotes.length > 0) {
@@ -195,6 +198,9 @@ export class PageChatService implements PageChatInterface {
         rendered: renderedTemplate,
       });
       this.history.push(humanAskMessage);
+
+      // Immediately update UI to show user message
+      this._onDataListener?.(this.history);
 
       // Prepare messages for the model
       const messages = [...this.history];
