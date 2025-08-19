@@ -251,45 +251,73 @@ export function PagePanel(props: PagePanelProps) {
       chatContext.removeOnDataListener();
     };
   }, []);
+  // 使用 ref 保持最新状态，避免闭包问题
+  const dropdownStatesRef = useRef({
+    isToolDropdownOpen,
+    isModelDropdownOpen,
+    isSystemPromptDropdownOpen,
+    isQuoteDropdownOpen,
+  });
+
+  // 更新 ref 中的状态
+  useEffect(() => {
+    dropdownStatesRef.current = {
+      isToolDropdownOpen,
+      isModelDropdownOpen,
+      isSystemPromptDropdownOpen,
+      isQuoteDropdownOpen,
+    };
+  }, [isToolDropdownOpen, isModelDropdownOpen, isSystemPromptDropdownOpen, isQuoteDropdownOpen]);
+
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
+      const currentStates = dropdownStatesRef.current;
+
       // 检测 Command+K (Mac) 或 Ctrl+K (Windows/Linux)
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        if (!isToolDropdownOpen && !isModelDropdownOpen && !isSystemPromptDropdownOpen) {
+        e.stopPropagation();
+
+        if (
+          !currentStates.isToolDropdownOpen &&
+          !currentStates.isModelDropdownOpen &&
+          !currentStates.isSystemPromptDropdownOpen
+        ) {
           showToolDropdown();
-        } else if (isToolDropdownOpen) {
+        } else if (currentStates.isToolDropdownOpen) {
           showSystemPromptDropdown();
-        } else if (isSystemPromptDropdownOpen) {
+        } else if (currentStates.isSystemPromptDropdownOpen) {
           showModelDropdown();
-        } else if (isModelDropdownOpen) {
+        } else if (currentStates.isModelDropdownOpen) {
           showToolDropdown();
         }
-
-        e.stopPropagation();
         return;
       }
 
       // 检测左右方向键
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-        if (isToolDropdownOpen || isModelDropdownOpen || isSystemPromptDropdownOpen) {
+        if (
+          currentStates.isToolDropdownOpen ||
+          currentStates.isModelDropdownOpen ||
+          currentStates.isSystemPromptDropdownOpen
+        ) {
           e.preventDefault();
           e.stopPropagation();
 
           if (e.key === 'ArrowRight') {
-            if (isSystemPromptDropdownOpen) {
+            if (currentStates.isSystemPromptDropdownOpen) {
               showModelDropdown();
-            } else if (isModelDropdownOpen) {
+            } else if (currentStates.isModelDropdownOpen) {
               showToolDropdown();
-            } else if (isToolDropdownOpen) {
+            } else if (currentStates.isToolDropdownOpen) {
               showSystemPromptDropdown();
             }
           } else if (e.key === 'ArrowLeft') {
-            if (isSystemPromptDropdownOpen) {
+            if (currentStates.isSystemPromptDropdownOpen) {
               showToolDropdown();
-            } else if (isModelDropdownOpen) {
+            } else if (currentStates.isModelDropdownOpen) {
               showSystemPromptDropdown();
-            } else if (isToolDropdownOpen) {
+            } else if (currentStates.isToolDropdownOpen) {
               showModelDropdown();
             }
           }
@@ -302,7 +330,7 @@ export function PagePanel(props: PagePanelProps) {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isToolDropdownOpen, isQuoteDropdownOpen, isModelDropdownOpen, isSystemPromptDropdownOpen]);
+  }, []); // 空依赖数组，避免频繁重新绑定事件监听器
 
   // Add this new useEffect to focus on input when menus are closed
   useEffect(() => {
