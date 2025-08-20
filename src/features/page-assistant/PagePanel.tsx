@@ -14,6 +14,7 @@ import {
   HumanInvisibleMessage,
   HumanAskMessage,
   SystemInvisibleMessage,
+  AIThinkingMessage,
   CommandType,
 } from '@src/types';
 import KeyBinding from '@src/components/common/Icons';
@@ -211,6 +212,14 @@ export function PagePanel(props: PagePanelProps) {
                 role: role,
                 name: 'HumanAskMessage',
               };
+            } else if (message instanceof AIThinkingMessage) {
+              return {
+                type: 'thinking',
+                id: `history-${idx}`,
+                text: '',
+                role: 'assistant',
+                name: 'AIThinkingMessage',
+              };
             } else if (typeof message.content == 'string') {
               return { type: 'text', id: `history-${idx}`, text: message.content, role: role, name: 'AIMessage' };
             } else if (message.content instanceof Array) {
@@ -228,15 +237,86 @@ export function PagePanel(props: PagePanelProps) {
                   }
                 }, ''),
               };
+            } else {
+              // Default case for any other message type
+              return {
+                type: 'text',
+                id: `history-${idx}`,
+                text: String(message.content || ''),
+                role: role,
+                name: 'UnknownMessage',
+              };
             }
-          }),
+          })
+          .filter(Boolean), // Remove any undefined values
       );
     }
 
     // console.log('注册消息回调');
-    chatContext.setOnDataListener(() => {
-      // console.log(data);
-      rerenderHistory();
+    chatContext.setOnDataListener(updatedHistory => {
+      // console.log('Data listener called with history:', updatedHistory);
+      // Use updatedHistory directly for rendering instead of modifying chatContext.history
+      setHistory(
+        updatedHistory
+          .filter(
+            message =>
+              !(
+                message instanceof HumanInvisibleMessage ||
+                message instanceof AIInvisibleMessage ||
+                message instanceof SystemInvisibleMessage
+              ),
+          )
+          .map((message, idx) => {
+            let role = 'assistant';
+            if (message instanceof HumanMessage) {
+              role = 'user';
+            }
+            if (message instanceof HumanAskMessage) {
+              return {
+                type: 'text',
+                id: `history-${idx}`,
+                text: message.rendered,
+                role: role,
+                name: 'HumanAskMessage',
+              };
+            } else if (message instanceof AIThinkingMessage) {
+              return {
+                type: 'thinking',
+                id: `history-${idx}`,
+                text: '',
+                role: 'assistant',
+                name: 'AIThinkingMessage',
+              };
+            } else if (typeof message.content == 'string') {
+              return { type: 'text', id: `history-${idx}`, text: message.content, role: role, name: 'AIMessage' };
+            } else if (message.content instanceof Array) {
+              return {
+                type: 'text',
+                id: `history-${idx}`,
+                role: role,
+                text: message.content.reduce((acc, cur) => {
+                  if (cur.type == 'text') {
+                    return acc + '\n' + cur.text;
+                  } else if (cur.type == 'image_url') {
+                    return acc + '\n' + cur.image_url;
+                  } else {
+                    return acc + '\n<unknown>';
+                  }
+                }, ''),
+              };
+            } else {
+              // Default case for any other message type
+              return {
+                type: 'text',
+                id: `history-${idx}`,
+                text: String(message.content || ''),
+                role: role,
+                name: 'UnknownMessage',
+              };
+            }
+          })
+          .filter(Boolean), // Remove any undefined values
+      );
     });
     rerenderHistory();
 

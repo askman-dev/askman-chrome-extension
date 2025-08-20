@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import { CodeBlock } from '@src/components/message/CodeBlock';
 import { QuoteAgent } from '@src/agents/quote';
 import CopyButton, { useCopyButton } from '@src/components/common/CopyButton';
+import { ThinkingAnimation } from '@src/components/ui/ThinkingAnimation';
 import { SCROLLBAR_STYLES_THIN_X } from '@src/styles/common';
 
 /* eslint-disable no-unused-vars */
@@ -10,6 +11,7 @@ export enum MessageType {
   TEXT = 'text',
   IMAGE = 'image',
   CODE = 'code',
+  THINKING = 'thinking',
 }
 
 export interface MessageItemProps {
@@ -101,12 +103,19 @@ export function MessageItem(props: MessageItemProps) {
   // 根据不同的类型，渲染不同的内容
   switch (type) {
     case MessageType.TEXT:
+    case 'text':
       messageItem = <>{TextWithLineBreaks(text)}</>;
       break;
     case MessageType.CODE:
+    case 'code':
       messageItem = <CodeBlock code={text} />;
       break;
+    case MessageType.THINKING:
+    case 'thinking':
+      messageItem = <ThinkingAnimation className="my-2" />;
+      break;
     default:
+      messageItem = <>{TextWithLineBreaks(text)}</>;
       break;
   }
 
@@ -122,7 +131,7 @@ export function MessageItem(props: MessageItemProps) {
       <div className={classNames('pr-8', role === 'user' ? `max-h-32 ${SCROLLBAR_STYLES_THIN_X}` : '')}>
         {messageItem}
       </div>
-      {isVisible && type !== MessageType.CODE && (
+      {isVisible && type !== MessageType.CODE && type !== MessageType.THINKING && type !== 'thinking' && (
         <CopyButton text={text} className="top-[-6px] right-1 bg-gray-100 hover:bg-gray-200" />
       )}
     </div>

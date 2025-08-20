@@ -1,4 +1,4 @@
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { HumanMessage, SystemMessage, AIMessage } from '@langchain/core/messages';
 
 export class SystemInvisibleMessage extends SystemMessage {
   isVisible = false;
@@ -24,6 +24,14 @@ export class HumanAskMessage extends HumanMessage {
 
 export class AIInvisibleMessage extends HumanMessage {
   isVisible = false;
+}
+
+export class AIThinkingMessage extends AIMessage {
+  isThinking = true;
+
+  constructor() {
+    super('');
+  }
 }
 
 export interface AgentContext {

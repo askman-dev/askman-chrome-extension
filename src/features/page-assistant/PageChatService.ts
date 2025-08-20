@@ -4,7 +4,7 @@ import { QuoteContext } from '@src/agents/quote';
 import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
 import configStorage from '@src/shared/storages/configStorage';
 import { createContext } from 'react';
-import { ToolsPromptInterface, SystemInvisibleMessage, HumanAskMessage } from '@src/types';
+import { ToolsPromptInterface, SystemInvisibleMessage, HumanAskMessage, AIThinkingMessage } from '@src/types';
 import { StorageManager } from '@src/utils/StorageManager';
 
 export interface SendOptions {
@@ -143,14 +143,23 @@ export class PageChatService implements PageChatInterface {
         messages.unshift(new SystemInvisibleMessage(options.overrideSystem));
       }
 
+      // Show thinking indicator
+      const thinkingMessage = new AIThinkingMessage();
+      const thinkingHistory = [...this.history, thinkingMessage];
+      this._onDataListener?.(thinkingHistory);
+
+      // Create AI message for streaming updates
+      const streamingMessage = new AIMessage('');
+
       // Stream the response
       const stream = await this.model.stream(messages);
       let response = '';
 
       for await (const chunk of stream) {
         response += chunk.content;
-        // Create a temporary AI message for the listener
-        const tempHistory = [...this.history, new AIMessage(response)];
+        // Update the same message content for streaming effect
+        streamingMessage.content = response;
+        const tempHistory = [...this.history, streamingMessage];
         this._onDataListener?.(tempHistory);
       }
 
@@ -210,14 +219,23 @@ export class PageChatService implements PageChatInterface {
         messages.unshift(new SystemInvisibleMessage(options.overrideSystem));
       }
 
+      // Show thinking indicator
+      const thinkingMessage2 = new AIThinkingMessage();
+      const thinkingHistory2 = [...this.history, thinkingMessage2];
+      this._onDataListener?.(thinkingHistory2);
+
+      // Create AI message for streaming updates
+      const streamingMessage2 = new AIMessage('');
+
       // Stream the response
       const stream = await this.model.stream(messages);
       let response = '';
 
       for await (const chunk of stream) {
         response += chunk.content;
-        // Create a temporary AI message for the listener
-        const tempHistory = [...this.history, new AIMessage(response)];
+        // Update the same message content for streaming effect
+        streamingMessage2.content = response;
+        const tempHistory = [...this.history, streamingMessage2];
         this._onDataListener?.(tempHistory);
       }
 
