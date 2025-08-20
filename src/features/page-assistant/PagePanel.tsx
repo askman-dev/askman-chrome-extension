@@ -92,6 +92,8 @@ export function PagePanel(props: PagePanelProps) {
   const [dropdownPosition, setDropdownPosition] = useState({ left: 0, top: 0 });
   const [hoveredQuoteIndex, setHoveredQuoteIndex] = useState<number | null>(null);
   const [isSystemPromptDropdownOpen, setIsSystemPromptDropdownOpen] = useState(false);
+  const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   const showToolDropdown = () => {
     setIsToolDropdownOpen(true);
@@ -573,6 +575,9 @@ export function PagePanel(props: PagePanelProps) {
           onClick={() => {
             clearHistory();
             setUserTools(null);
+            // 重置选择的系统提示词和模型
+            setSelectedSystemPrompt(null);
+            setSelectedModel(null);
             // 将焦点设置到输入框
             setTimeout(() => {
               inputRef.current?.focus();
@@ -730,8 +735,8 @@ export function PagePanel(props: PagePanelProps) {
                       // 如果 Model 下拉菜单打开，确认选择并关闭菜单
                       setIsModelDropdownOpen(false);
                     } else {
-                      // 如果没有下拉菜单打开，发送消息
-                      onSend();
+                      // 如果没有下拉菜单打开，发送消息（使用选中的系统提示词和模型）
+                      onSend(undefined, selectedSystemPrompt, selectedModel);
                     }
 
                     e.preventDefault();
@@ -798,6 +803,9 @@ export function PagePanel(props: PagePanelProps) {
                 onItemClick={(preset, withCommand) => {
                   if (withCommand) {
                     onSend(undefined, preset.hbs); // 按了 Command 键直接发送，使用 hbs 作为临时系统提示词
+                  } else {
+                    // 正常选择，保存为当前系统提示词
+                    setSelectedSystemPrompt(preset.hbs);
                   }
                   setIsSystemPromptDropdownOpen(false); // Explicitly close the dropdown
                 }}
@@ -808,6 +816,9 @@ export function PagePanel(props: PagePanelProps) {
                 onItemClick={(model, withCommand) => {
                   if (withCommand) {
                     onSend(undefined, undefined, model); // 直接传递 model，不再包装成对象
+                  } else {
+                    // 正常选择，保存为当前模型
+                    setSelectedModel(model);
                   }
                   setIsModelDropdownOpen(false); // Explicitly close the dropdown
                 }}

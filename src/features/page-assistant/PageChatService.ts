@@ -138,9 +138,12 @@ export class PageChatService implements PageChatInterface {
         messages.push(new HumanMessage(`Context:\n${contextString}\n\nQuestion: ${userPrompt}`));
       }
 
-      // Add system override if provided
+      // Add system override if provided, replacing any existing system messages
       if (options?.overrideSystem) {
-        messages.unshift(new SystemInvisibleMessage(options.overrideSystem));
+        // Remove existing system messages
+        const filteredMessages = messages.filter(msg => !(msg instanceof SystemInvisibleMessage));
+        // Add new system message at the beginning
+        messages.splice(0, messages.length, new SystemInvisibleMessage(options.overrideSystem), ...filteredMessages);
       }
 
       // Show thinking indicator
@@ -211,12 +214,20 @@ export class PageChatService implements PageChatInterface {
       // Immediately update UI to show user message
       this._onDataListener?.(this.history);
 
-      // Prepare messages for the model
+      // Prepare messages for the model - replace the last user message with rendered template
       const messages = [...this.history];
+      // Replace the HumanAskMessage content with rendered template for model
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage instanceof HumanAskMessage) {
+        messages[messages.length - 1] = new HumanMessage(renderedTemplate);
+      }
 
-      // Add system override if provided
+      // Add system override if provided, replacing any existing system messages
       if (options?.overrideSystem) {
-        messages.unshift(new SystemInvisibleMessage(options.overrideSystem));
+        // Remove existing system messages
+        const filteredMessages = messages.filter(msg => !(msg instanceof SystemInvisibleMessage));
+        // Add new system message at the beginning
+        messages.splice(0, messages.length, new SystemInvisibleMessage(options.overrideSystem), ...filteredMessages);
       }
 
       // Show thinking indicator
