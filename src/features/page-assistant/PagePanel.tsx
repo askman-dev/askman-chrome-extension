@@ -6,7 +6,7 @@ import { PageChatContext } from './PageChatService';
 import { ToolDropdown, QuoteDropdown, SystemPromptDropdown, ModelSelector } from '@src/components/controls';
 import { tools } from '@src/components/controls/ToolDropdown';
 import TextareaAutosize from 'react-textarea-autosize';
-import { ArrowsPointingInIcon, ArrowsPointingOutIcon, XMarkIcon, PlusIcon } from '@heroicons/react/20/solid';
+import { ArrowsPointingInIcon, ArrowsPointingOutIcon, XMarkIcon, PencilSquareIcon } from '@heroicons/react/20/solid';
 import { MessageItem } from '@src/components/message';
 import {
   ToolsPromptInterface,
@@ -17,7 +17,6 @@ import {
   AIThinkingMessage,
   CommandType,
 } from '@src/types';
-import KeyBinding from '@src/components/common/Icons';
 import { StorageManager } from '@src/utils/StorageManager';
 import { Handlebars } from '@src/../third-party/kbn-handlebars/src/handlebars';
 import { SCROLLBAR_STYLES_THIN_X } from '@src/styles/common';
@@ -547,24 +546,7 @@ export function PagePanel(props: PagePanelProps) {
       tabIndex={-1}
       {...rest}>
       <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between">
-        <span>
-          Askman{' '}
-          {blockConfigRef.current?.isShortcutDisabled(window.location.href) ? (
-            <KeyBinding text="⌘ I" className="relative group opacity-50 cursor-not-allowed">
-              <div className="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-20">
-                This shortcut will not work on this site to avoid conflicts with website&apos;s functionality.
-              </div>
-            </KeyBinding>
-          ) : (
-            <KeyBinding text="⌘ I" className="cursor-pointer" />
-          )}{' '}
-          <KeyBinding
-            text="Setting"
-            className="hover:bg-gray-300 cursor-pointer"
-            onClick={() => {
-              chrome.runtime.sendMessage({ cmd: CommandType.OpenOptionsPage });
-            }}></KeyBinding>
-        </span>
+        <span>Model</span>
 
         <div className="grow"></div>
 
@@ -583,17 +565,31 @@ export function PagePanel(props: PagePanelProps) {
               inputRef.current?.focus();
             }, 100);
           }}>
-          <PlusIcon className="w-4 h-4 cursor-pointer" aria-hidden="true" />
+          <PencilSquareIcon className="w-4 h-4" aria-hidden="true" />
+        </button>
+
+        <button
+          title="Settings"
+          aria-label="Open settings"
+          className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2 transition-colors duration-200"
+          onClick={() => {
+            chrome.runtime.sendMessage({ cmd: CommandType.OpenOptionsPage });
+          }}>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
         </button>
 
         <button
           className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2"
           onClick={() => setIsMaximized(!isMaximized)}>
-          {isMaximized ? (
-            <ArrowsPointingInIcon className="w-4 h-4 cursor-pointer" />
-          ) : (
-            <ArrowsPointingOutIcon className="w-4 h-4 cursor-pointer" />
-          )}
+          {isMaximized ? <ArrowsPointingInIcon className="w-4 h-4" /> : <ArrowsPointingOutIcon className="w-4 h-4" />}
         </button>
 
         <button
@@ -602,10 +598,16 @@ export function PagePanel(props: PagePanelProps) {
             setAskPanelVisible(false);
             onHide();
           }}>
-          <XMarkIcon className="w-4 h-4 cursor-pointer" />
+          <XMarkIcon className="w-4 h-4" />
         </button>
       </div>
       <div className={classNames('py-2 mb-2', SCROLLBAR_STYLES_THIN_X, isMaximized ? 'flex-grow' : 'max-h-80')}>
+        {history.length === 0 && (
+          <div className="flex items-center justify-center h-32">
+            <span className="text-gray-400 text-lg font-light">askman</span>
+          </div>
+        )}
+
         {history.map(message => {
           return <MessageItem key={message.id} {...message} />;
         })}
