@@ -659,11 +659,7 @@ export function PagePanel(props: PagePanelProps) {
         </button>
       </div>
       <div className={classNames('py-2 mb-2', SCROLLBAR_STYLES_THIN_X, isMaximized ? 'flex-grow' : 'max-h-80')}>
-        {history.length === 0 && (
-          <div className="flex items-center justify-center h-32">
-            <span className="text-gray-400 text-lg font-light">askman</span>
-          </div>
-        )}
+        {history.length === 0 && <div className="h-32"></div>}
 
         {history.map(message => {
           return <MessageItem key={message.id} {...message} />;
@@ -870,7 +866,7 @@ export function PagePanel(props: PagePanelProps) {
                   onSend(_item as unknown as ToolsPromptInterface); // 直接发送，不需要修改按钮文字
                   setIsToolDropdownOpen(false); // Explicitly close the dropdown
                 }}
-                buttonDisplay="➔"
+                buttonDisplay="➤"
               />
             </div>
           </div>

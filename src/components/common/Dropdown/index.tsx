@@ -206,7 +206,7 @@ export function Dropdown({
               <MenuButton
                 ref={buttonRef}
                 className={classNames(
-                  'group inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-600 px-2 py-1 text-sm font-medium text-black hover:bg-black/10 focus:outline-none',
+                  'group inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-400 px-2 py-1 text-sm font-medium hover:bg-black/10 focus:outline-none',
                   { 'bg-black/10': initOpen || open },
                 )}
                 onClick={e => {

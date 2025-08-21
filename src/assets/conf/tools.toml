@@ -1,5 +1,5 @@
 [framework]
-name = "Send"
+name = "No Context"
 hbs = "{{chat.input}}"
 
 [page]
