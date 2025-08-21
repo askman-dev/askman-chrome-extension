@@ -77,6 +77,24 @@ export function PagePanel(props: PagePanelProps) {
     };
   }, [handleClickOutside]);
 
+  // 监听全局焦点变化，防止焦点被扩展根容器抢夺
+  useEffect(() => {
+    const handleFocusChange = (e: FocusEvent) => {
+      if (e.target && (e.target as HTMLElement).id === 'askman-chrome-extension-content-view-root') {
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+          }
+        }, 10);
+      }
+    };
+
+    document.addEventListener('focusin', handleFocusChange);
+    return () => {
+      document.removeEventListener('focusin', handleFocusChange);
+    };
+  }, []);
+
   const chatContext = useContext(PageChatContext);
   const [userInput, setUserInput] = useState<string>('');
   const [askPanelVisible, setAskPanelVisible] = useState<boolean>(visible);
@@ -480,9 +498,47 @@ export function PagePanel(props: PagePanelProps) {
       !isSystemPromptDropdownOpen &&
       inputRef.current
     ) {
-      setTimeout(() => {
-        inputRef.current.focus();
-      }, 33);
+      // 使用 requestAnimationFrame 确保 DOM 完全更新
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          if (inputRef.current) {
+            // 强制重新获取焦点
+            document.activeElement?.blur?.();
+            inputRef.current.blur();
+
+            // 确保 tabIndex 正确
+            inputRef.current.tabIndex = 0;
+
+            // 尝试多种聚焦方法
+            inputRef.current.focus();
+
+            // 模拟真实的用户交互
+            const clickEvent = new MouseEvent('click', {
+              bubbles: true,
+              cancelable: true,
+              view: window,
+            });
+            inputRef.current.dispatchEvent(clickEvent);
+
+            const focusEvent = new FocusEvent('focus', {
+              bubbles: true,
+              cancelable: true,
+            });
+            inputRef.current.dispatchEvent(focusEvent);
+
+            // 如果焦点设置失败，尝试设置光标位置
+            setTimeout(() => {
+              if (document.activeElement !== inputRef.current && inputRef.current) {
+                try {
+                  inputRef.current.setSelectionRange(inputRef.current.value.length, inputRef.current.value.length);
+                } catch (e) {
+                  // Ignore selection errors
+                }
+              }
+            }, 10);
+          }
+        }, 100);
+      });
     }
   }, [isToolDropdownOpen, isQuoteDropdownOpen, isModelDropdownOpen, isSystemPromptDropdownOpen]);
 
@@ -598,7 +654,6 @@ export function PagePanel(props: PagePanelProps) {
           setIsSystemPromptDropdownOpen(false);
           setSelectorExpanded(false);
           setPendingDropdown(null);
-          inputRef.current?.focus();
           e.stopPropagation();
           e.preventDefault();
         }
