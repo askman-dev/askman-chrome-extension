@@ -18,6 +18,7 @@ import {
   CommandType,
 } from '@src/types';
 import { StorageManager } from '@src/utils/StorageManager';
+import configStorage from '@src/shared/storages/configStorage';
 import { Handlebars } from '@src/../third-party/kbn-handlebars/src/handlebars';
 import { SCROLLBAR_STYLES_THIN_X } from '@src/styles/common';
 import { HumanMessage } from '@langchain/core/messages';
@@ -64,6 +65,7 @@ export function PagePanel(props: PagePanelProps) {
       setIsQuoteDropdownOpen(false);
       setIsModelDropdownOpen(false);
       setIsSystemPromptDropdownOpen(false);
+      setSelectorExpanded(false);
     }
   }, []);
 
@@ -93,7 +95,10 @@ export function PagePanel(props: PagePanelProps) {
   const [isSystemPromptDropdownOpen, setIsSystemPromptDropdownOpen] = useState(false);
   const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [selectedModelName, setSelectedModelName] = useState<string>('Model');
+  const [selectedSystemName, setSelectedSystemName] = useState<string>('Default');
   const [buttonsExpanded, setButtonsExpanded] = useState(false);
+  const [selectorExpanded, setSelectorExpanded] = useState(false);
 
   const showToolDropdown = () => {
     setIsToolDropdownOpen(true);
@@ -185,10 +190,36 @@ export function PagePanel(props: PagePanelProps) {
       }
     };
 
+    const fetchCurrentSettings = async () => {
+      try {
+        // 获取当前模型
+        const currentModel = await configStorage.getCurrentModel();
+        if (currentModel) {
+          const simpleName = currentModel.split('/').pop() || currentModel;
+          setSelectedModelName(simpleName);
+          setSelectedModel(currentModel);
+        }
+
+        // 获取当前系统提示
+        const currentSystemPreset = await StorageManager.getCurrentSystemPreset();
+        if (currentSystemPreset) {
+          const systemPresets = await StorageManager.getSystemPresets();
+          const preset = systemPresets.find(p => p.name === currentSystemPreset);
+          if (preset) {
+            setSelectedSystemName(preset.name);
+            setSelectedSystemPrompt(preset.hbs);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching current settings:', error);
+      }
+    };
+
     QuoteAgent.getQuoteByDocument(window.location.href, document).then(quoteContext => {
       updatePageContext(quoteContext);
     });
     fetchCurrentTool();
+    fetchCurrentSettings();
     // console.log('chatContext.history = ' + JSON.stringify(chatContext.history));
     function rerenderHistory() {
       setHistory(
@@ -547,33 +578,56 @@ export function PagePanel(props: PagePanelProps) {
       tabIndex={-1}
       {...rest}>
       <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <ModelSelector
-            initOpen={isModelDropdownOpen}
-            className="relative"
-            onItemClick={(model, withCommand) => {
-              if (withCommand) {
-                onSend(undefined, undefined, model);
-              } else {
-                setSelectedModel(model);
-              }
-              setIsModelDropdownOpen(false);
-            }}
-            statusListener={updateModelDropdownStatus}
-          />
-          <SystemPromptDropdown
-            className="relative inline-block text-left"
-            statusListener={updateSystemPromptDropdownStatus}
-            initOpen={isSystemPromptDropdownOpen}
-            onItemClick={(preset, withCommand) => {
-              if (withCommand) {
-                onSend(undefined, preset.hbs);
-              } else {
-                setSelectedSystemPrompt(preset.hbs);
-              }
-              setIsSystemPromptDropdownOpen(false);
-            }}
-          />
+        <div className="flex items-center h-8 min-w-0">
+          {!selectorExpanded ? (
+            /* 紧凑胶囊模式 */
+            <div
+              className="bg-gray-100 hover:bg-gray-200 rounded text-sm text-gray-600 transition-colors !px-2 !py-0.5 cursor-pointer relative group"
+              title="Click to adjust model and system options"
+              onClick={() => setSelectorExpanded(true)}>
+              <span>
+                {selectedModelName} · {selectedSystemName}
+              </span>
+              {/* Hover tooltip */}
+              <div className="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity duration-200">
+                Click to adjust model and system options
+              </div>
+            </div>
+          ) : (
+            /* 展开模式 */
+            <div className="flex items-center gap-2 h-8">
+              <ModelSelector
+                initOpen={isModelDropdownOpen}
+                className="relative"
+                onItemClick={(model, withCommand) => {
+                  if (withCommand) {
+                    onSend(undefined, undefined, model);
+                  } else {
+                    setSelectedModel(model);
+                    // 简化模型名称显示
+                    const simpleName = model.split('/').pop() || model;
+                    setSelectedModelName(simpleName);
+                  }
+                  setIsModelDropdownOpen(false);
+                }}
+                statusListener={updateModelDropdownStatus}
+              />
+              <SystemPromptDropdown
+                className="relative inline-block text-left"
+                statusListener={updateSystemPromptDropdownStatus}
+                initOpen={isSystemPromptDropdownOpen}
+                onItemClick={(preset, withCommand) => {
+                  if (withCommand) {
+                    onSend(undefined, preset.hbs);
+                  } else {
+                    setSelectedSystemPrompt(preset.hbs);
+                    setSelectedSystemName(preset.name);
+                  }
+                  setIsSystemPromptDropdownOpen(false);
+                }}
+              />
+            </div>
+          )}
         </div>
 
         <div className="grow"></div>
