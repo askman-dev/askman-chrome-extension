@@ -66,6 +66,7 @@ export function PagePanel(props: PagePanelProps) {
       setIsModelDropdownOpen(false);
       setIsSystemPromptDropdownOpen(false);
       setSelectorExpanded(false);
+      setPendingDropdown(null);
     }
   }, []);
 
@@ -99,6 +100,7 @@ export function PagePanel(props: PagePanelProps) {
   const [selectedSystemName, setSelectedSystemName] = useState<string>('Default');
   const [buttonsExpanded, setButtonsExpanded] = useState(false);
   const [selectorExpanded, setSelectorExpanded] = useState(false);
+  const [pendingDropdown, setPendingDropdown] = useState<'system' | 'model' | null>(null);
 
   const showToolDropdown = () => {
     setIsToolDropdownOpen(true);
@@ -124,6 +126,18 @@ export function PagePanel(props: PagePanelProps) {
     setIsQuoteDropdownOpen(false);
     setIsModelDropdownOpen(false);
   };
+
+  // 处理待显示的下拉菜单 - 当 selector 展开后显示对应菜单
+  useEffect(() => {
+    if (selectorExpanded && pendingDropdown) {
+      if (pendingDropdown === 'system') {
+        showSystemPromptDropdown();
+      } else if (pendingDropdown === 'model') {
+        showModelDropdown();
+      }
+      setPendingDropdown(null);
+    }
+  }, [selectorExpanded, pendingDropdown]);
 
   // chat list ref
   // const chatListRef = useRef<HTMLDivElement>(null);
@@ -398,10 +412,16 @@ export function PagePanel(props: PagePanelProps) {
         ) {
           showToolDropdown();
         } else if (currentStates.isToolDropdownOpen) {
-          showSystemPromptDropdown();
-        } else if (currentStates.isSystemPromptDropdownOpen) {
-          showModelDropdown();
+          // 从 tool 切换到 model，需要先展开 selector 然后显示菜单
+          setSelectorExpanded(true);
+          setPendingDropdown('model');
         } else if (currentStates.isModelDropdownOpen) {
+          // 从 model 切换到 system，保持 selector 展开
+          setSelectorExpanded(true);
+          setPendingDropdown('system');
+        } else if (currentStates.isSystemPromptDropdownOpen) {
+          // 从 system 切换到 tool，可以收起 selector
+          setSelectorExpanded(false);
           showToolDropdown();
         }
         return;
@@ -418,20 +438,26 @@ export function PagePanel(props: PagePanelProps) {
           e.stopPropagation();
 
           if (e.key === 'ArrowRight') {
-            if (currentStates.isSystemPromptDropdownOpen) {
-              showModelDropdown();
+            if (currentStates.isToolDropdownOpen) {
+              setSelectorExpanded(true);
+              setPendingDropdown('model');
             } else if (currentStates.isModelDropdownOpen) {
+              setSelectorExpanded(true);
+              setPendingDropdown('system');
+            } else if (currentStates.isSystemPromptDropdownOpen) {
+              setSelectorExpanded(false);
               showToolDropdown();
-            } else if (currentStates.isToolDropdownOpen) {
-              showSystemPromptDropdown();
             }
           } else if (e.key === 'ArrowLeft') {
-            if (currentStates.isSystemPromptDropdownOpen) {
-              showToolDropdown();
+            if (currentStates.isToolDropdownOpen) {
+              setSelectorExpanded(true);
+              setPendingDropdown('system');
+            } else if (currentStates.isSystemPromptDropdownOpen) {
+              setSelectorExpanded(true);
+              setPendingDropdown('model');
             } else if (currentStates.isModelDropdownOpen) {
-              showSystemPromptDropdown();
-            } else if (currentStates.isToolDropdownOpen) {
-              showModelDropdown();
+              setSelectorExpanded(false);
+              showToolDropdown();
             }
           }
           return;
@@ -570,6 +596,8 @@ export function PagePanel(props: PagePanelProps) {
           setIsToolDropdownOpen(false);
           setIsModelDropdownOpen(false);
           setIsSystemPromptDropdownOpen(false);
+          setSelectorExpanded(false);
+          setPendingDropdown(null);
           inputRef.current?.focus();
           e.stopPropagation();
           e.preventDefault();
@@ -637,7 +665,7 @@ export function PagePanel(props: PagePanelProps) {
             <button
               title="New chat"
               aria-label="Start a new chat"
-              className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2 transition-colors duration-200"
+              className="bg-gray-100 text-gray-600 rounded p-1 hover:bg-black hover:text-white mr-2 transition-colors duration-200"
               onClick={() => {
                 clearHistory();
                 setUserTools(null);
@@ -655,7 +683,7 @@ export function PagePanel(props: PagePanelProps) {
             <button
               title="Setting"
               aria-label="Open settings"
-              className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2 transition-colors duration-200"
+              className="bg-gray-100 text-gray-600 rounded p-1 hover:bg-black hover:text-white mr-2 transition-colors duration-200"
               onClick={() => {
                 chrome.runtime.sendMessage({ cmd: CommandType.OpenOptionsPage });
               }}>
@@ -677,7 +705,7 @@ export function PagePanel(props: PagePanelProps) {
 
             <button
               title="Large Panel"
-              className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2"
+              className="bg-gray-100 text-gray-600 rounded p-1 hover:bg-black hover:text-white mr-2"
               onClick={() => setIsMaximized(!isMaximized)}>
               {isMaximized ? (
                 <ArrowsPointingInIcon className="w-4 h-4" />
@@ -688,7 +716,7 @@ export function PagePanel(props: PagePanelProps) {
 
             <button
               title="Close [ESC]"
-              className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2"
+              className="bg-gray-100 text-gray-600 rounded p-1 hover:bg-black hover:text-white mr-2"
               onClick={() => {
                 setAskPanelVisible(false);
                 onHide();
@@ -700,7 +728,7 @@ export function PagePanel(props: PagePanelProps) {
 
         <button
           title={buttonsExpanded ? 'Collapse' : 'Expand'}
-          className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white"
+          className="bg-gray-100 text-gray-600 rounded p-1 hover:bg-black hover:text-white"
           onClick={() => setButtonsExpanded(!buttonsExpanded)}>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -801,6 +829,8 @@ export function PagePanel(props: PagePanelProps) {
                       setIsToolDropdownOpen(false);
                       setIsModelDropdownOpen(false);
                       setIsSystemPromptDropdownOpen(false);
+                      setSelectorExpanded(false);
+                      setPendingDropdown(null);
                       e.stopPropagation();
                       e.preventDefault();
                       return;
@@ -860,20 +890,26 @@ export function PagePanel(props: PagePanelProps) {
                       e.stopPropagation();
 
                       if (e.key === 'ArrowRight') {
-                        if (isSystemPromptDropdownOpen) {
-                          showModelDropdown();
+                        if (isToolDropdownOpen) {
+                          setSelectorExpanded(true);
+                          setPendingDropdown('model');
                         } else if (isModelDropdownOpen) {
+                          setSelectorExpanded(true);
+                          setPendingDropdown('system');
+                        } else if (isSystemPromptDropdownOpen) {
+                          setSelectorExpanded(false);
                           showToolDropdown();
-                        } else if (isToolDropdownOpen) {
-                          showSystemPromptDropdown();
                         }
                       } else if (e.key === 'ArrowLeft') {
-                        if (isSystemPromptDropdownOpen) {
-                          showToolDropdown();
+                        if (isToolDropdownOpen) {
+                          setSelectorExpanded(true);
+                          setPendingDropdown('system');
+                        } else if (isSystemPromptDropdownOpen) {
+                          setSelectorExpanded(true);
+                          setPendingDropdown('model');
                         } else if (isModelDropdownOpen) {
-                          showSystemPromptDropdown();
-                        } else if (isToolDropdownOpen) {
-                          showModelDropdown();
+                          setSelectorExpanded(false);
+                          showToolDropdown();
                         }
                       }
                       return;
