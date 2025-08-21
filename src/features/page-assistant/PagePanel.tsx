@@ -93,6 +93,7 @@ export function PagePanel(props: PagePanelProps) {
   const [isSystemPromptDropdownOpen, setIsSystemPromptDropdownOpen] = useState(false);
   const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [buttonsExpanded, setButtonsExpanded] = useState(false);
 
   const showToolDropdown = () => {
     setIsToolDropdownOpen(true);
@@ -545,60 +546,116 @@ export function PagePanel(props: PagePanelProps) {
       }}
       tabIndex={-1}
       {...rest}>
-      <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between">
-        <span>Model</span>
+      <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <ModelSelector
+            initOpen={isModelDropdownOpen}
+            className="relative"
+            onItemClick={(model, withCommand) => {
+              if (withCommand) {
+                onSend(undefined, undefined, model);
+              } else {
+                setSelectedModel(model);
+              }
+              setIsModelDropdownOpen(false);
+            }}
+            statusListener={updateModelDropdownStatus}
+          />
+          <SystemPromptDropdown
+            className="relative inline-block text-left"
+            statusListener={updateSystemPromptDropdownStatus}
+            initOpen={isSystemPromptDropdownOpen}
+            onItemClick={(preset, withCommand) => {
+              if (withCommand) {
+                onSend(undefined, preset.hbs);
+              } else {
+                setSelectedSystemPrompt(preset.hbs);
+              }
+              setIsSystemPromptDropdownOpen(false);
+            }}
+          />
+        </div>
 
         <div className="grow"></div>
 
-        <button
-          title="New Chat"
-          aria-label="Start a new chat"
-          className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2 transition-colors duration-200"
-          onClick={() => {
-            clearHistory();
-            setUserTools(null);
-            // 重置选择的系统提示词和模型
-            setSelectedSystemPrompt(null);
-            setSelectedModel(null);
-            // 将焦点设置到输入框
-            setTimeout(() => {
-              inputRef.current?.focus();
-            }, 100);
-          }}>
-          <PencilSquareIcon className="w-4 h-4" aria-hidden="true" />
-        </button>
+        {buttonsExpanded && (
+          <>
+            <button
+              title="New chat"
+              aria-label="Start a new chat"
+              className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2 transition-colors duration-200"
+              onClick={() => {
+                clearHistory();
+                setUserTools(null);
+                // 重置选择的系统提示词和模型
+                setSelectedSystemPrompt(null);
+                setSelectedModel(null);
+                // 将焦点设置到输入框
+                setTimeout(() => {
+                  inputRef.current?.focus();
+                }, 100);
+              }}>
+              <PencilSquareIcon className="w-4 h-4" aria-hidden="true" />
+            </button>
+
+            <button
+              title="Setting"
+              aria-label="Open settings"
+              className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2 transition-colors duration-200"
+              onClick={() => {
+                chrome.runtime.sendMessage({ cmd: CommandType.OpenOptionsPage });
+              }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </button>
+
+            <button
+              title="Large Panel"
+              className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2"
+              onClick={() => setIsMaximized(!isMaximized)}>
+              {isMaximized ? (
+                <ArrowsPointingInIcon className="w-4 h-4" />
+              ) : (
+                <ArrowsPointingOutIcon className="w-4 h-4" />
+              )}
+            </button>
+
+            <button
+              title="Close [ESC]"
+              className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2"
+              onClick={() => {
+                setAskPanelVisible(false);
+                onHide();
+              }}>
+              <XMarkIcon className="w-4 h-4" />
+            </button>
+          </>
+        )}
 
         <button
-          title="Settings"
-          aria-label="Open settings"
-          className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2 transition-colors duration-200"
-          onClick={() => {
-            chrome.runtime.sendMessage({ cmd: CommandType.OpenOptionsPage });
-          }}>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          title={buttonsExpanded ? 'Collapse' : 'Expand'}
+          className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white"
+          onClick={() => setButtonsExpanded(!buttonsExpanded)}>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              d={buttonsExpanded ? 'm9 18 6-6-6-6' : 'm15 18-6-6 6-6'}
             />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-        </button>
-
-        <button
-          className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white mr-2"
-          onClick={() => setIsMaximized(!isMaximized)}>
-          {isMaximized ? <ArrowsPointingInIcon className="w-4 h-4" /> : <ArrowsPointingOutIcon className="w-4 h-4" />}
-        </button>
-
-        <button
-          className="bg-gray-100 text-gray-600 rounded-full p-1 hover:bg-black hover:text-white"
-          onClick={() => {
-            setAskPanelVisible(false);
-            onHide();
-          }}>
-          <XMarkIcon className="w-4 h-4" />
         </button>
       </div>
       <div className={classNames('py-2 mb-2', SCROLLBAR_STYLES_THIN_X, isMaximized ? 'flex-grow' : 'max-h-80')}>
@@ -736,6 +793,9 @@ export function PagePanel(props: PagePanelProps) {
                     } else if (isModelDropdownOpen) {
                       // 如果 Model 下拉菜单打开，确认选择并关闭菜单
                       setIsModelDropdownOpen(false);
+                    } else if (isSystemPromptDropdownOpen) {
+                      // 如果 SystemPrompt 下拉菜单打开，确认选择并关闭菜单
+                      setIsSystemPromptDropdownOpen(false);
                     } else {
                       // 如果没有下拉菜单打开，发送消息（使用选中的系统提示词和模型）
                       onSend(undefined, selectedSystemPrompt, selectedModel);
@@ -798,36 +858,7 @@ export function PagePanel(props: PagePanelProps) {
               />
             </div>
             <div className="flex">
-              <SystemPromptDropdown
-                className="relative inline-block text-left"
-                statusListener={updateSystemPromptDropdownStatus}
-                initOpen={isSystemPromptDropdownOpen}
-                onItemClick={(preset, withCommand) => {
-                  if (withCommand) {
-                    onSend(undefined, preset.hbs); // 按了 Command 键直接发送，使用 hbs 作为临时系统提示词
-                  } else {
-                    // 正常选择，保存为当前系统提示词
-                    setSelectedSystemPrompt(preset.hbs);
-                  }
-                  setIsSystemPromptDropdownOpen(false); // Explicitly close the dropdown
-                }}
-              />
-              <ModelSelector
-                initOpen={isModelDropdownOpen}
-                className="relative"
-                onItemClick={(model, withCommand) => {
-                  if (withCommand) {
-                    onSend(undefined, undefined, model); // 直接传递 model，不再包装成对象
-                  } else {
-                    // 正常选择，保存为当前模型
-                    setSelectedModel(model);
-                  }
-                  setIsModelDropdownOpen(false); // Explicitly close the dropdown
-                }}
-                statusListener={updateModelDropdownStatus}
-              />
               <div className="grow"></div>
-              <div className="w-px h-6 bg-gray-200 mx-2 my-auto"></div>
               <ToolDropdown
                 initOpen={isToolDropdownOpen}
                 statusListener={updateToolDropdownStatus}

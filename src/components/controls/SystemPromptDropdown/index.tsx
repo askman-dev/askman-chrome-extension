@@ -115,9 +115,12 @@ export function SystemPromptDropdown({
           ...preset,
         }))}
         selectedId={selectedPreset || undefined}
-        showShortcut={true}
+        showShortcut={false}
         shortcutKey="⌘ KK"
         renderItem={renderPresetItem}
+        hoverMessage={`System Prompt [${
+          selectedPreset === 'system-init' || !selectedPreset ? 'System Prompt' : selectedPreset
+        }]`}
       />
       {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
     </div>

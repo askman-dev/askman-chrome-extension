@@ -27,6 +27,7 @@ export interface DropdownProps {
   align?: 'left' | 'right';
   buttonDisplay?: string;
   onMainButtonClick?: (_e: React.MouseEvent) => void;
+  hoverMessage?: string;
 }
 
 export function Dropdown({
@@ -43,6 +44,7 @@ export function Dropdown({
   align = 'left',
   buttonDisplay,
   onMainButtonClick,
+  hoverMessage,
 }: DropdownProps) {
   const [isCommandPressed, setIsCommandPressed] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -129,7 +131,7 @@ export function Dropdown({
       // 延迟重置关闭标志
       setTimeout(() => {
         isClosingRef.current = false;
-      }, 100);
+      }, 33);
 
       const selectedItemIndex = selectedIndex >= 0 ? selectedIndex : 0;
       const selectedItem = items[selectedItemIndex];
@@ -242,7 +244,7 @@ export function Dropdown({
                   if (initOpen) {
                     hoverTimeoutRef.current = setTimeout(() => {
                       statusListener(false);
-                    }, 200);
+                    }, 50);
                   }
                 }}
                 onMouseLeave={() => {
@@ -250,25 +252,30 @@ export function Dropdown({
                   if (initOpen) {
                     hoverTimeoutRef.current = setTimeout(() => {
                       statusListener(false);
-                    }, 200);
+                    }, 50);
                   }
                 }}>
+                {showShortcut && (
+                  <span
+                    className="bg-gray-100 text-gray-600 rounded text-xs mr-1 flex-shrink-0"
+                    style={{ marginRight: '4px', padding: '2px 6px' }}>
+                    {shortcutKey}
+                  </span>
+                )}
                 <div className="relative inline-block">
                   <span
-                    className="truncate max-w-[6rem] text-right inline-flex items-center"
-                    dir="rtl"
+                    className="truncate max-w-[6rem] text-left inline-flex items-center"
                     title={typeof displayName === 'string' ? displayName : 'Untitled'}>
                     {typeof displayName === 'string' ? displayName : 'Untitled'}
                   </span>
                   <div className="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
-                    {typeof displayName === 'string' ? displayName : 'Untitled'}
+                    {hoverMessage || (typeof displayName === 'string' ? displayName : 'Untitled')}
                   </div>
                 </div>
-                {showShortcut && <span className="flex-shrink-0 pl-1">{shortcutKey}</span>}
                 {buttonDisplay ? (
-                  <span className="-mr-1 h-5 w-5 ml-1 text-violet-200 flex-shrink-0">{buttonDisplay}</span>
+                  <span className="-mr-1 h-5 w-5 ml-1 flex-shrink-0">{buttonDisplay}</span>
                 ) : (
-                  <ChevronDownIcon className="-mr-1 h-5 w-5 text-violet-200 flex-shrink-0" />
+                  <ChevronDownIcon className="-mr-1 h-5 w-5 flex-shrink-0" />
                 )}
               </MenuButton>
 
@@ -290,7 +297,7 @@ export function Dropdown({
                   // 鼠标离开菜单区域时，延迟关闭
                   hoverTimeoutRef.current = setTimeout(() => {
                     statusListener(false);
-                  }, 200);
+                  }, 50);
                 }}>
                 <div className="px-1 py-1">
                   {items.map((item, index) => (
@@ -315,7 +322,7 @@ export function Dropdown({
                               // 延迟重置关闭标志，给足够时间完成关闭操作
                               setTimeout(() => {
                                 isClosingRef.current = false;
-                              }, 100);
+                              }, 33);
 
                               // 从实际的鼠标事件检测Command/Ctrl键
                               const actualCommandPressed = e.metaKey || e.ctrlKey;

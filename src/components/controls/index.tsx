@@ -126,6 +126,7 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
         showShortcut={false}
         renderItem={renderModelItem}
         align="right"
+        hoverMessage={`Model [${simplifyModelName(selectedModelName)}]`}
       />
     </div>
   );

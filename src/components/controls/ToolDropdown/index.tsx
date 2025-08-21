@@ -35,7 +35,7 @@ export { tools };
 export function ToolDropdown({ className, onItemClick, initOpen, statusListener, buttonDisplay }: ToolDropdownProps) {
   const [allTools, setAllTools] = useState<ToolsPromptInterface[]>([]);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
-  const [selectedToolName, setSelectedToolName] = useState<string>('Frame'); // 默认显示 Frame
+  const [selectedToolName, setSelectedToolName] = useState<string>('Send'); // 默认显示 Send
   const { showPreview, previewPos, previewContent, showToolPreview, hideToolPreview } = useToolPreview();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -159,6 +159,7 @@ export function ToolDropdown({ className, onItemClick, initOpen, statusListener,
         align="right"
         buttonDisplay={buttonDisplay}
         onMainButtonClick={handleMainButtonClick}
+        hoverMessage={`Send with Context [${selectedTool ? selectedToolName : '工具'}]`}
       />
       {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
     </div>
