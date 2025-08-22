@@ -999,7 +999,14 @@ export function PagePanel(props: PagePanelProps) {
               />
             </div>
             <div className="flex">
-              <div className="grow"></div>
+              <div
+                className="grow cursor-text"
+                onClick={() => {
+                  // 点击空白区域时聚焦到输入框
+                  if (inputRef.current) {
+                    inputRef.current.focus();
+                  }
+                }}></div>
               <ToolDropdown
                 initOpen={isToolDropdownOpen}
                 statusListener={updateToolDropdownStatus}
