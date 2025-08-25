@@ -125,8 +125,14 @@ export function MessageItem(props: MessageItemProps) {
         <div>
           {hasReasoning && (
             <div className="text-gray-500 italic mb-2 text-sm font-normal">
-              <span>Reasoning: </span>
-              <span>{reasoning}</span>
+              <style>
+                {`
+                  .reasoning-content > div:first-child::before {
+                    content: "Reasoning: ";
+                  }
+                `}
+              </style>
+              <div className="reasoning-content">{TextWithLineBreaks(reasoning)}</div>
             </div>
           )}
           {hasContent && <div className="text-black border-t border-gray-200 pt-2">{TextWithLineBreaks(content)}</div>}
