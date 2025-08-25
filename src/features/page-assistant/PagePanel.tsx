@@ -31,15 +31,6 @@ interface PagePanelProps extends React.HTMLAttributes<HTMLDivElement> {
   quotes?: Array<Promise<QuoteContext>>;
   onHide?: () => void;
 }
-// interface DomProps {
-//   status?: 'ready' | 'disabled' | 'loading';
-//   className?: string;
-//   divClassName?: string;
-//   text?: string;
-//   iconChevronBottom?: string;
-//   iconChevronBottomClassName?: string;
-//   onClick?: () => void;
-// }
 
 export function PagePanel(props: PagePanelProps) {
   const { visible, quotes, onHide, ...rest } = props;
@@ -155,9 +146,6 @@ export function PagePanel(props: PagePanelProps) {
     }
   }, [selectorExpanded, pendingDropdown]);
 
-  // chat list ref
-  // const chatListRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     quotes.forEach(quote => {
       quote
@@ -247,7 +235,6 @@ export function PagePanel(props: PagePanelProps) {
     });
     fetchCurrentTool();
     fetchCurrentSettings();
-    // console.log('chatContext.history = ' + JSON.stringify(chatContext.history));
     function rerenderHistory() {
       setHistory(
         chatContext.history
@@ -312,9 +299,7 @@ export function PagePanel(props: PagePanelProps) {
       );
     }
 
-    // console.log('注册消息回调');
     chatContext.setOnDataListener(updatedHistory => {
-      // console.log('Data listener called with history:', updatedHistory);
       // Use updatedHistory directly for rendering instead of modifying chatContext.history
       setHistory(
         updatedHistory
@@ -382,12 +367,10 @@ export function PagePanel(props: PagePanelProps) {
 
     askPanelVisible &&
       setTimeout(() => {
-        // console.log('获取焦点');
         inputRef.current.focus();
       }, 200);
 
     return () => {
-      // console.log('移除消息回调');
       chatContext.removeOnDataListener();
     };
   }, []);
@@ -626,8 +609,6 @@ export function PagePanel(props: PagePanelProps) {
     initBlockConfig();
   }, []);
 
-  // myObject.test('你是谁');
-  // console.log('history = ' + JSON.stringify(history));
   return (
     <div
       ref={panelRef}
@@ -658,7 +639,7 @@ export function PagePanel(props: PagePanelProps) {
       <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between items-center">
         <div className="flex items-center h-8 min-w-0">
           {/* Always show expanded mode - 紧凑胶囊模式 temporarily disabled */}
-          <div className="flex items-center gap-1 h-8">
+          <div className="flex items-center gap-2 h-8">
             <ModelSelector
               initOpen={isModelDropdownOpen}
               className="relative"
@@ -846,12 +827,6 @@ export function PagePanel(props: PagePanelProps) {
                 onKeyDown={e => {
                   // 检测 ESC 键
                   if (e.key === 'Escape') {
-                    console.log('ESC key detected in textarea', {
-                      isQuoteDropdownOpen,
-                      isToolDropdownOpen,
-                      isModelDropdownOpen,
-                      isSystemPromptDropdownOpen,
-                    });
                     if (
                       isQuoteDropdownOpen ||
                       isToolDropdownOpen ||

@@ -44,7 +44,6 @@ export function ToolDropdown({ className, onItemClick, initOpen, statusListener,
     const targetTool = selectedTool ? allTools.find(t => t.id === selectedTool) : allTools[0];
 
     if (targetTool) {
-      console.log('[AskToolDropdown] main button clicked, sending tool:', targetTool.name);
       // 将 ToolsPromptInterface 转为 Record<string, unknown> 以匹配参数类型
       handleToolClick(targetTool as unknown as Record<string, unknown>, _e.metaKey || _e.ctrlKey);
     }

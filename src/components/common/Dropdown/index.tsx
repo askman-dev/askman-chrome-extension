@@ -1,4 +1,4 @@
-import React, { Fragment, useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
@@ -55,15 +55,6 @@ export function Dropdown({
 
   const selectedIndex = selectedId ? items.findIndex(item => item.id === selectedId) : 0;
 
-  // 移除自己的状态管理，完全依赖 HeadlessUI 的状态，避免状态冲突
-  // useEffect(() => {
-  //   if (initOpen && !isOpened) {
-  //     setIsOpen(true);
-  //   } else if (!initOpen && isOpened) {
-  //     setIsOpen(false);
-  //   }
-  // }, [initOpen]);
-
   // 直接使用 initOpen 作为状态，让 HeadlessUI 管理打开/关闭
   useEffect(() => {
     statusListener(initOpen);
@@ -93,9 +84,6 @@ export function Dropdown({
       }
     };
   }, []);
-
-  // 移除自定义mousedown监听器，让HeadlessUI处理outside click
-  // HeadlessUI Menu 自动处理outside click关闭行为
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Command 或 Ctrl 按下

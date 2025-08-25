@@ -21,7 +21,6 @@ export class PageGithubAgent implements BaseAgent {
     });
 
     if (!editBtn || editBtn.length === 0) {
-      console.log('找不到 readme 按钮');
       return;
     }
     let wrap;
@@ -31,7 +30,6 @@ export class PageGithubAgent implements BaseAgent {
       wrap = ActionButtonHelper.createShadowRoot();
       editBtn[0].parentElement.insertBefore(wrap, editBtn[0]);
     }
-    console.log('找到 readme 按钮:', editBtn);
 
     return wrap.shadowRoot.getElementById('shadow-root');
   }
