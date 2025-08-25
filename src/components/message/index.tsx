@@ -12,6 +12,7 @@ export enum MessageType {
   IMAGE = 'image',
   CODE = 'code',
   THINKING = 'thinking',
+  REASONING = 'reasoning',
 }
 
 export interface MessageItemProps {
@@ -19,6 +20,10 @@ export interface MessageItemProps {
   text: string;
   role?: string;
   id?: string;
+  reasoning?: string;
+  content?: string;
+  hasReasoning?: boolean;
+  hasContent?: boolean;
 }
 
 function decodeEntities(text: string): string {
@@ -28,7 +33,7 @@ function decodeEntities(text: string): string {
 }
 
 export function MessageItem(props: MessageItemProps) {
-  const { type, text, role } = props;
+  const { type, text, role, reasoning, content, hasReasoning, hasContent } = props;
   const [codeHover, setCodeHover] = useState<number | null>(null);
   const { isVisible, handlers } = useCopyButton(type !== MessageType.CODE);
   let messageItem = <div>{text}</div>;
@@ -114,6 +119,21 @@ export function MessageItem(props: MessageItemProps) {
     case 'thinking':
       messageItem = <ThinkingAnimation className="my-2" />;
       break;
+    case MessageType.REASONING:
+    case 'reasoning':
+      messageItem = (
+        <div>
+          {hasReasoning && (
+            <div className="text-gray-500 italic mb-2 text-sm font-normal">
+              <span>Reasoning: </span>
+              <span>{reasoning}</span>
+            </div>
+          )}
+          {hasContent && <div className="text-black border-t border-gray-200 pt-2">{TextWithLineBreaks(content)}</div>}
+          {!hasReasoning && !hasContent && <div>{TextWithLineBreaks(text)}</div>}
+        </div>
+      );
+      break;
     default:
       messageItem = <>{TextWithLineBreaks(text)}</>;
       break;
@@ -124,7 +144,7 @@ export function MessageItem(props: MessageItemProps) {
       className={classNames(
         'relative',
         role === 'assistant'
-          ? 'text-black mb-3 leading-relaxed text-base font-medium'
+          ? 'text-black mb-2 leading-relaxed text-base font-medium'
           : 'text-sky-600 mb-1 leading-relaxed max-h-32  text-base font-medium',
       )}
       {...handlers}>

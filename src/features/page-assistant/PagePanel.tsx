@@ -15,6 +15,7 @@ import {
   HumanAskMessage,
   SystemInvisibleMessage,
   AIThinkingMessage,
+  AIReasoningMessage,
   CommandType,
 } from '@src/types';
 import { StorageManager } from '@src/utils/StorageManager';
@@ -267,6 +268,18 @@ export function PagePanel(props: PagePanelProps) {
                 role: 'assistant',
                 name: 'AIThinkingMessage',
               };
+            } else if (message instanceof AIReasoningMessage) {
+              return {
+                type: 'reasoning',
+                id: `history-${idx}`,
+                text: message.getDisplayText(),
+                reasoning: message.reasoning,
+                content: message.content,
+                hasReasoning: message.hasReasoning(),
+                hasContent: message.hasContent(),
+                role: 'assistant',
+                name: 'AIReasoningMessage',
+              };
             } else if (typeof message.content == 'string') {
               return { type: 'text', id: `history-${idx}`, text: message.content, role: role, name: 'AIMessage' };
             } else if (message.content instanceof Array) {
@@ -331,6 +344,18 @@ export function PagePanel(props: PagePanelProps) {
                 text: '',
                 role: 'assistant',
                 name: 'AIThinkingMessage',
+              };
+            } else if (message instanceof AIReasoningMessage) {
+              return {
+                type: 'reasoning',
+                id: `history-${idx}`,
+                text: message.getDisplayText(),
+                reasoning: message.reasoning,
+                content: message.content,
+                hasReasoning: message.hasReasoning(),
+                hasContent: message.hasContent(),
+                role: 'assistant',
+                name: 'AIReasoningMessage',
               };
             } else if (typeof message.content == 'string') {
               return { type: 'text', id: `history-${idx}`, text: message.content, role: role, name: 'AIMessage' };

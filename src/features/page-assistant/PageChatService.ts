@@ -4,7 +4,13 @@ import { QuoteContext } from '@src/agents/quote';
 import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
 import configStorage from '@src/shared/storages/configStorage';
 import { createContext } from 'react';
-import { ToolsPromptInterface, SystemInvisibleMessage, HumanAskMessage, AIThinkingMessage } from '@src/types';
+import {
+  ToolsPromptInterface,
+  SystemInvisibleMessage,
+  HumanAskMessage,
+  AIThinkingMessage,
+  AIReasoningMessage,
+} from '@src/types';
 import { StorageManager } from '@src/utils/StorageManager';
 
 export interface SendOptions {
@@ -151,23 +157,48 @@ export class PageChatService implements PageChatInterface {
       const thinkingHistory = [...this.history, thinkingMessage];
       this._onDataListener?.(thinkingHistory);
 
-      // Create AI message for streaming updates
-      const streamingMessage = new AIMessage('');
+      // Get current model configuration for custom streaming
+      const configs = await configStorage.getModelConfig();
+      let apiKey = 'sk-example';
+      let baseURL = 'https://extapi.askman.dev/v1';
+      let modelName = 'free';
 
-      // Stream the response
-      const stream = await this.model.stream(messages);
-      let response = '';
-
-      for await (const chunk of stream) {
-        response += chunk.content;
-        // Update the same message content for streaming effect
-        streamingMessage.content = response;
-        const tempHistory = [...this.history, streamingMessage];
-        this._onDataListener?.(tempHistory);
+      // Find the current model config
+      if (options?.overrideModel) {
+        for (const config of configs) {
+          const model = config.config.models.find(
+            m => m.name === options.overrideModel || `${config.provider}/${m.name}` === options.overrideModel,
+          );
+          if (model) {
+            apiKey = config.config.api_key;
+            baseURL = config.config.base_url;
+            modelName = model.name;
+            break;
+          }
+        }
+      } else {
+        // Use default model from storage
+        const currentModel = await configStorage.getCurrentModel();
+        if (currentModel) {
+          for (const config of configs) {
+            const model = config.config.models.find(
+              m => m.name === currentModel || `${config.provider}/${m.name}` === currentModel,
+            );
+            if (model) {
+              apiKey = config.config.api_key;
+              baseURL = config.config.base_url;
+              modelName = model.name;
+              break;
+            }
+          }
+        }
       }
 
-      // Add final AI message to history
-      this.history.push(new AIMessage(response));
+      // Use custom streaming to handle reasoning + content phases
+      const finalMessage = await this.streamWithReasoning(messages, apiKey, baseURL, modelName);
+
+      // Add final reasoning message to history (keep it as AIReasoningMessage to preserve gray styling)
+      this.history.push(finalMessage);
       this._onDataListener?.(this.history);
     } catch (error) {
       console.error('Error in askWithQuotes:', error);
@@ -235,23 +266,48 @@ export class PageChatService implements PageChatInterface {
       const thinkingHistory2 = [...this.history, thinkingMessage2];
       this._onDataListener?.(thinkingHistory2);
 
-      // Create AI message for streaming updates
-      const streamingMessage2 = new AIMessage('');
+      // Get current model configuration for custom streaming
+      const configs = await configStorage.getModelConfig();
+      let apiKey = 'sk-example';
+      let baseURL = 'https://extapi.askman.dev/v1';
+      let modelName = 'free';
 
-      // Stream the response
-      const stream = await this.model.stream(messages);
-      let response = '';
-
-      for await (const chunk of stream) {
-        response += chunk.content;
-        // Update the same message content for streaming effect
-        streamingMessage2.content = response;
-        const tempHistory = [...this.history, streamingMessage2];
-        this._onDataListener?.(tempHistory);
+      // Find the current model config
+      if (options?.overrideModel) {
+        for (const config of configs) {
+          const model = config.config.models.find(
+            m => m.name === options.overrideModel || `${config.provider}/${m.name}` === options.overrideModel,
+          );
+          if (model) {
+            apiKey = config.config.api_key;
+            baseURL = config.config.base_url;
+            modelName = model.name;
+            break;
+          }
+        }
+      } else {
+        // Use default model from storage
+        const currentModel = await configStorage.getCurrentModel();
+        if (currentModel) {
+          for (const config of configs) {
+            const model = config.config.models.find(
+              m => m.name === currentModel || `${config.provider}/${m.name}` === currentModel,
+            );
+            if (model) {
+              apiKey = config.config.api_key;
+              baseURL = config.config.base_url;
+              modelName = model.name;
+              break;
+            }
+          }
+        }
       }
 
-      // Add final AI message to history
-      this.history.push(new AIMessage(response));
+      // Use custom streaming to handle reasoning + content phases
+      const finalMessage2 = await this.streamWithReasoning(messages, apiKey, baseURL, modelName);
+
+      // Add final reasoning message to history (keep it as AIReasoningMessage to preserve gray styling)
+      this.history.push(finalMessage2);
       this._onDataListener?.(this.history);
     } catch (error) {
       console.error('Error in askWithTool:', error);
@@ -259,6 +315,126 @@ export class PageChatService implements PageChatInterface {
       this.history.push(errorMessage);
       this._onDataListener?.(this.history);
     }
+  }
+
+  // Custom streaming method to access raw chunks with reasoning data
+  private async streamWithReasoning(
+    messages: BaseMessage[],
+    apiKey: string,
+    baseURL: string,
+    modelName: string,
+  ): Promise<AIReasoningMessage> {
+    const reasoningMessage = new AIReasoningMessage();
+
+    try {
+      // Convert messages to API format
+      const apiMessages = messages
+        .filter(msg => !(msg instanceof SystemInvisibleMessage) || msg.content.trim() !== '')
+        .map(msg => {
+          if (msg instanceof SystemInvisibleMessage) {
+            return { role: 'system', content: msg.content };
+          } else if (msg instanceof HumanMessage) {
+            return { role: 'user', content: msg.content };
+          } else if (msg instanceof AIMessage) {
+            return { role: 'assistant', content: msg.content };
+          }
+          return { role: 'user', content: String(msg.content) };
+        });
+
+      // Make direct API request (ensure no double slashes)
+      const cleanBaseURL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
+      const response = await fetch(`${cleanBaseURL}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: modelName,
+          messages: apiMessages,
+          stream: true,
+          temperature: 0.2,
+          top_p: 0.95,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No response body reader available');
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let hasFirstChunk = false;
+      let accumulatedReasoning = '';
+      let accumulatedContent = '';
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+
+        // Keep the last incomplete line in buffer
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6).trim();
+            if (data === '[DONE]') continue;
+
+            try {
+              const chunk = JSON.parse(data);
+              const delta = chunk.choices?.[0]?.delta;
+
+              if (delta) {
+                let shouldUpdate = false;
+
+                // Handle reasoning phase (only when reasoning is present and content is empty)
+                if (delta.reasoning && typeof delta.reasoning === 'string' && !delta.content) {
+                  accumulatedReasoning += delta.reasoning;
+                  reasoningMessage.updateReasoning(accumulatedReasoning);
+                  shouldUpdate = true;
+                  console.log('Reasoning chunk:', delta.reasoning);
+                }
+
+                // Handle content phase (only when content is present)
+                if (delta.content && typeof delta.content === 'string') {
+                  accumulatedContent += delta.content;
+                  reasoningMessage.updateContent(accumulatedContent);
+                  shouldUpdate = true;
+                  console.log('Content chunk:', delta.content);
+                }
+
+                // Update UI only when we have actual changes
+                if (shouldUpdate) {
+                  if (!hasFirstChunk) {
+                    hasFirstChunk = true;
+                  }
+                  const tempHistory = [...this.history, reasoningMessage];
+                  this._onDataListener?.(tempHistory);
+                }
+              }
+            } catch (parseError) {
+              console.error('Error parsing chunk:', parseError);
+            }
+          }
+        }
+      }
+
+      reader.releaseLock();
+    } catch (error) {
+      console.error('Error in custom streaming:', error);
+      reasoningMessage.updateContent(`Error: ${error.message}`);
+    }
+
+    return reasoningMessage;
   }
 
   private async switchToModel(modelName: string) {

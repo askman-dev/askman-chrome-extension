@@ -34,6 +34,45 @@ export class AIThinkingMessage extends AIMessage {
   }
 }
 
+export class AIReasoningMessage extends AIMessage {
+  reasoning: string = '';
+  content: string = '';
+  isReasoning = true;
+
+  constructor() {
+    super('');
+  }
+
+  // Update reasoning text (gray phase)
+  updateReasoning(text: string) {
+    this.reasoning = text;
+  }
+
+  // Update content text (normal phase)
+  updateContent(text: string) {
+    this.content = text;
+    // Don't switch phases - keep both reasoning and content visible
+  }
+
+  // Get display text for UI (show both reasoning and content)
+  getDisplayText(): string {
+    if (this.reasoning && this.content) {
+      return `${this.reasoning}\n\n${this.content}`;
+    }
+    return this.content || this.reasoning;
+  }
+
+  // Check if we have reasoning content
+  hasReasoning(): boolean {
+    return Boolean(this.reasoning);
+  }
+
+  // Check if we have final content
+  hasContent(): boolean {
+    return Boolean(this.content);
+  }
+}
+
 export interface AgentContext {
   selection?: string;
   pageUrl?: string;
