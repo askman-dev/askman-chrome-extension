@@ -248,9 +248,7 @@ export function Dropdown({
                   </span>
                 )}
                 <div className="relative inline-block">
-                  <span
-                    className="truncate max-w-[6rem] text-left inline-flex items-center"
-                    title={typeof displayName === 'string' ? displayName : 'Untitled'}>
+                  <span className="truncate max-w-[6rem] text-left inline-flex items-center">
                     {typeof displayName === 'string' ? displayName : 'Untitled'}
                   </span>
                   <div className="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
