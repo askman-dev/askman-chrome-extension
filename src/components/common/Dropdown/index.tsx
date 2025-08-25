@@ -205,10 +205,7 @@ export function Dropdown({
             <>
               <MenuButton
                 ref={buttonRef}
-                className={classNames(
-                  'group inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-400 px-2 py-1 text-sm font-medium hover:bg-black/10 focus:outline-none',
-                  { 'bg-black/10': initOpen || open },
-                )}
+                className="group inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-600 text-sm font-medium focus:outline-none"
                 onClick={e => {
                   e.stopPropagation();
                   if (e.isTrusted) {
@@ -282,7 +279,8 @@ export function Dropdown({
               <MenuItems
                 className={`absolute ${
                   align === 'left' ? 'left-0' : 'right-0'
-                } mt-0 min-w-[10rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-[9999]`}
+                } mt-0 min-w-[10rem] origin-top-right divide-y divide-gray-100 rounded bg-white ring-1 ring-black/10 border border-gray-200 focus:outline-none z-[9999]`}
+                style={{ boxShadow: '0 0 10px 2px rgba(0, 0, 0, 0.1)' }}
                 onMouseEnter={() => {
                   // 鼠标进入菜单区域时，清除关闭定时器
                   if (hoverTimeoutRef.current) {

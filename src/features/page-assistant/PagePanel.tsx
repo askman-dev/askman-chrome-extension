@@ -114,8 +114,6 @@ export function PagePanel(props: PagePanelProps) {
   const [isSystemPromptDropdownOpen, setIsSystemPromptDropdownOpen] = useState(false);
   const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  const [selectedModelName, setSelectedModelName] = useState<string>('Model');
-  const [selectedSystemName, setSelectedSystemName] = useState<string>('Default');
   const [buttonsExpanded, setButtonsExpanded] = useState(false);
   const [selectorExpanded, setSelectorExpanded] = useState(false);
   const [pendingDropdown, setPendingDropdown] = useState<'system' | 'model' | null>(null);
@@ -227,8 +225,6 @@ export function PagePanel(props: PagePanelProps) {
         // 获取当前模型
         const currentModel = await configStorage.getCurrentModel();
         if (currentModel) {
-          const simpleName = currentModel.split('/').pop() || currentModel;
-          setSelectedModelName(simpleName);
           setSelectedModel(currentModel);
         }
 
@@ -238,7 +234,6 @@ export function PagePanel(props: PagePanelProps) {
           const systemPresets = await StorageManager.getSystemPresets();
           const preset = systemPresets.find(p => p.name === currentSystemPreset);
           if (preset) {
-            setSelectedSystemName(preset.name);
             setSelectedSystemPrompt(preset.hbs);
           }
         }
@@ -662,79 +657,41 @@ export function PagePanel(props: PagePanelProps) {
       {...rest}>
       <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between items-center">
         <div className="flex items-center h-8 min-w-0">
-          {!selectorExpanded ? (
-            /* 紧凑胶囊模式 */
-            <div
-              className="bg-gray-100 hover:bg-gray-200 rounded text-sm text-gray-600 transition-colors !px-2 !py-0.5 cursor-pointer relative group"
-              title="Click to adjust model and system options"
-              onClick={() => setSelectorExpanded(true)}>
-              <span>
-                {selectedModelName} · {selectedSystemName}
-              </span>
-              {/* Hover tooltip */}
-              <div className="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity duration-200">
-                Click to adjust model and system options
-              </div>
-            </div>
-          ) : (
-            /* 展开模式 */
-            <div className="flex items-center gap-2 h-8">
-              <ModelSelector
-                initOpen={isModelDropdownOpen}
-                className="relative"
-                onItemClick={(model, withCommand) => {
-                  if (withCommand) {
-                    onSend(undefined, undefined, model);
-                  } else {
-                    setSelectedModel(model);
-                    // 简化模型名称显示
-                    const simpleName = model.split('/').pop() || model;
-                    setSelectedModelName(simpleName);
-                  }
-                  setIsModelDropdownOpen(false);
-                }}
-                statusListener={updateModelDropdownStatus}
-              />
-              <SystemPromptDropdown
-                className="relative inline-block text-left"
-                statusListener={updateSystemPromptDropdownStatus}
-                initOpen={isSystemPromptDropdownOpen}
-                onItemClick={(preset, withCommand) => {
-                  if (withCommand) {
-                    onSend(undefined, preset.hbs);
-                  } else {
-                    setSelectedSystemPrompt(preset.hbs);
-                    setSelectedSystemName(preset.name);
-                  }
-                  setIsSystemPromptDropdownOpen(false);
-                }}
-              />
-            </div>
-          )}
+          {/* Always show expanded mode - 紧凑胶囊模式 temporarily disabled */}
+          <div className="flex items-center gap-1 h-8">
+            <ModelSelector
+              initOpen={isModelDropdownOpen}
+              className="relative"
+              onItemClick={(model, withCommand) => {
+                if (withCommand) {
+                  onSend(undefined, undefined, model);
+                } else {
+                  setSelectedModel(model);
+                }
+                setIsModelDropdownOpen(false);
+              }}
+              statusListener={updateModelDropdownStatus}
+            />
+            <SystemPromptDropdown
+              className="relative inline-block text-left"
+              statusListener={updateSystemPromptDropdownStatus}
+              initOpen={isSystemPromptDropdownOpen}
+              onItemClick={(preset, withCommand) => {
+                if (withCommand) {
+                  onSend(undefined, preset.hbs);
+                } else {
+                  setSelectedSystemPrompt(preset.hbs);
+                }
+                setIsSystemPromptDropdownOpen(false);
+              }}
+            />
+          </div>
         </div>
 
         <div className="grow"></div>
 
         {buttonsExpanded && (
           <>
-            <button
-              title="New chat"
-              aria-label="Start a new chat"
-              className="bg-gray-100 text-gray-600 rounded p-1 hover:bg-black hover:text-white mr-2 transition-colors duration-200"
-              onClick={() => {
-                clearHistory();
-                setUserTools(null);
-                // 重置选择的系统提示词和模型
-                setSelectedSystemPrompt(null);
-                setSelectedModel(null);
-                // 将焦点设置到输入框
-                setTimeout(() => {
-                  inputRef.current?.focus();
-                }, 100);
-              }}>
-              <PencilSquareIcon className="w-4 h-4" aria-hidden="true" />
-            </button>
-
             <button
               title="Setting"
               aria-label="Open settings"
@@ -770,30 +727,51 @@ export function PagePanel(props: PagePanelProps) {
             </button>
 
             <button
-              title="Close [ESC]"
-              className="bg-gray-100 text-gray-600 rounded p-1 hover:bg-black hover:text-white mr-2"
+              title="New chat"
+              aria-label="Start a new chat"
+              className="bg-gray-100 text-gray-600 rounded p-1 hover:bg-black hover:text-white mr-2 transition-colors duration-200"
               onClick={() => {
-                setAskPanelVisible(false);
-                onHide();
+                clearHistory();
+                setUserTools(null);
+                // 重置选择的系统提示词和模型
+                setSelectedSystemPrompt(null);
+                setSelectedModel(null);
+                // 将焦点设置到输入框
+                setTimeout(() => {
+                  inputRef.current?.focus();
+                }, 100);
               }}>
-              <XMarkIcon className="w-4 h-4" />
+              <PencilSquareIcon className="w-4 h-4" aria-hidden="true" />
             </button>
           </>
         )}
 
-        <button
-          title={buttonsExpanded ? 'Collapse' : 'Expand'}
-          className="bg-gray-100 text-gray-600 rounded p-1 hover:bg-black hover:text-white"
-          onClick={() => setButtonsExpanded(!buttonsExpanded)}>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d={buttonsExpanded ? 'm9 18 6-6-6-6' : 'm15 18-6-6 6-6'}
-            />
-          </svg>
-        </button>
+        <div className="flex bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 mr-2">
+          <button
+            title={buttonsExpanded ? 'Collapse' : 'Expand more options'}
+            className="text-gray-600 hover:bg-black hover:text-white rounded-l px-1 py-1 transition-colors duration-200 w-3"
+            onMouseEnter={() => setButtonsExpanded(true)}
+            onClick={() => setButtonsExpanded(!buttonsExpanded)}>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d={buttonsExpanded ? 'm9 18 6-6-6-6' : 'm15 18-6-6 6-6'}
+              />
+            </svg>
+          </button>
+
+          <button
+            title="Close [ESC]"
+            className="text-gray-600 hover:bg-black hover:text-white rounded-r px-2 py-1 transition-colors duration-200 flex-1"
+            onClick={() => {
+              setAskPanelVisible(false);
+              onHide();
+            }}>
+            <XMarkIcon className="w-4 h-4" />
+          </button>
+        </div>
       </div>
       <div className={classNames('py-2 mb-2', SCROLLBAR_STYLES_THIN_X, isMaximized ? 'flex-grow' : 'max-h-80')}>
         {history.length === 0 && <div className="h-32"></div>}
