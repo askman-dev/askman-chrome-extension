@@ -770,7 +770,7 @@ export function PagePanel(props: PagePanelProps) {
 
           <button
             title="Close [ESC]"
-            className="text-gray-600 hover:bg-black hover:text-white rounded-r px-2 py-1 transition-colors duration-200 flex-1"
+            className="text-gray-600 hover:bg-black hover:text-white rounded-r p-1 transition-colors duration-200"
             onClick={() => {
               setAskPanelVisible(false);
               onHide();
@@ -808,7 +808,7 @@ export function PagePanel(props: PagePanelProps) {
             </div>
           )} */}
 
-          <div className="w-full pr-2 mb-2 p-1 rounded-md border-solid border-1 border-gray ">
+          <div className="w-full pr-2 mb-2 p-1 rounded-md border-solid border-1 border-gray-200 ">
             <div className="flex">
               {initQuotes.length > 0 && (
                 <div className="quotes relative flex flex-wrap gap-2">

@@ -193,7 +193,7 @@ export function Dropdown({
             <>
               <MenuButton
                 ref={buttonRef}
-                className="group inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-600 text-sm font-medium focus:outline-none"
+                className="group inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-500 text-sm font-normal focus:outline-none"
                 onClick={e => {
                   e.stopPropagation();
                   if (e.isTrusted) {
