@@ -121,6 +121,7 @@ export function SystemPromptDropdown({
         hoverMessage={`System Prompt [${
           selectedPreset === 'system-init' || !selectedPreset ? 'System Prompt' : selectedPreset
         }]`}
+        variant="button"
       />
       {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
     </div>

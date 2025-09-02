@@ -28,6 +28,7 @@ export interface DropdownProps {
   buttonDisplay?: string;
   onMainButtonClick?: (_e: React.MouseEvent) => void;
   hoverMessage?: string;
+  variant?: 'default' | 'button';
 }
 
 export function Dropdown({
@@ -45,6 +46,7 @@ export function Dropdown({
   buttonDisplay,
   onMainButtonClick,
   hoverMessage,
+  variant = 'default',
 }: DropdownProps) {
   const [isCommandPressed, setIsCommandPressed] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -193,7 +195,12 @@ export function Dropdown({
             <>
               <MenuButton
                 ref={buttonRef}
-                className="group inline-flex max-w-[12rem] justify-center rounded-md text-sm text-gray-500 text-sm font-normal focus:outline-none"
+                className={classNames(
+                  'group inline-flex max-w-[12rem] justify-center items-center rounded-md text-sm text-sm font-normal focus:outline-none',
+                  variant === 'button'
+                    ? 'bg-gray-100 text-gray-600 px-2 h-6 hover:bg-black hover:text-white transition-colors duration-200'
+                    : 'text-gray-500',
+                )}
                 onClick={e => {
                   e.stopPropagation();
                   if (e.isTrusted) {
@@ -240,13 +247,6 @@ export function Dropdown({
                     }, 50);
                   }
                 }}>
-                {showShortcut && (
-                  <span
-                    className="bg-gray-100 text-gray-600 rounded text-xs mr-1 flex-shrink-0"
-                    style={{ marginRight: '4px', padding: '2px 6px' }}>
-                    {shortcutKey}
-                  </span>
-                )}
                 <div className="relative inline-block">
                   <span className="truncate max-w-[6rem] text-left inline-flex items-center">
                     {typeof displayName === 'string' ? displayName : 'Untitled'}
@@ -257,8 +257,13 @@ export function Dropdown({
                 </div>
                 {buttonDisplay ? (
                   <span className="-mr-1 h-5 w-5 ml-1 flex-shrink-0">{buttonDisplay}</span>
-                ) : (
+                ) : variant === 'button' ? null : (
                   <ChevronDownIcon className="-mr-1 h-5 w-5 flex-shrink-0" />
+                )}
+                {showShortcut && (
+                  <span className="text-gray-500 rounded text-xs flex-shrink-0" style={{ padding: '2px 2px' }}>
+                    [{shortcutKey}]
+                  </span>
                 )}
               </MenuButton>
 

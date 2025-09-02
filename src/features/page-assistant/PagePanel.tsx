@@ -662,9 +662,9 @@ export function PagePanel(props: PagePanelProps) {
       tabIndex={-1}
       {...rest}>
       <div className="font-medium rounded-lg bg-transparent bg-gradient-to-r from-white via-white to-white/60 mb-2 text-base flex justify-between items-center">
-        <div className="flex items-center h-8 min-w-0">
+        <div className="flex items-center h-6 min-w-0">
           {/* Always show expanded mode - 紧凑胶囊模式 temporarily disabled */}
-          <div className="flex items-center gap-2 h-8">
+          <div className="flex items-center gap-2 h-6">
             <ModelSelector
               initOpen={isModelDropdownOpen}
               className="relative"
@@ -780,7 +780,7 @@ export function PagePanel(props: PagePanelProps) {
         </div>
       </div>
       <div className={classNames('py-2 mb-2', SCROLLBAR_STYLES_THIN_X, isMaximized ? 'flex-grow' : 'max-h-80')}>
-        {history.length === 0 && <div className="h-32"></div>}
+        {history.length === 0 && <div className="h-16"></div>}
 
         {history.map(message => {
           return <MessageItem key={message.id} {...message} />;
