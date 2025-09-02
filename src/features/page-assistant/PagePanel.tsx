@@ -755,7 +755,7 @@ export function PagePanel(props: PagePanelProps) {
         <div className="flex bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 mr-2">
           <button
             title={buttonsExpanded ? 'Collapse' : 'Expand more options'}
-            className="text-gray-600 hover:bg-black hover:text-white rounded-l px-1 py-1 transition-colors duration-200 w-3"
+            className="text-gray-600 hover:bg-black hover:text-white rounded-l px-1 py-1 transition-colors duration-200 w-4"
             onMouseEnter={() => setButtonsExpanded(true)}
             onClick={() => setButtonsExpanded(!buttonsExpanded)}>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
