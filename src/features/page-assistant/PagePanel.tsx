@@ -506,7 +506,7 @@ export function PagePanel(props: PagePanelProps) {
         setTimeout(() => {
           if (inputRef.current) {
             // 强制重新获取焦点
-            document.activeElement?.blur?.();
+            (document.activeElement as HTMLElement)?.blur?.();
             inputRef.current.blur();
 
             // 确保 tabIndex 正确
@@ -752,7 +752,7 @@ export function PagePanel(props: PagePanelProps) {
           </>
         )}
 
-        <div className="flex bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200 mr-2">
+        <div className="flex bg-gray-100 rounded hover:bg-gray-200 transition-colors duration-200">
           <button
             title={buttonsExpanded ? 'Collapse' : 'Expand more options'}
             className="text-gray-600 hover:bg-black hover:text-white rounded-l px-1 py-1 transition-colors duration-200 w-4"

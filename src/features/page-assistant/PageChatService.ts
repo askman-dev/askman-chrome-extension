@@ -329,7 +329,11 @@ export class PageChatService implements PageChatInterface {
     try {
       // Convert messages to API format
       const apiMessages = messages
-        .filter(msg => !(msg instanceof SystemInvisibleMessage) || msg.content.trim() !== '')
+        .filter(
+          msg =>
+            !(msg instanceof SystemInvisibleMessage) ||
+            (typeof msg.content === 'string' ? msg.content.trim() !== '' : true),
+        )
         .map(msg => {
           if (msg instanceof SystemInvisibleMessage) {
             return { role: 'system', content: msg.content };
