@@ -87,7 +87,57 @@ export function QuoteDropdown({ className, style, onItemClick, initOpen, statusL
                     <button
                       ref={el => (menuItemsRef.current[index] = el)}
                       onClick={() => {
-                        onItemClick(quote);
+                        console.log('[QuoteDropdown] 点击引用项:', quote.type);
+
+                        // Dynamically get fresh page data when clicked
+                        let freshQuote: QuoteContext;
+                        switch (quote.type) {
+                          case 'page.title': {
+                            const currentTitle = document.title;
+                            console.log('[QuoteDropdown] 获取页面标题:', currentTitle);
+                            freshQuote = {
+                              type: 'page.title',
+                              pageTitle: currentTitle,
+                              name: 'Page.title',
+                            };
+                            break;
+                          }
+                          case 'page.url': {
+                            const currentUrl = window.location.href;
+                            console.log('[QuoteDropdown] 获取页面URL:', currentUrl);
+                            freshQuote = {
+                              type: 'page.url',
+                              pageUrl: currentUrl,
+                              name: 'Page.url',
+                            };
+                            break;
+                          }
+                          case 'page.content': {
+                            const currentContent = document.body.innerText.slice(0, 200) + '...';
+                            console.log('[QuoteDropdown] 获取页面内容 (前200字符):', currentContent);
+                            freshQuote = {
+                              type: 'page.content',
+                              pageContent: document.body.innerText,
+                              name: 'Page.content',
+                            };
+                            break;
+                          }
+                          case 'page.selection': {
+                            const currentSelection = window.getSelection()?.toString().trim() || '';
+                            console.log('[QuoteDropdown] 获取页面选择文本:', currentSelection);
+                            freshQuote = {
+                              type: 'page.selection',
+                              selection: currentSelection,
+                              name: 'Page.selection',
+                            };
+                            break;
+                          }
+                          default:
+                            freshQuote = quote;
+                        }
+
+                        console.log('[QuoteDropdown] 发送引用数据:', freshQuote);
+                        onItemClick(freshQuote);
                         setIsOpen(false);
                         statusListener(false);
                       }}

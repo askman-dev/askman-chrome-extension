@@ -553,12 +553,19 @@ export function PagePanel(props: PagePanelProps) {
     // Use overrideTool if provided, otherwise fall back to userTools state
     const toolToUse = overrideTool || userTools;
 
+    console.log('[PagePanel] onSend 被调用');
+    console.log('[PagePanel] 用户输入:', userInput.trim());
+    console.log('[PagePanel] 当前引用数据:', initQuotes);
+    console.log('[PagePanel] 选择的工具:', toolToUse);
+
     if (toolToUse) {
+      console.log('[PagePanel] 调用 askWithTool');
       chatContext.askWithTool(toolToUse, pageContext, initQuotes, userInput.trim(), {
         overrideSystem,
         overrideModel,
       });
     } else {
+      console.log('[PagePanel] 调用 askWithQuotes');
       chatContext.askWithQuotes(initQuotes!, userInput.trim(), {
         overrideSystem,
         overrideModel,

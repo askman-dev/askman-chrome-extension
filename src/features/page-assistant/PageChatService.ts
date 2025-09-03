@@ -115,97 +115,72 @@ export class PageChatService implements PageChatInterface {
       return;
     }
 
-    try {
-      // Override model if specified
-      if (options?.overrideModel) {
-        await this.switchToModel(options.overrideModel);
-      }
+    console.log('[PageChatService] askWithQuotes 被调用');
+    console.log('[PageChatService] 收到的引用数据:', quotes);
+    console.log('[PageChatService] 用户输入:', userPrompt);
 
-      // Add user message to history
-      const humanMessage = new HumanMessage(userPrompt);
-      this.history.push(humanMessage);
+    // Create a default tool with template function that handles quotes context
+    const defaultQuotesTool: ToolsPromptInterface = {
+      id: 'default-quotes',
+      name: 'Default Quotes Handler',
+      hbs: '', // Not using Handlebars
+      template: (context: { chat: { input: string }; quotes: QuoteContext[] }) => {
+        const { chat, quotes } = context;
 
-      // Immediately update UI to show user message
-      this._onDataListener?.(this.history);
+        console.log('[PageChatService] 模板渲染 - context:', context);
 
-      // Build context from quotes
-      let contextString = '';
-      if (quotes && quotes.length > 0) {
-        contextString = quotes
-          .map(quote => {
-            return `Context: ${quote.selection || quote.pageContent || quote.text || ''}`;
+        if (!quotes || quotes.length === 0) {
+          console.log('[PageChatService] 没有引用数据，返回原输入:', chat.input);
+          return chat.input;
+        }
+
+        const contextString = quotes
+          .map((quote, index) => {
+            console.log(`[PageChatService] 处理引用 ${index}:`, quote);
+
+            // Fix: Check all possible properties including pageTitle and pageUrl
+            const content =
+              quote.selection ||
+              quote.pageContent ||
+              quote.pageTitle || // Added
+              quote.pageUrl || // Added
+              quote.text ||
+              '';
+
+            console.log(`[PageChatService] 引用内容 ${index}:`, content ? content.slice(0, 100) + '...' : '(空)');
+
+            if (!content) return '';
+
+            // Use cleaner format with quote type
+            return `[${quote.type || 'context'}]: ${content}`;
           })
-          .join('\n\n');
-      }
+          .filter(line => line !== '')
+          .join('\n');
 
-      // Prepare messages for the model
-      const messages = [...this.history];
-      if (contextString) {
-        messages.push(new HumanMessage(`Context:\n${contextString}\n\nQuestion: ${userPrompt}`));
-      }
+        console.log(
+          '[PageChatService] 最终上下文字符串:',
+          contextString ? contextString.slice(0, 200) + '...' : '(空)',
+        );
 
-      // Add system override if provided, replacing any existing system messages
-      if (options?.overrideSystem) {
-        // Remove existing system messages
-        const filteredMessages = messages.filter(msg => !(msg instanceof SystemInvisibleMessage));
-        // Add new system message at the beginning
-        messages.splice(0, messages.length, new SystemInvisibleMessage(options.overrideSystem), ...filteredMessages);
-      }
-
-      // Show thinking indicator
-      const thinkingMessage = new AIThinkingMessage();
-      const thinkingHistory = [...this.history, thinkingMessage];
-      this._onDataListener?.(thinkingHistory);
-
-      // Get current model configuration for custom streaming
-      const configs = await configStorage.getModelConfig();
-      let apiKey = 'sk-example';
-      let baseURL = 'https://extapi.askman.dev/v1';
-      let modelName = 'free';
-
-      // Find the current model config
-      if (options?.overrideModel) {
-        for (const config of configs) {
-          const model = config.config.models.find(
-            m => m.name === options.overrideModel || `${config.provider}/${m.name}` === options.overrideModel,
-          );
-          if (model) {
-            apiKey = config.config.api_key;
-            baseURL = config.config.base_url;
-            modelName = model.name;
-            break;
-          }
+        if (!contextString) {
+          console.log('[PageChatService] 上下文为空，返回原输入');
+          return chat.input;
         }
-      } else {
-        // Use default model from storage
-        const currentModel = await configStorage.getCurrentModel();
-        if (currentModel) {
-          for (const config of configs) {
-            const model = config.config.models.find(
-              m => m.name === currentModel || `${config.provider}/${m.name}` === currentModel,
-            );
-            if (model) {
-              apiKey = config.config.api_key;
-              baseURL = config.config.base_url;
-              modelName = model.name;
-              break;
-            }
-          }
-        }
-      }
 
-      // Use custom streaming to handle reasoning + content phases
-      const finalMessage = await this.streamWithReasoning(messages, apiKey, baseURL, modelName);
+        const finalTemplate = `Context:\n${contextString}\n\nQuestion: ${chat.input}`;
+        console.log('[PageChatService] 最终模板结果:', finalTemplate.slice(0, 300) + '...');
+        return finalTemplate;
+      },
+    };
 
-      // Add final reasoning message to history (keep it as AIReasoningMessage to preserve gray styling)
-      this.history.push(finalMessage);
-      this._onDataListener?.(this.history);
-    } catch (error) {
-      console.error('Error in askWithQuotes:', error);
-      const errorMessage = new AIMessage(`Error: ${error.message}`);
-      this.history.push(errorMessage);
-      this._onDataListener?.(this.history);
-    }
+    // Call askWithTool with the default tool
+    return this.askWithTool(
+      defaultQuotesTool,
+      new QuoteContext(), // Empty pageContext since quotes contain the needed info
+      quotes,
+      userPrompt,
+      options,
+    );
   }
 
   async askWithTool(
