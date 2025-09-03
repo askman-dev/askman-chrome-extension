@@ -12,6 +12,7 @@ import {
   AIReasoningMessage,
 } from '@src/types';
 import { StorageManager } from '@src/utils/StorageManager';
+import { tools } from '@src/components/controls/ToolDropdown';
 
 export interface SendOptions {
   overrideSystem?: string;
@@ -115,67 +116,23 @@ export class PageChatService implements PageChatInterface {
       return;
     }
 
-    console.log('[PageChatService] askWithQuotes 被调用');
+    console.log('[PageChatService] askWithQuotes 被调用 - 使用 No Context 工具');
     console.log('[PageChatService] 收到的引用数据:', quotes);
     console.log('[PageChatService] 用户输入:', userPrompt);
 
-    // Create a default tool with template function that handles quotes context
-    const defaultQuotesTool: ToolsPromptInterface = {
-      id: 'default-quotes',
-      name: 'Default Quotes Handler',
-      hbs: '', // Not using Handlebars
-      template: (context: { chat: { input: string }; quotes: QuoteContext[] }) => {
-        const { chat, quotes } = context;
+    // Find the "No Context" tool
+    const noContextTool = tools.find(t => t.name === 'No Context');
 
-        console.log('[PageChatService] 模板渲染 - context:', context);
+    if (!noContextTool) {
+      console.error('[PageChatService] No Context 工具未找到');
+      throw new Error('No Context tool not found');
+    }
 
-        if (!quotes || quotes.length === 0) {
-          console.log('[PageChatService] 没有引用数据，返回原输入:', chat.input);
-          return chat.input;
-        }
+    console.log('[PageChatService] 找到 No Context 工具，调用 askWithTool');
 
-        const contextString = quotes
-          .map((quote, index) => {
-            console.log(`[PageChatService] 处理引用 ${index}:`, quote);
-
-            // Fix: Check all possible properties including pageTitle and pageUrl
-            const content =
-              quote.selection ||
-              quote.pageContent ||
-              quote.pageTitle || // Added
-              quote.pageUrl || // Added
-              quote.text ||
-              '';
-
-            console.log(`[PageChatService] 引用内容 ${index}:`, content ? content.slice(0, 100) + '...' : '(空)');
-
-            if (!content) return '';
-
-            // Use cleaner format with quote type
-            return `[${quote.type || 'context'}]: ${content}`;
-          })
-          .filter(line => line !== '')
-          .join('\n');
-
-        console.log(
-          '[PageChatService] 最终上下文字符串:',
-          contextString ? contextString.slice(0, 200) + '...' : '(空)',
-        );
-
-        if (!contextString) {
-          console.log('[PageChatService] 上下文为空，返回原输入');
-          return chat.input;
-        }
-
-        const finalTemplate = `Context:\n${contextString}\n\nQuestion: ${chat.input}`;
-        console.log('[PageChatService] 最终模板结果:', finalTemplate.slice(0, 300) + '...');
-        return finalTemplate;
-      },
-    };
-
-    // Call askWithTool with the default tool
+    // Use the No Context tool directly - this ensures we use the same template logic
     return this.askWithTool(
-      defaultQuotesTool,
+      noContextTool,
       new QuoteContext(), // Empty pageContext since quotes contain the needed info
       quotes,
       userPrompt,
@@ -220,12 +177,21 @@ export class PageChatService implements PageChatInterface {
       // Immediately update UI to show user message
       this._onDataListener?.(this.history);
 
-      // Prepare messages for the model - replace the last user message with rendered template
+      // Prepare messages for the model - transform all HumanAskMessage to HumanMessage
       const messages = [...this.history];
-      // Replace the HumanAskMessage content with rendered template for model
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage instanceof HumanAskMessage) {
-        messages[messages.length - 1] = new HumanMessage(renderedTemplate);
+      // Transform all HumanAskMessage to HumanMessage using their rendered content
+      for (let i = 0; i < messages.length; i++) {
+        const msg = messages[i];
+        if (msg instanceof HumanAskMessage) {
+          // For the latest message, use the current renderedTemplate
+          if (i === messages.length - 1) {
+            messages[i] = new HumanMessage(renderedTemplate);
+          }
+          // For historical messages, use their stored rendered content
+          else if (msg.rendered) {
+            messages[i] = new HumanMessage(msg.rendered);
+          }
+        }
       }
 
       // Add system override if provided, replacing any existing system messages

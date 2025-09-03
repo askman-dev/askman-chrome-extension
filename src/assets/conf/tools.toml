@@ -2,21 +2,22 @@
 name = "No Context"
 hbs = """
 {{#if quotes.length}}
-Context:
+<webpage_info>
 {{#each quotes}}
-{{#if this.pageTitle}}[page.title]: {{this.pageTitle}}
+{{#if this.pageTitle}}<title>{{this.pageTitle}}</title>
 {{/if}}
-{{#if this.pageUrl}}[page.url]: {{this.pageUrl}}
+{{#if this.pageUrl}}<url>{{this.pageUrl}}</url>
 {{/if}}
-{{#if this.pageContent}}[page.content]: {{this.pageContent}}
+{{#if this.pageContent}}<content>{{this.pageContent}}</content>
 {{/if}}
-{{#if this.selection}}[selection]: {{this.selection}}
+{{#if this.selection}}<selection>{{this.selection}}</selection>
 {{/if}}
-{{#if this.text}}[text]: {{this.text}}
+{{#if this.text}}<reference>{{this.text}}</reference>
 {{/if}}
 {{/each}}
+</webpage_info>
 
-Question: {{/if}}{{chat.input}}
+{{/if}}{{chat.input}}
 """
 
 [page]
