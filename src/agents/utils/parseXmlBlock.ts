@@ -89,28 +89,84 @@ export function parseBlocks(text: string): Block[] {
 
   lines.forEach(line => {
     allLines.push(line);
-    const startTagMatch = line.match(/^<(?<tag>webpage_info|webpage_content|title|url|reference|content)>/);
-    const endTagMatch = line.match(/^<\/(?<tag>webpage_info|webpage_content|title|url|reference|content)>$/);
+
+    // Check for single-line tags: <tag>content</tag>
+    const singleLineMatch = line.match(
+      /^<(webpage_info|webpage_content|title|url|reference|content|selection)>(.*?)<\/\1>$/,
+    );
+
+    if (singleLineMatch && depth === 0) {
+      if (textBlock) {
+        blocks.push(textBlock);
+        textBlock = null;
+      }
+
+      const tag = singleLineMatch[1]; // First capture group
+      const content = singleLineMatch[2]; // Second capture group
+
+      // Special handling for webpage_info: parse its content and expand inner tags
+      if (tag === 'webpage_info' && content) {
+        const innerBlocks = parseBlocks(content);
+        blocks.push(...innerBlocks);
+      } else {
+        blocks.push({
+          type: tag,
+          content: content,
+          metadata: { tag: tag },
+        });
+      }
+      return;
+    }
+
+    // Multi-line tag logic with support for content on same line as opening tag
+    const startTagMatch = line.match(/^<(webpage_info|webpage_content|title|url|reference|content|selection)>(.*)$/);
+    const endTagMatch = line.match(/^<\/(webpage_info|webpage_content|title|url|reference|content|selection)>$/);
+    const endTagInLineMatch = line.match(/<\/(webpage_info|webpage_content|title|url|reference|content|selection)>$/);
 
     if (startTagMatch && depth === 0) {
       if (textBlock) {
         blocks.push(textBlock);
         textBlock = null;
       }
+
+      const tag = startTagMatch[1]; // First capture group
+      const firstLineContent = startTagMatch[2]; // Second capture group
+
       currentBlock = {
-        type: startTagMatch.groups.tag,
-        content: '',
-        metadata: { tag: startTagMatch.groups.tag },
+        type: tag,
+        content: firstLineContent, // Content from first line (can be empty)
+        metadata: { tag: tag },
       };
-      currentTag = startTagMatch.groups.tag; // 记录当前标签名
+      currentTag = tag;
       depth = 1;
-    } else if (endTagMatch && depth === 1 && endTagMatch.groups.tag === currentTag) {
+    } else if (endTagMatch && depth === 1 && endTagMatch[1] === currentTag) {
       // 只有当结束标签与当前处理的标签名匹配时，才减少深度
       depth = 0;
       if (currentBlock) {
-        blocks.push(currentBlock);
+        // Special handling for webpage_info: parse its content and expand inner tags
+        if (currentBlock.type === 'webpage_info' && currentBlock.content) {
+          const innerBlocks = parseBlocks(currentBlock.content);
+          blocks.push(...innerBlocks);
+        } else {
+          blocks.push(currentBlock);
+        }
         currentBlock = null;
       }
+    } else if (endTagInLineMatch && depth === 1 && endTagInLineMatch[1] === currentTag) {
+      // Handle end tag that appears at the end of content line
+      const contentBeforeTag = line.substring(0, line.lastIndexOf(`</${endTagInLineMatch[1]}>`));
+      if (currentBlock) {
+        currentBlock.content += (currentBlock.content ? '\n' : '') + contentBeforeTag;
+        // Special handling for webpage_info: parse its content and expand inner tags
+        if (currentBlock.type === 'webpage_info' && currentBlock.content) {
+          const innerBlocks = parseBlocks(currentBlock.content);
+          blocks.push(...innerBlocks);
+        } else {
+          blocks.push(currentBlock);
+        }
+        currentBlock = null;
+      }
+      depth = 0;
     } else if (currentBlock && depth > 0) {
       currentBlock.content += (currentBlock.content ? '\n' : '') + line;
     } else {

@@ -51,11 +51,11 @@ export function MessageItem(props: MessageItemProps) {
         );
       } else if (
         block.type === 'reference' ||
-        block.type === 'webpage_info' ||
         block.type === 'webpage_content' ||
         block.type === 'content' ||
         block.type === 'title' ||
-        block.type === 'url'
+        block.type === 'url' ||
+        block.type === 'selection'
       ) {
         return (
           <div key={`reference-${index}`} className="inline-flex relative ">
