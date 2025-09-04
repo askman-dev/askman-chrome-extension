@@ -58,7 +58,7 @@ export function MessageItem(props: MessageItemProps) {
         block.type === 'selection'
       ) {
         return (
-          <div key={`reference-${index}`} className="inline-flex relative ">
+          <div key={`reference-${index}`} className="inline-flex relative mr-2">
             <span
               className="rounded-md p-1 bg-gray-100 text-gray-700 text-sm hover:bg-gray-200 cursor-pointer"
               title={block.content}>
