@@ -353,7 +353,6 @@ export class PageChatService implements PageChatInterface {
                   accumulatedReasoning += delta.reasoning;
                   reasoningMessage.updateReasoning(accumulatedReasoning);
                   shouldUpdate = true;
-                  console.log('Reasoning chunk:', delta.reasoning);
                 }
 
                 // Handle content phase (only when content is present)
