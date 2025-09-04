@@ -28,7 +28,7 @@ export interface DropdownProps {
   buttonDisplay?: string;
   onMainButtonClick?: (_e: React.MouseEvent) => void;
   hoverMessage?: string;
-  variant?: 'default' | 'button';
+  variant?: 'default' | 'button' | 'button-icon';
 }
 
 export function Dropdown({
@@ -173,165 +173,174 @@ export function Dropdown({
   );
 
   return (
-    <div
+    <Menu
+      as="div"
       ref={menuRef}
-      className={classNames(`${className}`)}
+      className={classNames('relative', className)}
       onMouseDown={e => {
         e.stopPropagation();
       }}
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}>
-      <Menu as="div" className="relative">
-        {({ open, close }) => {
-          // 保存 open/close 函数引用
-          openMenuRef.current = () => {
-            if (!open) {
-              buttonRef.current?.click();
-            }
-          };
-          closeMenuRef.current = close;
+      {({ open, close }) => {
+        // 保存 open/close 函数引用
+        openMenuRef.current = () => {
+          if (!open) {
+            buttonRef.current?.click();
+          }
+        };
+        closeMenuRef.current = close;
 
-          return (
-            <>
-              <MenuButton
-                ref={buttonRef}
-                className={classNames(
-                  'group inline-flex max-w-[12rem] justify-center items-center rounded-md text-sm text-sm font-normal focus:outline-none',
-                  variant === 'button'
-                    ? 'bg-gray-100 text-gray-600 px-2 h-6 hover:bg-black hover:text-white transition-colors duration-200'
-                    : 'text-gray-500',
-                )}
-                onClick={e => {
-                  e.stopPropagation();
-                  if (e.isTrusted) {
-                    onMainButtonClick?.(e);
-                  }
-                }}
-                onMouseEnter={() => {
-                  // 清除之前的关闭定时器
-                  if (hoverTimeoutRef.current) {
-                    clearTimeout(hoverTimeoutRef.current);
-                  }
-                  // 如果正在关闭过程中，不要重新打开
-                  if (isClosingRef.current) {
-                    return;
-                  }
-                  // 悬停时自动打开菜单
-                  if (!initOpen) {
-                    statusListener(true);
-                  }
-                }}
-                onFocus={() => {
-                  // 如果正在关闭过程中，不要重新打开
-                  if (isClosingRef.current) {
-                    return;
-                  }
-                  // 获得焦点时自动打开菜单
-                  if (!initOpen) {
-                    statusListener(true);
-                  }
-                }}
-                onBlur={() => {
-                  // 失去焦点时延迟关闭菜单（给用户时间移动到菜单上）
-                  if (initOpen) {
-                    hoverTimeoutRef.current = setTimeout(() => {
-                      statusListener(false);
-                    }, 50);
-                  }
-                }}
-                onMouseLeave={() => {
-                  // 延迟关闭菜单，给用户时间移动到菜单上
-                  if (initOpen) {
-                    hoverTimeoutRef.current = setTimeout(() => {
-                      statusListener(false);
-                    }, 50);
-                  }
-                }}>
-                <div className="relative inline-block">
-                  <span className="truncate max-w-[6rem] text-left inline-flex items-center">
-                    {typeof displayName === 'string' ? displayName : 'Untitled'}
-                  </span>
-                  <div className="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
-                    {hoverMessage || (typeof displayName === 'string' ? displayName : 'Untitled')}
-                  </div>
-                </div>
-                {buttonDisplay ? (
-                  <span className="-mr-1 h-5 w-5 ml-1 flex-shrink-0">{buttonDisplay}</span>
-                ) : variant === 'button' ? null : (
-                  <ChevronDownIcon className="-mr-1 h-5 w-5 flex-shrink-0" />
-                )}
-                {showShortcut && (
-                  <span className="text-gray-500 rounded text-xs flex-shrink-0" style={{ padding: '2px 2px' }}>
-                    [{shortcutKey}]
-                  </span>
-                )}
-              </MenuButton>
-
-              <MenuItems
-                className={`absolute ${
-                  align === 'left' ? 'left-0' : 'right-0'
-                } mt-0 min-w-[10rem] origin-top-right divide-y divide-gray-100 rounded bg-white ring-1 ring-black/10 border border-gray-200 focus:outline-none z-[9999]`}
-                style={{ boxShadow: '0 0 10px 2px rgba(0, 0, 0, 0.1)' }}
-                onMouseEnter={() => {
-                  // 鼠标进入菜单区域时，清除关闭定时器
-                  if (hoverTimeoutRef.current) {
-                    clearTimeout(hoverTimeoutRef.current);
-                  }
-                  // 如果正在关闭过程中，不要干预
-                  if (isClosingRef.current) {
-                    return;
-                  }
-                }}
-                onMouseLeave={() => {
-                  // 鼠标离开菜单区域时，延迟关闭
+        return (
+          <>
+            <MenuButton
+              ref={buttonRef}
+              className={classNames(
+                'group inline-flex justify-center items-center rounded-md focus:outline-none',
+                variant === 'button-icon'
+                  ? 'bg-gray-100 text-gray-600 p-1 h-6 w-6 hover:bg-black hover:text-white transition-colors duration-200'
+                  : variant === 'button'
+                    ? 'max-w-[12rem] text-sm text-sm font-normal bg-gray-100 text-gray-600 px-2 h-6 hover:bg-black hover:text-white transition-colors duration-200'
+                    : 'max-w-[12rem] text-sm text-sm font-normal text-gray-500',
+              )}
+              onClick={e => {
+                e.stopPropagation();
+                if (e.isTrusted) {
+                  onMainButtonClick?.(e);
+                }
+              }}
+              onMouseEnter={() => {
+                // 清除之前的关闭定时器
+                if (hoverTimeoutRef.current) {
+                  clearTimeout(hoverTimeoutRef.current);
+                }
+                // 如果正在关闭过程中，不要重新打开
+                if (isClosingRef.current) {
+                  return;
+                }
+                // 悬停时自动打开菜单
+                if (!initOpen) {
+                  statusListener(true);
+                }
+              }}
+              onFocus={() => {
+                // 如果正在关闭过程中，不要重新打开
+                if (isClosingRef.current) {
+                  return;
+                }
+                // 获得焦点时自动打开菜单
+                if (!initOpen) {
+                  statusListener(true);
+                }
+              }}
+              onBlur={() => {
+                // 失去焦点时延迟关闭菜单（给用户时间移动到菜单上）
+                if (initOpen) {
                   hoverTimeoutRef.current = setTimeout(() => {
                     statusListener(false);
                   }, 50);
-                }}>
-                <div className="px-1 py-1">
-                  {items.map((item, index) => (
-                    <MenuItem key={item.id}>
-                      {({ active }) => {
-                        return (
-                          <button
-                            ref={el => (menuItemsRef.current[index] = el)}
-                            className="w-full focus:outline-none"
-                            onClick={e => {
-                              // 清除悬停定时器，确保点击后菜单立即关闭
-                              if (hoverTimeoutRef.current) {
-                                clearTimeout(hoverTimeoutRef.current);
-                              }
+                }
+              }}
+              onMouseLeave={() => {
+                // 延迟关闭菜单，给用户时间移动到菜单上
+                if (initOpen) {
+                  hoverTimeoutRef.current = setTimeout(() => {
+                    statusListener(false);
+                  }, 50);
+                }
+              }}>
+              {variant === 'button-icon' ? (
+                // 极简图标模式：直接渲染图标
+                buttonDisplay || <ChevronDownIcon className="w-4 h-4" />
+              ) : (
+                // 原有复杂渲染模式
+                <>
+                  <div className="relative inline-block">
+                    <span className="truncate max-w-[6rem] text-left inline-flex items-center">
+                      {typeof displayName === 'string' ? displayName : 'Untitled'}
+                    </span>
+                    <div className="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
+                      {hoverMessage || (typeof displayName === 'string' ? displayName : 'Untitled')}
+                    </div>
+                  </div>
+                  {buttonDisplay ? (
+                    <span className="-mr-1 h-5 w-5 ml-1 flex-shrink-0">{buttonDisplay}</span>
+                  ) : variant === 'button' ? null : (
+                    <ChevronDownIcon className="-mr-1 h-5 w-5 flex-shrink-0" />
+                  )}
+                  {showShortcut && (
+                    <span className="text-gray-500 rounded text-xs flex-shrink-0" style={{ padding: '2px 2px' }}>
+                      [{shortcutKey}]
+                    </span>
+                  )}
+                </>
+              )}
+            </MenuButton>
 
-                              // 设置关闭标志，防止hover事件重新打开菜单
-                              isClosingRef.current = true;
+            <MenuItems
+              className={`absolute ${
+                align === 'left' ? 'left-0' : 'right-0'
+              } mt-0 min-w-[10rem] origin-top-right divide-y divide-gray-100 rounded bg-white ring-1 ring-black/10 border border-gray-200 focus:outline-none z-[9999]`}
+              style={{ boxShadow: '0 0 10px 2px rgba(0, 0, 0, 0.1)' }}
+              onMouseEnter={() => {
+                // 鼠标进入菜单区域时，清除关闭定时器
+                if (hoverTimeoutRef.current) {
+                  clearTimeout(hoverTimeoutRef.current);
+                }
+                // 如果正在关闭过程中，不要干预
+                if (isClosingRef.current) {
+                  return;
+                }
+              }}
+              onMouseLeave={() => {
+                // 鼠标离开菜单区域时，延迟关闭
+                hoverTimeoutRef.current = setTimeout(() => {
+                  statusListener(false);
+                }, 50);
+              }}>
+              <div className="px-1 py-1">
+                {items.map((item, index) => (
+                  <MenuItem key={item.id}>
+                    {({ active }) => {
+                      return (
+                        <button
+                          ref={el => (menuItemsRef.current[index] = el)}
+                          className="w-full focus:outline-none"
+                          onClick={e => {
+                            // 清除悬停定时器，确保点击后菜单立即关闭
+                            if (hoverTimeoutRef.current) {
+                              clearTimeout(hoverTimeoutRef.current);
+                            }
 
-                              // 通知父组件关闭菜单
-                              statusListener(false);
+                            // 设置关闭标志，防止hover事件重新打开菜单
+                            isClosingRef.current = true;
 
-                              // 延迟重置关闭标志，给足够时间完成关闭操作
-                              setTimeout(() => {
-                                isClosingRef.current = false;
-                              }, 33);
+                            // 通知父组件关闭菜单
+                            statusListener(false);
 
-                              // 从实际的鼠标事件检测Command/Ctrl键
-                              const actualCommandPressed = e.metaKey || e.ctrlKey;
-                              onItemClick(item, actualCommandPressed);
-                            }}>
-                            {renderItem
-                              ? renderItem(item, index, active, item.id === selectedId)
-                              : defaultRenderItem(item, index, active, item.id === selectedId)}
-                          </button>
-                        );
-                      }}
-                    </MenuItem>
-                  ))}
-                </div>
-              </MenuItems>
-            </>
-          );
-        }}
-      </Menu>
-    </div>
+                            // 延迟重置关闭标志，给足够时间完成关闭操作
+                            setTimeout(() => {
+                              isClosingRef.current = false;
+                            }, 33);
+
+                            // 从实际的鼠标事件检测Command/Ctrl键
+                            const actualCommandPressed = e.metaKey || e.ctrlKey;
+                            onItemClick(item, actualCommandPressed);
+                          }}>
+                          {renderItem
+                            ? renderItem(item, index, active, item.id === selectedId)
+                            : defaultRenderItem(item, index, active, item.id === selectedId)}
+                        </button>
+                      );
+                    }}
+                  </MenuItem>
+                ))}
+              </div>
+            </MenuItems>
+          </>
+        );
+      }}
+    </Menu>
   );
 }
 
