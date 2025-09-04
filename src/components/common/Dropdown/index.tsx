@@ -25,7 +25,7 @@ export interface DropdownProps {
   selectedId?: string;
   showShortcut?: boolean;
   align?: 'left' | 'right';
-  buttonDisplay?: string;
+  buttonDisplay?: React.ReactNode;
   onMainButtonClick?: (_e: React.MouseEvent) => void;
   hoverMessage?: string;
   variant?: 'default' | 'button' | 'button-icon';
