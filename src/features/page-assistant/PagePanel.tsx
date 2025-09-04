@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import 'highlight.js/styles/default.min.css';
 import { QuoteAgent, QuoteContext } from '@src/agents/quote';
-import React, { useState, useContext, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useContext, useEffect, useRef, useCallback, useMemo } from 'react';
 import { PageChatContext } from './PageChatService';
 import { ToolDropdown, QuoteDropdown, SystemPromptDropdown, ModelSelector } from '@src/components/controls';
 import { tools } from '@src/components/controls/ToolDropdown';
@@ -118,27 +118,30 @@ export function PagePanel(props: PagePanelProps) {
   const [pendingDropdown, setPendingDropdown] = useState<'system' | 'model' | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // 菜单项数据
-  const menuItems = [
-    {
-      id: 'toggle-size',
-      name: isMaximized ? 'Minimize Panel' : 'Maximize Panel',
-      shortName: isMaximized ? 'Minimize' : 'Maximize',
-      icon: isMaximized ? 'minimize' : 'maximize',
-    },
-    {
-      id: 'new-chat',
-      name: 'New Chat',
-      shortName: 'New Chat',
-      icon: 'new-chat',
-    },
-    {
-      id: 'settings',
-      name: 'Settings',
-      shortName: 'Settings',
-      icon: 'settings',
-    },
-  ];
+  // 菜单项数据 - 使用 useMemo 优化性能
+  const menuItems = useMemo(
+    () => [
+      {
+        id: 'toggle-size',
+        name: isMaximized ? 'Minimize Panel' : 'Maximize Panel',
+        shortName: isMaximized ? 'Minimize' : 'Maximize',
+        icon: isMaximized ? 'minimize' : 'maximize',
+      },
+      {
+        id: 'new-chat',
+        name: 'New Chat',
+        shortName: 'New Chat',
+        icon: 'new-chat',
+      },
+      {
+        id: 'settings',
+        name: 'Settings',
+        shortName: 'Settings',
+        icon: 'settings',
+      },
+    ],
+    [isMaximized],
+  );
 
   const showToolDropdown = () => {
     setIsToolDropdownOpen(true);
@@ -739,13 +742,10 @@ export function PagePanel(props: PagePanelProps) {
             <style>
               {`
                 .panel-menu-button > div > button:first-child {
-                  padding: 4px !important;
+                  padding: 2px 0 0 2px !important;
                   height: 24px !important;
                   width: 24px !important;
                   min-width: 24px !important;
-                  display: flex !important;
-                  align-items: center !important;
-                  justify-content: center !important;
                 }
               `}
             </style>
