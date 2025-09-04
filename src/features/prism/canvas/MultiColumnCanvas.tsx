@@ -423,7 +423,7 @@ const MultiColumnCanvas: React.FC<MultiColumnCanvasProps> = ({
       const branchMessages = sourceColumn.messages.slice(0, branchPointIndex + 1);
 
       const newColumn: ChatColumnType = {
-        id: `col_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `col_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
         messages: branchMessages,
         parentColumnId: fromColumnId,
         branchPoint: fromMessageId,
