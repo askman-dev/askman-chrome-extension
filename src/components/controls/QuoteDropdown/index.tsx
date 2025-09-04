@@ -1,4 +1,4 @@
-import { Menu, Transition } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useRef } from 'react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
@@ -52,7 +52,7 @@ export function QuoteDropdown({ className, style, onItemClick, initOpen, statusL
       type="button"
       style={style}>
       <Menu as="div" className="relative h-0">
-        <Menu.Button
+        <MenuButton
           ref={buttonRef}
           className="inline-flex w-full justify-center rounded-md text-gray-600 bg-white text-sm font-medium text-black hover:bg-black/10 focus:outline-none h-0 invisible pointer-events-none"
           title="Content"
@@ -68,7 +68,7 @@ export function QuoteDropdown({ className, style, onItemClick, initOpen, statusL
               </>
             );
           }}
-        </Menu.Button>
+        </MenuButton>
         <Transition
           as={Fragment}
           enter="transition ease-out duration-100"
@@ -77,17 +77,26 @@ export function QuoteDropdown({ className, style, onItemClick, initOpen, statusL
           leave="transition ease-in duration-75"
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95">
-          <Menu.Items
-            static
-            className="absolute left-0 w-36 mt-[-0.5rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10">
+          <MenuItems className="absolute left-0 w-36 mt-[-0.5rem] origin-top-right divide-y divide-gray-100 rounded bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-10">
             <div className="px-1 py-1">
               {quoteContexts.map((quote, index) => (
-                <Menu.Item key={quote.name}>
+                <MenuItem key={quote.name}>
                   {({ active }) => (
                     <button
                       ref={el => (menuItemsRef.current[index] = el)}
-                      onClick={() => {
+                      onMouseDown={e => {
+                        console.log('[QuoteDropdown] MouseDown事件:', quote.type);
+                        // 阻止mousedown事件冒泡
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      onClick={e => {
                         console.log('[QuoteDropdown] 点击引用项:', quote.type);
+                        console.log('[QuoteDropdown] 点击事件详情:', e.type, e.isTrusted);
+
+                        // 阻止事件冒泡和默认行为
+                        e.preventDefault();
+                        e.stopPropagation();
 
                         // Dynamically get fresh page data when clicked
                         let freshQuote: QuoteContext;
@@ -150,10 +159,10 @@ export function QuoteDropdown({ className, style, onItemClick, initOpen, statusL
                       {quote.name}
                     </button>
                   )}
-                </Menu.Item>
+                </MenuItem>
               ))}
             </div>
-          </Menu.Items>
+          </MenuItems>
         </Transition>
       </Menu>
     </button>
