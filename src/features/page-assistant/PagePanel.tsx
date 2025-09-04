@@ -708,7 +708,7 @@ export function PagePanel(props: PagePanelProps) {
           <div className="flex items-center gap-2 h-6">
             <ModelSelector
               initOpen={isModelDropdownOpen}
-              className="relative"
+              className="flex items-center"
               onItemClick={(model, withCommand) => {
                 if (withCommand) {
                   onSend(undefined, undefined, model);
@@ -740,7 +740,7 @@ export function PagePanel(props: PagePanelProps) {
         <div className="flex items-center gap-2">
           <BaseDropdown
             displayName=""
-            className="relative"
+            className="flex items-center"
             onItemClick={(item, _isCommandPressed) => {
               const itemId = item.id as string;
               if (itemId === 'toggle-size') {

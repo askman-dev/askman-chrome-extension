@@ -200,8 +200,8 @@ export function Dropdown({
                 variant === 'button-icon'
                   ? 'bg-gray-100 text-gray-600 p-1 h-6 w-6 hover:bg-black hover:text-white transition-colors duration-200'
                   : variant === 'button'
-                    ? 'max-w-[12rem] text-sm text-sm font-normal bg-gray-100 text-gray-600 px-2 h-6 hover:bg-black hover:text-white transition-colors duration-200'
-                    : 'max-w-[12rem] text-sm text-sm font-normal text-gray-500',
+                    ? 'max-w-[16rem] text-sm text-sm font-normal bg-gray-100 text-gray-600 px-2 h-6 hover:bg-black hover:text-white transition-colors duration-200'
+                    : 'max-w-[16rem] text-sm text-sm font-normal text-gray-500',
               )}
               onClick={e => {
                 e.stopPropagation();
@@ -256,7 +256,7 @@ export function Dropdown({
                 // 原有复杂渲染模式
                 <>
                   <div className="relative inline-block">
-                    <span className="truncate max-w-[6rem] text-left inline-flex items-center">
+                    <span className="truncate max-w-[10rem] text-left inline-flex items-center">
                       {typeof displayName === 'string' ? displayName : 'Untitled'}
                     </span>
                     <div className="absolute left-1/2 -translate-x-1/2 -top-8 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
@@ -280,7 +280,7 @@ export function Dropdown({
             <MenuItems
               className={`absolute ${
                 align === 'left' ? 'left-0' : 'right-0'
-              } mt-0 min-w-[10rem] origin-top-right divide-y divide-gray-100 rounded bg-white ring-1 ring-black/10 border border-gray-200 focus:outline-none z-[9999]`}
+              } top-full mt-1 min-w-[10rem] origin-top-right divide-y divide-gray-100 rounded bg-white ring-1 ring-black/10 border border-gray-200 focus:outline-none z-[9999]`}
               style={{ boxShadow: '0 0 10px 2px rgba(0, 0, 0, 0.1)' }}
               onMouseEnter={() => {
                 // 鼠标进入菜单区域时，清除关闭定时器
