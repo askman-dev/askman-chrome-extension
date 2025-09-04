@@ -560,6 +560,7 @@ export function PagePanel(props: PagePanelProps) {
 
     if (toolToUse) {
       console.log('[PagePanel] 调用 askWithTool');
+      // console.log('[PagePanel] pageContext内容:', pageContext);
       chatContext.askWithTool(toolToUse, pageContext, initQuotes, userInput.trim(), {
         overrideSystem,
         overrideModel,

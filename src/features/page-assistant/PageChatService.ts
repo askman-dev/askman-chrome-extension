@@ -157,14 +157,21 @@ export class PageChatService implements PageChatInterface {
         await this.switchToModel(options.overrideModel);
       }
 
-      // Process template
+      // Process template - fix page property mapping for Handlebars template
       const context = {
         chat: { input: userPrompt },
-        page: pageContext,
+        page: {
+          title: pageContext.pageTitle,
+          url: pageContext.pageUrl,
+          content: pageContext.pageContent,
+          selection: pageContext.selection,
+        },
         quotes: quotes,
       };
 
+      // console.log('[PageChatService] 模板渲染上下文:', context);
       const renderedTemplate = (tool.template as (..._args: unknown[]) => string)?.(context) || '';
+      // console.log('[PageChatService] 渲染结果:', renderedTemplate);
 
       // Create human ask message with rendered template
       const humanAskMessage = new HumanAskMessage({
