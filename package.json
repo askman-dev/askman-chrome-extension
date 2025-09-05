@@ -32,7 +32,7 @@
     "@langchain/community": "^0.3.11",
     "@langchain/core": "^0.3.17",
     "@langchain/openai": "^0.3.12",
-    "@monaco-editor/react": "^4.6.0",
+    "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
     "@radix-ui/react-slot": "^1.2.3",
     "@shikijs/core": "^1.15.1",
