@@ -46,6 +46,7 @@ const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = fal
         editorRef.current.dispose();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -67,7 +68,7 @@ const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = fal
 
     const monaco = monacoRef.current;
     monaco.languages.register({ id: 'toml' });
-    
+
     // 使用全局高亮器实例
     const highlighter = await getOrCreateHighlighter();
     shikiToMonaco(highlighter, monaco);
@@ -111,10 +112,7 @@ const TOMLEditor: React.FC<TOMLEditorProps> = ({ value, onChange, readOnly = fal
 
   return (
     <div className="bg-[#272822] p-4 pt-2 rounded-lg">
-      <div className={classNames(
-        "flex items-center mb-2 h-6 px-2 rounded",
-        isModified ? "bg-orange-600" : ""
-      )}>
+      <div className={classNames('flex items-center mb-2 h-6 px-2 rounded', isModified ? 'bg-orange-600' : '')}>
         <span className="text-white">
           {readOnly ? '[Read Only]' : '[Editable]'} {filename}
         </span>

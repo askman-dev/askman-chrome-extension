@@ -136,7 +136,7 @@ export class QuoteAgent implements BaseAgent {
     quote.pageContent = document.body.innerText;
     quote.selection = document.getSelection()?.toString().trim();
     quote.browserLanguage = navigator?.language;
-    // console.log('getQuoteByDocument:', quote);
+    // console.log('[QuoteAgent] getQuoteByDocument result:', quote);
     return Promise.resolve(quote);
   }
 

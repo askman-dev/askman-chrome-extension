@@ -22,6 +22,7 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
 
   useEffect(() => {
     loadConfigs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [systemConfigPath, userConfigStorageKey]);
 
   const loadConfigs = async () => {
@@ -62,7 +63,7 @@ const ConfigManager: React.FC<ConfigManagerProps> = ({
       console.error('Error saving user tools:', e);
     }
   };
-  
+
   const renderActiveEditor = () => {
     // 生成一个包含所有相关信息的唯一 key
     const getEditorKey = (base: string) => {

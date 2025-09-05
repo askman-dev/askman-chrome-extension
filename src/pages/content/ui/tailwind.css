@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+/* Import the main tailwind configuration */
+@import "@src/assets/style/tailwind.css";
+
+/* Ensure content script specific styles */
+#shadow-root {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif, 'Microsoft YaHei', 'SimSun', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', sans-serif, 'PingFang SC', 'Hiragino Sans GB';
+}

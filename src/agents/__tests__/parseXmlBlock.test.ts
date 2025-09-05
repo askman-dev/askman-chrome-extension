@@ -208,4 +208,87 @@ Instructions:
     const result = parseBlocks(input);
     expect(result).toHaveLength(3);
   });
+
+  it('should expand webpage_info tag and show individual inner tags', () => {
+    const input = `<webpage_info>
+<title>Example Domain</title>
+<content>Example Domain
+
+This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
+
+More information...</content>
+</webpage_info>
+
+333`;
+
+    const result = parseBlocks(input);
+    expect(result).toHaveLength(3);
+
+    // Should expand webpage_info into individual tags
+    expect(result[0]).toEqual({
+      type: 'title',
+      content: 'Example Domain',
+      metadata: { tag: 'title' },
+    });
+
+    expect(result[1]).toEqual({
+      type: 'content',
+      content:
+        'Example Domain\n\nThis domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.\n\nMore information...',
+      metadata: { tag: 'content' },
+    });
+
+    expect(result[2]).toEqual({
+      type: 'text',
+      content: '\n333',
+    });
+  });
+
+  it('should parse content tag that starts with content on same line', () => {
+    const input = `<content>Example Domain
+
+This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
+
+More information...</content>
+
+333`;
+
+    const result = parseBlocks(input);
+    expect(result).toHaveLength(2);
+
+    expect(result[0]).toEqual({
+      type: 'content',
+      content:
+        'Example Domain\n\nThis domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.\n\nMore information...',
+      metadata: { tag: 'content' },
+    });
+
+    expect(result[1]).toEqual({
+      type: 'text',
+      content: '\n333',
+    });
+  });
+
+  it('should successfully expand simple webpage_info with title (working case)', () => {
+    const input = `<webpage_info>
+<title>Example Domain</title>
+</webpage_info>
+
+33333`;
+
+    const result = parseBlocks(input);
+    expect(result).toHaveLength(2);
+
+    // Should expand webpage_info into individual tags
+    expect(result[0]).toEqual({
+      type: 'title',
+      content: 'Example Domain',
+      metadata: { tag: 'title' },
+    });
+
+    expect(result[1]).toEqual({
+      type: 'text',
+      content: '\n33333',
+    });
+  });
 });

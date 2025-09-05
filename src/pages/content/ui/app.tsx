@@ -1,10 +1,10 @@
 import { useRef, useState, useEffect } from 'react';
 import { useDebounceFn } from 'ahooks';
-import AskButton from '@src/components/features/dialog/DialogTrigger';
-import AskPanel from '@src/components/features/dialog/DialogPanel';
+import AskButton from '@src/components/dialog/DialogTrigger';
+import AskPanel from '@src/features/page-assistant/PagePanel';
 import { CommandType, TabMessage } from '@root/src/types';
 import { QuoteAgent, QuoteContext } from '@root/src/agents/quote';
-import { ChatCoreContext, ChatPopupContext } from '@root/src/chat/chat';
+import { PageChatService, PageChatContext } from '@src/features/page-assistant/PageChatService';
 import { PageGithubAgent } from '@root/src/agents/page-github/script';
 import PageGithubReadmeToolDropdown from '@root/src/agents/page-github/component';
 import { createPortal } from 'react-dom';
@@ -16,7 +16,7 @@ import Notification from '@src/components/common/Notification';
 
 const ASK_BUTTON_OFFSET_X = 5; // 按钮距离左侧的偏移量
 
-const tabChatContext = new ChatCoreContext();
+const tabChatContext = new PageChatService();
 
 // 模拟键盘事件
 function simulateKeyPress(key: string, ctrlKey = false, metaKey = false) {
@@ -203,7 +203,8 @@ export default function App() {
       window.removeEventListener('scroll', hideAskButton);
       chrome.runtime.onMessage.removeListener(onBackgroundMessage);
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAsk = () => {
     console.log('🚀 ~ handleAsk ~ targetDom.current:', targetDom.current);
@@ -252,7 +253,7 @@ export default function App() {
           />,
           pageActionButton,
         )}
-      <ChatPopupContext.Provider value={tabChatContext}>
+      <PageChatContext.Provider value={tabChatContext}>
         {parentRect && (
           <AskButton
             visible={askButtonVisible}
@@ -286,7 +287,7 @@ export default function App() {
             }}
           />
         ) : null}
-      </ChatPopupContext.Provider>
+      </PageChatContext.Provider>
     </>
   );
 }

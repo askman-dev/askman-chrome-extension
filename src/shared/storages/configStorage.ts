@@ -21,6 +21,7 @@ export interface TomlModelConfig {
       name: string;
       id?: string;
       max_tokens: number;
+      default?: boolean;
     }>;
   };
 }

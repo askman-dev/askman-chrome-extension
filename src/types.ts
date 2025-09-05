@@ -1,4 +1,4 @@
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { HumanMessage, SystemMessage, AIMessage } from '@langchain/core/messages';
 
 export class SystemInvisibleMessage extends SystemMessage {
   isVisible = false;
@@ -24,6 +24,53 @@ export class HumanAskMessage extends HumanMessage {
 
 export class AIInvisibleMessage extends HumanMessage {
   isVisible = false;
+}
+
+export class AIThinkingMessage extends AIMessage {
+  isThinking = true;
+
+  constructor() {
+    super('');
+  }
+}
+
+export class AIReasoningMessage extends AIMessage {
+  reasoning: string = '';
+  content: string = '';
+  isReasoning = true;
+
+  constructor() {
+    super('');
+  }
+
+  // Update reasoning text (gray phase)
+  updateReasoning(text: string) {
+    this.reasoning = text;
+  }
+
+  // Update content text (normal phase)
+  updateContent(text: string) {
+    this.content = text;
+    // Don't switch phases - keep both reasoning and content visible
+  }
+
+  // Get display text for UI (show both reasoning and content)
+  getDisplayText(): string {
+    if (this.reasoning && this.content) {
+      return `${this.reasoning}\n\n${this.content}`;
+    }
+    return this.content || this.reasoning;
+  }
+
+  // Check if we have reasoning content
+  hasReasoning(): boolean {
+    return Boolean(this.reasoning);
+  }
+
+  // Check if we have final content
+  hasContent(): boolean {
+    return Boolean(this.content);
+  }
 }
 
 export interface AgentContext {
@@ -66,7 +113,7 @@ export interface ToolsPromptInterface {
   id: string;
   name: string;
   hbs: string;
-  template: any;
+  template: unknown;
 }
 
 /* eslint-disable no-unused-vars */

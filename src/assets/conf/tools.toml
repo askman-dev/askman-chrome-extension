@@ -1,7 +1,23 @@
 [framework]
-name = "Simple"
+name = "No Context"
 hbs = """
-{{chat.input}}
+{{#if quotes.length}}
+<webpage_info>
+{{#each quotes}}
+{{#if this.pageTitle}}<title>{{this.pageTitle}}</title>
+{{/if}}
+{{#if this.pageUrl}}<url>{{this.pageUrl}}</url>
+{{/if}}
+{{#if this.pageContent}}<content>{{this.pageContent}}</content>
+{{/if}}
+{{#if this.selection}}<selection>{{this.selection}}</selection>
+{{/if}}
+{{#if this.text}}<reference>{{this.text}}</reference>
+{{/if}}
+{{/each}}
+</webpage_info>
+
+{{/if}}{{chat.input}}
 """
 
 [page]

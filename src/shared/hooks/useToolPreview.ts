@@ -17,8 +17,6 @@ export function useToolPreview() {
     // Calculate the relative position between the menu item and dropdown
     const relativeY = menuItemRect.top - menuButtonRect.top;
 
-    console.log('menuItemRect-width', menuItemRect.width, 'menuButtonRect-width', menuButtonRect.width);
-
     if (align === 'right') {
       setPreviewPos({
         x: menuItemRect.width,

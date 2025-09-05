@@ -1,0 +1,7 @@
+/* Import Tailwind CSS directly for content scripts */
+@import "tailwindcss";
+
+/* Additional styles for content script components */
+.askman-dialog-panel {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}

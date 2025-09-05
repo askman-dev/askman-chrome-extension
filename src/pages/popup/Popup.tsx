@@ -22,7 +22,7 @@ const Popup = () => {
         </div>
         <div className="instructions">
           <p>After installation, please refresh your tag page first. Then click the action button to start chatting.</p>
-          <p className="note">Note: Chat is not available on new tabs, settings pages, or browser system pages.</p>
+          <p className="note">Note: Chat is not available on new tab pages, settings pages, or browser system pages.</p>
         </div>
         <button
           className="action-button"

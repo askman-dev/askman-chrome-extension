@@ -28,6 +28,11 @@ function onContextMenuClicked(info: chrome.contextMenus.OnClickData, tab: chrome
     case 'id-browser-action-context-menu':
       // chrome.runtime.openOptionsPage();
       break;
+    case 'id-canvas-chat':
+      chrome.tabs.create({
+        url: 'chrome-extension://' + chrome.runtime.id + '/src/pages/thought-prism/index.html',
+      });
+      break;
   }
 }
 function onCommandMessageListener(command) {
@@ -75,6 +80,11 @@ function initExtension() {
     contexts: ['page', 'selection'],
     id: 'id-context-menu',
   });
+  chrome.contextMenus.create({
+    title: 'Open Thought Prism',
+    contexts: ['action'],
+    id: 'id-canvas-chat',
+  });
   // chrome.contextMenus.create({
   //   title: 'Options for models, prompts, etc.',
   //   contexts: ['browser_action'],
@@ -98,7 +108,7 @@ function isUrlNotSupported(url: string): boolean {
   ) {
     return true;
   }
-  // New tab page is not supported
+  // New tab pages are not supported
   if (url === 'chrome://newtab/' || url === 'about:blank') {
     return true;
   }
