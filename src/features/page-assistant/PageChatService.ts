@@ -116,9 +116,8 @@ export class PageChatService implements PageChatInterface {
       return;
     }
 
-    console.log('[PageChatService] askWithQuotes 被调用 - 使用 No Context 工具');
-    console.log('[PageChatService] 收到的引用数据:', quotes);
-    console.log('[PageChatService] 用户输入:', userPrompt);
+    // Debug logging can be enabled for development
+    // console.log('[PageChatService] askWithQuotes called with No Context tool');
 
     // Find the "No Context" tool
     const noContextTool = tools.find(t => t.name === 'No Context');
@@ -128,7 +127,7 @@ export class PageChatService implements PageChatInterface {
       throw new Error('No Context tool not found');
     }
 
-    console.log('[PageChatService] 找到 No Context 工具，调用 askWithTool');
+    // console.log('[PageChatService] Found No Context tool, calling askWithTool');
 
     // Use the No Context tool directly - this ensures we use the same template logic
     return this.askWithTool(
@@ -360,7 +359,6 @@ export class PageChatService implements PageChatInterface {
                   accumulatedContent += delta.content;
                   reasoningMessage.updateContent(accumulatedContent);
                   shouldUpdate = true;
-                  console.log('Content chunk:', delta.content);
                 }
 
                 // Update UI only when we have actual changes
