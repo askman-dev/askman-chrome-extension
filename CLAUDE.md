@@ -291,3 +291,5 @@ pnpm vitest --run     # Run tests without watch mode
 - `src/agents/quote.ts` - Page context extraction and processing
 
 This architecture enables sophisticated AI-powered web page interaction while maintaining Chrome Web Store compliance and cross-browser compatibility.
+- Always use 'think hard' mode
+- Always explore, think, plan before execute
