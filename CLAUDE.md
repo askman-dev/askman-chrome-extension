@@ -291,3 +291,111 @@ pnpm vitest --run     # Run tests without watch mode
 - `src/agents/quote.ts` - Page context extraction and processing
 
 This architecture enables sophisticated AI-powered web page interaction while maintaining Chrome Web Store compliance and cross-browser compatibility.
+
+## Enhanced Commit Guidelines
+
+When committing code, create comprehensive commit messages with appropriate analysis depth based on change scope:
+
+### 1. Change Scope Analysis
+First determine the commit scope to decide analysis depth:
+
+**🎯 Major Features/Changes** (Requires full analysis)
+- New features with user stories
+- Architectural changes
+- Breaking changes
+- Major refactoring
+
+**⚙️ Standard Development** (Requires file tree + basic description)
+- Bug fixes
+- Minor improvements  
+- Dependency updates
+- Configuration changes
+
+**🔧 Maintenance/Trivial** (Basic commit message sufficient)
+- Typo fixes
+- Code formatting
+- Simple documentation updates
+- Version bumps
+
+### 2. Story Analysis & Traceability (When Applicable)
+- Look for user stories with acceptance criteria in the project (check `memory/features/*-stories-ac.md` files)
+- **If stories exist**: Reference which stories the commit addresses
+- **If no stories exist**: Skip story references (don't force-create them)
+- Use format: `feat: <description> - Closes Story #X: <story title>` (only when stories exist)
+
+### 3. File Tree & Change Documentation (Always Include)
+Include a complete file tree for all commits (except trivial ones):
+
+```
+## Files Changed (X files, +lines/-lines)
+
+├── path/to/file1.ext                    (+added/-removed) [M/A/D]
+├── directory/
+│   ├── file2.ext                        (+added/-removed) [A]
+│   └── file3.ext                        (+added/-removed) [M]
+└── other/path/file4.ext                 (+added/-removed) [M]
+
+### File-Level Changes
+
+**🔧 Category 1**
+- `path/to/file1.ext` (+X/-Y)
+  - Specific change description
+  - Key functionality added/modified
+  - Impact and reasoning (when significant)
+```
+
+### 4. Handling Commits Without Memory Files
+
+**When to Create Memory Files:**
+Create memory files only for:
+- ✅ **Complex features** with multiple user requirements
+- ✅ **Architectural decisions** that need future reference
+- ✅ **Learning experiences** worth documenting
+- ✅ **Process improvements** that should be replicated
+
+Don't create memory files for:
+- ❌ Simple bug fixes
+- ❌ Routine maintenance
+- ❌ Dependency updates
+- ❌ Minor UI tweaks
+
+### 5. Flexible Commit Templates
+
+**Major Feature Template** (with stories):
+```
+feat(<scope>): <description>
+
+## Files Changed (X files, +lines/-lines)
+[File tree with detailed descriptions]
+
+Closes Story #X: <story title>
+```
+
+**Standard Development Template** (no stories):
+```
+<type>(<scope>): <description>
+
+## Files Changed (X files, +lines/-lines)
+[File tree with basic descriptions]
+```
+
+**Simple Template** (maintenance):
+```
+<type>: <description>
+[Brief explanation if needed]
+```
+
+## Memory System Integration
+
+This project uses a structured memory system for knowledge management and process improvement:
+
+- **Location**: `memory/` directory with organized folders (prompts/, features/, knowledge/)
+- **Usage Guide**: See `memory/README.md` for comprehensive prompt usage and workflow guidance
+- **Integration**: Memory extraction should be applied after significant development sessions
+
+## Development Guidelines
+
+- Always use 'think hard' mode
+- Always explore, think, plan before execute
+- Apply memory extraction prompts for complex features and architectural decisions
+- Follow commit guidelines with appropriate analysis depth based on change scope

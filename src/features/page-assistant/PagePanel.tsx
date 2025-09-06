@@ -12,6 +12,7 @@ import {
   XMarkIcon,
   PencilSquareIcon,
   ChevronDownIcon,
+  ChevronUpIcon,
 } from '@heroicons/react/20/solid';
 import { BaseDropdown } from '@src/components/common/Dropdown';
 import { MessageItem } from '@src/components/message';
@@ -27,6 +28,7 @@ import {
 } from '@src/types';
 import { StorageManager } from '@src/utils/StorageManager';
 import configStorage from '@src/shared/storages/configStorage';
+import { createStorage, StorageType } from '@src/shared/storages/base';
 import { Handlebars } from '@src/../third-party/kbn-handlebars/src/handlebars';
 import { SCROLLBAR_STYLES_THIN_X } from '@src/styles/common';
 import { HumanMessage } from '@langchain/core/messages';
@@ -40,9 +42,21 @@ interface PagePanelProps extends React.HTMLAttributes<HTMLDivElement> {
   onHide?: () => void;
 }
 
+// Create storage instance for height expansion state
+const heightExpandedStorage = createStorage<Record<string, boolean>>(
+  'panelHeightExpanded',
+  {},
+  {
+    storageType: StorageType.Session,
+    liveUpdate: true,
+  },
+);
+
 export function PagePanel(props: PagePanelProps) {
   const { visible, quotes, onHide, ...rest } = props;
   const [isMaximized, setIsMaximized] = useState(false);
+  const [isHeightExpanded, setIsHeightExpanded] = useState(false);
+  const [tempHeightExpandedState, setTempHeightExpandedState] = useState<boolean | null>(null);
 
   const getTruncatedContent = (quote: QuoteContext): string => {
     const content =
@@ -117,6 +131,107 @@ export function PagePanel(props: PagePanelProps) {
   const [selectorExpanded, setSelectorExpanded] = useState(false);
   const [pendingDropdown, setPendingDropdown] = useState<'system' | 'model' | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Load height expansion state from storage on mount
+  useEffect(() => {
+    const loadHeightExpandedState = async () => {
+      try {
+        // Check if chrome.tabs API is available
+        if (!chrome?.tabs?.query) {
+          return; // Graceful fallback to default state
+        }
+
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (!tab?.id || !tab?.url) {
+          return; // Invalid tab data, use default state
+        }
+
+        const tabKey = `${tab.id}-${tab.url}`;
+        const states = await heightExpandedStorage.get();
+        setIsHeightExpanded(states[tabKey] || false);
+      } catch (error) {
+        console.warn('Failed to load height expansion state:', error);
+        // Fallback: continue with default state (false)
+        // No user-facing error - just log for debugging
+      }
+    };
+    loadHeightExpandedState();
+  }, []);
+
+  // Save height expansion state to storage when it changes
+  useEffect(() => {
+    const saveHeightExpandedState = async () => {
+      try {
+        // Skip saving if chrome.tabs API is unavailable or component is initializing
+        if (!chrome?.tabs?.query) {
+          return;
+        }
+
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (!tab?.id || !tab?.url) {
+          return; // Invalid tab data, skip saving
+        }
+
+        const tabKey = `${tab.id}-${tab.url}`;
+        const currentStates = await heightExpandedStorage.get();
+        await heightExpandedStorage.set({
+          ...currentStates,
+          [tabKey]: isHeightExpanded,
+        });
+      } catch (error) {
+        console.warn('Failed to save height expansion state:', error);
+        // Graceful degradation: feature continues to work in current session
+        // but state won't persist across panel reopens
+      }
+    };
+    saveHeightExpandedState();
+  }, [isHeightExpanded]);
+
+  // Handle maximize priority logic - save height expansion state when maximize activates
+  useEffect(() => {
+    if (isMaximized && tempHeightExpandedState === null) {
+      // Maximize is being activated - save current height expansion state
+      setTempHeightExpandedState(isHeightExpanded);
+    }
+  }, [isMaximized, tempHeightExpandedState, isHeightExpanded]);
+
+  // Restore height expansion state when maximize is deactivated
+  useEffect(() => {
+    if (!isMaximized && tempHeightExpandedState !== null) {
+      // Maximize is being deactivated - restore previous height expansion state
+      setIsHeightExpanded(tempHeightExpandedState);
+      setTempHeightExpandedState(null);
+    }
+  }, [isMaximized, tempHeightExpandedState]);
+
+  // Handle viewport changes - ensure height constraints work on resize
+  useEffect(() => {
+    const handleResize = () => {
+      // Force re-calculation of height constraints on viewport changes
+      // The CSS min() and calc() will automatically adjust, but this ensures
+      // any cached calculations are updated
+      if (isHeightExpanded && !isMaximized) {
+        // Trigger a small state update to force recalculation
+        const forceUpdate = Date.now();
+        if (panelRef.current) {
+          panelRef.current.style.setProperty('--force-update', forceUpdate.toString());
+        }
+      }
+    };
+
+    // Debounce resize events to avoid excessive recalculations
+    let resizeTimeout: NodeJS.Timeout;
+    const debouncedHandleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(handleResize, 100);
+    };
+
+    window.addEventListener('resize', debouncedHandleResize);
+    return () => {
+      window.removeEventListener('resize', debouncedHandleResize);
+      clearTimeout(resizeTimeout);
+    };
+  }, [isHeightExpanded, isMaximized]);
 
   // 菜单项数据 - 使用 useMemo 优化性能
   const menuItems = useMemo(
@@ -680,9 +795,18 @@ export function PagePanel(props: PagePanelProps) {
         'antialiased bg-white text-black text-left fixed border-1 border-solid border-gray-200 drop-shadow-lg text-sm rounded-lg p-4 font-system-ui',
         isMaximized
           ? 'w-[80%] h-[80%] top-[10%] right-[10px] flex flex-col'
-          : 'w-[473px] min-w-80 max-w-lg min-h-[155px]',
+          : isHeightExpanded
+            ? 'w-[473px] min-w-80 max-w-lg h-[92vh] max-h-[900px] flex flex-col transition-all duration-300 ease-in-out'
+            : 'w-[473px] min-w-80 max-w-lg min-h-[155px] flex flex-col',
         `${askPanelVisible ? 'visible' : 'invisible'}`,
       )}
+      style={{
+        ...(isHeightExpanded &&
+          !isMaximized && {
+            height: 'min(92vh, calc(100vh - 60px))',
+            maxHeight: '900px',
+          }),
+      }}
       onKeyDown={e => {
         if (
           e.key === 'Escape' &&
@@ -812,7 +936,12 @@ export function PagePanel(props: PagePanelProps) {
           </button>
         </div>
       </div>
-      <div className={classNames('py-2 mb-2', SCROLLBAR_STYLES_THIN_X, isMaximized ? 'flex-grow' : 'max-h-80')}>
+      <div
+        className={classNames(
+          'py-2 mb-2',
+          SCROLLBAR_STYLES_THIN_X,
+          isMaximized || isHeightExpanded ? 'flex-grow' : 'max-h-80',
+        )}>
         {history.length === 0 && <div className="h-16"></div>}
 
         {history.map(message => {
@@ -1033,6 +1162,31 @@ export function PagePanel(props: PagePanelProps) {
               />
             </div>
           </div>
+        </div>
+        <div className="relative">
+          {/* Height expand button - positioned at bottom of panel */}
+          {!isMaximized && (
+            <div className="group absolute -bottom-4 left-0 right-0 py-1 flex justify-center">
+              <button
+                className="opacity-0 group-hover:opacity-100 hover:opacity-100 transition-all duration-200 text-gray-600 bg-gray-100 hover:bg-black hover:text-white rounded px-2 py-0.5"
+                onClick={() => {
+                  console.log('Height expand button clicked:', !isHeightExpanded);
+                  setIsHeightExpanded(!isHeightExpanded);
+                }}
+                title={isHeightExpanded ? '收起面板高度' : '展开面板高度'}
+                aria-label={isHeightExpanded ? 'Collapse panel height' : 'Expand panel height'}
+                aria-expanded={isHeightExpanded}
+                aria-describedby="height-expand-desc"
+                type="button"
+                tabIndex={0}>
+                {isHeightExpanded ? <ChevronUpIcon className="w-3 h-3" /> : <ChevronDownIcon className="w-3 h-3" />}
+              </button>
+              {/* Screen reader description for height expand button */}
+              <span id="height-expand-desc" className="sr-only">
+                Toggle panel height between normal and expanded view for better readability of long conversations
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>
