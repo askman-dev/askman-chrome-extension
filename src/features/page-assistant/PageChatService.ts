@@ -399,7 +399,7 @@ export class PageChatService implements PageChatInterface {
       if (error.name === 'AbortError') {
         console.log('Stream was aborted by user');
         // Mark message as interrupted but don't show error
-        reasoningMessage.markAsInterrupted?.();
+        reasoningMessage.markAsInterrupted();
         return reasoningMessage;
       }
       console.error('Error in custom streaming:', error);
