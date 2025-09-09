@@ -142,8 +142,8 @@ importers:
         specifier: ^14.6.0
         version: 14.6.0(@testing-library/dom@9.3.4)
       '@types/chrome':
-        specifier: ^0.0.297
-        version: 0.0.297
+        specifier: ^0.1.9
+        version: 0.1.9
       '@types/node':
         specifier: 22.8.7
         version: 22.8.7
@@ -1826,8 +1826,8 @@ packages:
   '@types/babel__traverse@7.20.6':
     resolution: {integrity: sha512-r1bzfrm0tomOI8g1SzvCaQHo6Lcv6zu0EA+W2kHrt8dyrHQxGzBBL4kdkzIS+jBMV+EYcMAEAqXqYaLJq5rOZg==}
 
-  '@types/chrome@0.0.297':
-    resolution: {integrity: sha512-e7HM20aH/0Ate5zEP00il2Dzlt8HvO6nXGgxiXKuc1E5cVsNvcykBiTyrSvmWPPDzdZRC5QZvVDYXTihiF1Jfw==}
+  '@types/chrome@0.1.9':
+    resolution: {integrity: sha512-Tjzql/wuGkC4Q3FWSziPMbggN0FwQZph4WFhzvnBfmnipzX1vtNBNToAGGpSqAAf26wfKFfZTZmxN8+pgMK9Rw==}
 
   '@types/conventional-commits-parser@5.0.1':
     resolution: {integrity: sha512-7uz5EHdzz2TqoMfV7ee61Egf5y6NkcO4FB/1iCCQnbeiI1F3xzv3vK5dBCXUCLQgGYS+mUeigK1iKQzvED+QnQ==}
@@ -6597,7 +6597,7 @@ snapshots:
     dependencies:
       '@babel/types': 7.26.7
 
-  '@types/chrome@0.0.297':
+  '@types/chrome@0.1.9':
     dependencies:
       '@types/filesystem': 0.0.36
       '@types/har-format': 1.2.16
