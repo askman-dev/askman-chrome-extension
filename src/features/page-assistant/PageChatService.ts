@@ -39,6 +39,8 @@ export class PageChatService implements PageChatInterface {
   model: ChatOpenAI;
   history: BaseMessage[] | HumanAskMessage[];
   _onDataListener: (_data: BaseMessage[]) => void;
+  private currentAbortController: AbortController | null = null;
+  private currentStreamingMessageId: string | null = null;
 
   constructor() {
     this.history = [];
@@ -251,7 +253,8 @@ export class PageChatService implements PageChatInterface {
       }
 
       // Use custom streaming to handle reasoning + content phases
-      const finalMessage2 = await this.streamWithReasoning(messages, apiKey, baseURL, modelName);
+      const abortSignal = this.currentAbortController?.signal;
+      const finalMessage2 = await this.streamWithReasoning(messages, apiKey, baseURL, modelName, abortSignal);
 
       // Add final reasoning message to history (keep it as AIReasoningMessage to preserve gray styling)
       this.history.push(finalMessage2);
@@ -270,6 +273,7 @@ export class PageChatService implements PageChatInterface {
     apiKey: string,
     baseURL: string,
     modelName: string,
+    abortSignal?: AbortSignal,
   ): Promise<AIReasoningMessage> {
     const reasoningMessage = new AIReasoningMessage();
 
@@ -292,6 +296,15 @@ export class PageChatService implements PageChatInterface {
           return { role: 'user', content: String(msg.content) };
         });
 
+      // Create or use provided abort controller
+      const controller = new AbortController();
+      this.currentAbortController = controller;
+
+      // Chain provided abort signal if exists
+      if (abortSignal) {
+        abortSignal.addEventListener('abort', () => controller.abort());
+      }
+
       // Make direct API request (ensure no double slashes)
       const cleanBaseURL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
       const response = await fetch(`${cleanBaseURL}/chat/completions`, {
@@ -307,6 +320,7 @@ export class PageChatService implements PageChatInterface {
           temperature: 0.2,
           top_p: 0.95,
         }),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -378,9 +392,22 @@ export class PageChatService implements PageChatInterface {
       }
 
       reader.releaseLock();
+
+      // Stream completed naturally - clean up state
+      console.log('Stream completed successfully');
     } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Stream was aborted by user');
+        // Mark message as interrupted but don't show error
+        reasoningMessage.markAsInterrupted?.();
+        return reasoningMessage;
+      }
       console.error('Error in custom streaming:', error);
       reasoningMessage.updateContent(`Error: ${error.message}`);
+    } finally {
+      // Always clean up streaming state when method ends
+      this.currentAbortController = null;
+      this.currentStreamingMessageId = null;
     }
 
     return reasoningMessage;
@@ -419,6 +446,27 @@ export class PageChatService implements PageChatInterface {
 
   removeOnDataListener(): void {
     this._onDataListener = null;
+  }
+
+  // Streaming control methods
+  abortCurrentStream(): void {
+    if (this.currentAbortController) {
+      this.currentAbortController.abort();
+      this.currentAbortController = null;
+      this.currentStreamingMessageId = null;
+    }
+  }
+
+  isStreaming(): boolean {
+    return this.currentAbortController !== null;
+  }
+
+  getCurrentStreamingMessageId(): string | null {
+    return this.currentStreamingMessageId;
+  }
+
+  setCurrentStreamingMessageId(messageId: string | null): void {
+    this.currentStreamingMessageId = messageId;
   }
 }
 
