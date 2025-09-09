@@ -394,10 +394,8 @@ export class PageChatService implements PageChatInterface {
       reader.releaseLock();
 
       // Stream completed naturally - clean up state
-      console.log('Stream completed successfully');
     } catch (error) {
       if (error.name === 'AbortError') {
-        console.log('Stream was aborted by user');
         // Mark message as interrupted but don't show error
         reasoningMessage.markAsInterrupted();
         return reasoningMessage;

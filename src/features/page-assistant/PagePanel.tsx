@@ -746,7 +746,6 @@ export function PagePanel(props: PagePanelProps) {
       }
     } catch (error) {
       // Stream completed or was aborted
-      console.log('[PagePanel] Stream completed or aborted:', error);
     } finally {
       // Always reset streaming state when done
       setIsStreaming(false);
@@ -1207,7 +1206,6 @@ export function PagePanel(props: PagePanelProps) {
               <button
                 className="opacity-0 group-hover:opacity-100 hover:opacity-100 transition-all duration-200 text-gray-600 bg-gray-100 hover:bg-black hover:text-white rounded px-2 py-0.5"
                 onClick={() => {
-                  console.log('Height expand button clicked:', !isHeightExpanded);
                   setIsHeightExpanded(!isHeightExpanded);
                 }}
                 title={isHeightExpanded ? '收起面板高度' : '展开面板高度'}
