@@ -26,5 +26,5 @@
     }
   },
   "include": ["src", "utils", "vite.config.ts", "node_modules/@types", "test-utils/llm.ts"],
-  "exclude": ["node_modules/**/@vitejs/plugin-react/**/*"]
+  "exclude": ["node_modules/**/@vitejs/plugin-react/**/*", "**/*.test.ts", "**/*.test.tsx"]
 }
