@@ -13,6 +13,7 @@ import {
   PencilSquareIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  StopIcon,
 } from '@heroicons/react/20/solid';
 import { BaseDropdown } from '@src/components/common/Dropdown';
 import { MessageItem } from '@src/components/message';
@@ -131,6 +132,9 @@ export function PagePanel(props: PagePanelProps) {
   const [selectorExpanded, setSelectorExpanded] = useState(false);
   const [pendingDropdown, setPendingDropdown] = useState<'system' | 'model' | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Streaming control state
+  const [isStreaming, setIsStreaming] = useState(false);
 
   // Load height expansion state from storage on mount
   useEffect(() => {
@@ -404,7 +408,7 @@ export function PagePanel(props: PagePanelProps) {
               return {
                 type: 'text',
                 id: `history-${idx}`,
-                text: message.rendered,
+                text: message.rendered || String(message.content),
                 role: role,
                 name: 'HumanAskMessage',
               };
@@ -481,7 +485,7 @@ export function PagePanel(props: PagePanelProps) {
               return {
                 type: 'text',
                 id: `history-${idx}`,
-                text: message.rendered,
+                text: message.rendered || String(message.content),
                 role: role,
                 name: 'HumanAskMessage',
               };
@@ -697,32 +701,55 @@ export function PagePanel(props: PagePanelProps) {
     setInitQuotes(prevQuotes => [...prevQuotes, newQuote]);
   };
 
+  // Stop current streaming
+  const stopStreaming = useCallback(() => {
+    if (chatContext && typeof chatContext.abortCurrentStream === 'function') {
+      chatContext.abortCurrentStream();
+      setIsStreaming(false);
+    }
+  }, [chatContext]);
+
   async function onSend(overrideTool?: ToolsPromptInterface, overrideSystem?: string, overrideModel?: string) {
     // Use overrideTool if provided, otherwise fall back to userTools state
     const toolToUse = overrideTool || userTools;
 
-    // Debug logging for development
-    // console.log('[PagePanel] onSend called with:', { userInput: userInput.trim(), toolToUse, quotesCount: initQuotes?.length });
+    // Capture user input before clearing
+    const currentInput = userInput.trim();
 
-    if (toolToUse) {
-      // console.log('[PagePanel] calling askWithTool');
-      // console.log('[PagePanel] pageContext内容:', pageContext);
-      chatContext.askWithTool(toolToUse, pageContext, initQuotes, userInput.trim(), {
-        overrideSystem,
-        overrideModel,
-      });
-    } else {
-      // console.log('[PagePanel] calling askWithQuotes');
-      chatContext.askWithQuotes(initQuotes!, userInput.trim(), {
-        overrideSystem,
-        overrideModel,
-      });
-    }
-
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    // 1. 立即清空输入框和重置 quotes - 提供更好的用户体验
     setUserInput('');
+    setInitQuotes([]);
+
+    // 2. 管理流式状态
+    if (isStreaming) {
+      stopStreaming();
+    }
+    setIsStreaming(true);
+
+    // Debug logging for development
+    // console.log('[PagePanel] onSend called with:', { userInput: currentInput, toolToUse, quotesCount: initQuotes?.length });
+
+    try {
+      if (toolToUse) {
+        // console.log('[PagePanel] calling askWithTool');
+        // console.log('[PagePanel] pageContext内容:', pageContext);
+        await chatContext.askWithTool(toolToUse, pageContext, initQuotes, currentInput, {
+          overrideSystem,
+          overrideModel,
+        });
+      } else {
+        // console.log('[PagePanel] calling askWithQuotes');
+        await chatContext.askWithQuotes(initQuotes!, currentInput, {
+          overrideSystem,
+          overrideModel,
+        });
+      }
+    } catch (error) {
+      // Stream completed or was aborted
+    } finally {
+      // Always reset streaming state when done
+      setIsStreaming(false);
+    }
   }
 
   function updateDropdownPosition(input: HTMLTextAreaElement, cursorPosition: number) {
@@ -1147,19 +1174,28 @@ export function PagePanel(props: PagePanelProps) {
                     inputRef.current.focus();
                   }
                 }}></div>
-              <ToolDropdown
-                initOpen={isToolDropdownOpen}
-                statusListener={updateToolDropdownStatus}
-                className="inline-block relative"
-                onItemClick={(_item, _withCommand) => {
-                  if (_withCommand) {
-                    setUserTools(_item as unknown as ToolsPromptInterface);
-                  }
-                  onSend(_item as unknown as ToolsPromptInterface); // 直接发送，不需要修改按钮文字
-                  setIsToolDropdownOpen(false); // Explicitly close the dropdown
-                }}
-                buttonDisplay="➤"
-              />
+              {isStreaming ? (
+                <button
+                  onClick={stopStreaming}
+                  className="inline-flex items-center justify-center w-8 h-8 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors duration-200"
+                  title="Stop streaming">
+                  <StopIcon className="w-4 h-4" />
+                </button>
+              ) : (
+                <ToolDropdown
+                  initOpen={isToolDropdownOpen}
+                  statusListener={updateToolDropdownStatus}
+                  className="inline-block relative"
+                  onItemClick={(_item, _withCommand) => {
+                    if (_withCommand) {
+                      setUserTools(_item as unknown as ToolsPromptInterface);
+                    }
+                    onSend(_item as unknown as ToolsPromptInterface); // 直接发送，不需要修改按钮文字
+                    setIsToolDropdownOpen(false); // Explicitly close the dropdown
+                  }}
+                  buttonDisplay="➤"
+                />
+              )}
             </div>
           </div>
         </div>
@@ -1170,7 +1206,6 @@ export function PagePanel(props: PagePanelProps) {
               <button
                 className="opacity-0 group-hover:opacity-100 hover:opacity-100 transition-all duration-200 text-gray-600 bg-gray-100 hover:bg-black hover:text-white rounded px-2 py-0.5"
                 onClick={() => {
-                  console.log('Height expand button clicked:', !isHeightExpanded);
                   setIsHeightExpanded(!isHeightExpanded);
                 }}
                 title={isHeightExpanded ? '收起面板高度' : '展开面板高度'}

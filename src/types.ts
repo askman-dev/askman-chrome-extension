@@ -38,6 +38,8 @@ export class AIReasoningMessage extends AIMessage {
   reasoning: string = '';
   content: string = '';
   isReasoning = true;
+  isInterrupted = false;
+  interruptedAt: Date | null = null;
 
   constructor() {
     super('');
@@ -70,6 +72,40 @@ export class AIReasoningMessage extends AIMessage {
   // Check if we have final content
   hasContent(): boolean {
     return Boolean(this.content);
+  }
+
+  // Mark message as interrupted and preserve existing content
+  markAsInterrupted(): void {
+    const currentContent = this.getDisplayText();
+    const timestamp = new Date();
+
+    // Preserve existing content and add interruption marker
+    if (currentContent) {
+      // If we have reasoning but no content, add marker to reasoning
+      if (this.reasoning && !this.content) {
+        this.reasoning = `${this.reasoning}\n\n[已中断]`;
+      }
+      // If we have content, add marker to content
+      else if (this.content) {
+        this.content = `${this.content}\n\n[已中断]`;
+      }
+    } else {
+      // No existing content, just show interruption marker
+      this.content = '[已中断]';
+    }
+
+    this.isInterrupted = true;
+    this.interruptedAt = timestamp;
+  }
+
+  // Check if message was interrupted
+  isMessageInterrupted(): boolean {
+    return this.isInterrupted;
+  }
+
+  // Get interruption timestamp
+  getInterruptedAt(): Date | null {
+    return this.interruptedAt;
   }
 }
 
