@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
+import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { render } from '@testing-library/react';
 // import { Chrome } from '@types/chrome';
 
@@ -36,66 +36,35 @@ beforeAll(() => {
     });
   }) as unknown as typeof fetch;
 
-  // 创建完整的 chrome API mock
-  global.chrome = {
-    runtime: {
-      onMessage: {
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-      },
-      getURL: vi.fn(path => {
-        console.log('[TEST] getURL called with:', path);
-        return `chrome-extension://fake-id/${path}`;
-      }),
+  // Configure Chrome API mock behavior for this test
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (chrome.storage.local.get as any).mockImplementation(
+    (keys: unknown, callback?: (_data: typeof mockStorageData) => void) => {
+      if (callback) {
+        callback(mockStorageData);
+      }
+      return Promise.resolve(mockStorageData);
     },
-    storage: {
-      local: {
-        get: vi.fn((keys, callback) => {
-          if (callback) {
-            callback(mockStorageData);
-          }
-          return Promise.resolve(mockStorageData);
-        }),
-        set: vi.fn((items, callback) => {
-          if (callback) callback();
-          return Promise.resolve();
-        }),
-        onChanged: {
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          hasListeners: vi.fn(),
-        },
-      },
-      sync: {
-        get: vi.fn((keys, callback) => {
-          if (callback) {
-            callback(mockStorageData);
-          }
-          return Promise.resolve(mockStorageData);
-        }),
-        set: vi.fn((items, callback) => {
-          if (callback) callback();
-          return Promise.resolve();
-        }),
-        onChanged: {
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          hasListeners: vi.fn(),
-        },
-      },
-    },
-  } as unknown as typeof chrome;
+  );
 
-  // 打印检查
-  // console.log('Chrome storage mock setup:', {
-  //   local: global.chrome.storage.local,
-  //   sync: global.chrome.storage.sync
-  // });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (chrome.storage.sync.get as any).mockImplementation(
+    (keys: unknown, callback?: (_data: typeof mockStorageData) => void) => {
+      if (callback) {
+        callback(mockStorageData);
+      }
+      return Promise.resolve(mockStorageData);
+    },
+  );
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (chrome.runtime.getURL as any).mockImplementation((path: string) => {
+    console.log('[TEST] getURL called with:', path);
+    return `chrome-extension://fake-id/${path}`;
+  });
 });
 
-afterAll(() => {
-  delete global.chrome;
-});
+// No cleanup needed - chrome mock is global
 
 // vi.mock('@assets/conf/chat-presets.toml', () => ({
 //   default: {
