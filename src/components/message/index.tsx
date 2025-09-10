@@ -108,19 +108,15 @@ export function MessageItem(props: MessageItemProps) {
   // 根据不同的类型，渲染不同的内容
   switch (type) {
     case MessageType.TEXT:
-    case 'text':
       messageItem = <>{TextWithLineBreaks(text)}</>;
       break;
     case MessageType.CODE:
-    case 'code':
       messageItem = <CodeBlock code={text} />;
       break;
     case MessageType.THINKING:
-    case 'thinking':
       messageItem = <ThinkingAnimation className="my-2" />;
       break;
     case MessageType.REASONING:
-    case 'reasoning':
       messageItem = (
         <div>
           {hasReasoning && (
