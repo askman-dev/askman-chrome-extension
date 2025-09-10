@@ -57,6 +57,22 @@ beforeAll(() => {
     },
   );
 
+  (chrome.storage.session.get as any).mockImplementation(
+    (keys: unknown, callback?: (_data: typeof mockStorageData) => void) => {
+      if (callback) {
+        callback(mockStorageData);
+      }
+      return Promise.resolve(mockStorageData);
+    },
+  );
+
+  (chrome.tabs.query as any).mockImplementation((queryInfo, callback) => {
+    if (callback) {
+      callback([{ id: 1, url: 'https://example.com' }]);
+    }
+    return Promise.resolve([{ id: 1, url: 'https://example.com' }]);
+  });
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (chrome.runtime.getURL as any).mockImplementation((path: string) => {
     console.log('[TEST] getURL called with:', path);

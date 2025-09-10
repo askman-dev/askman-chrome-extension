@@ -61,6 +61,9 @@ beforeAll(() => {
           removeListener: vi.fn(),
         },
       },
+      tabs: {
+        query: vi.fn(),
+      },
     },
     writable: true,
   });
