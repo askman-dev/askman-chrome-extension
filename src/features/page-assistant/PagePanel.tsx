@@ -29,6 +29,7 @@ import {
   AIToolExecutingMessage,
   AIToolResultMessage,
   CommandType,
+  TabMessage,
 } from '@src/types';
 import { StorageManager } from '@src/utils/StorageManager';
 import configStorage from '@src/shared/storages/configStorage';
@@ -604,6 +605,14 @@ export function PagePanel(props: PagePanelProps) {
     });
     rerenderHistory();
 
+    const messageListener = (message: TabMessage) => {
+      if (message.cmd === CommandType.AGENT_STREAM) {
+        setHistory(message.data);
+      }
+    };
+
+    chrome.runtime.onMessage.addListener(messageListener);
+
     askPanelVisible &&
       setTimeout(() => {
         inputRef.current.focus();
@@ -611,6 +620,7 @@ export function PagePanel(props: PagePanelProps) {
 
     return () => {
       chatContext.removeOnDataListener();
+      chrome.runtime.onMessage.removeListener(messageListener);
     };
   }, []);
   // 使用 ref 保持最新状态，避免闭包问题
@@ -803,10 +813,17 @@ export function PagePanel(props: PagePanelProps) {
     try {
       if (isAgentMode) {
         console.log('[PagePanel] 🤖 ROUTING TO: askWithAgent (tool calling mode)');
-        // Agent mode: Use askWithAgent for tool calling capabilities
-        await chatContext.askWithAgent(currentInput, pageContext, initQuotes, {
-          overrideSystem,
-          overrideModel,
+        chrome.runtime.sendMessage({
+          cmd: CommandType.ASK_AGENT,
+          data: {
+            userPrompt: currentInput,
+            pageContext,
+            quotes: initQuotes,
+            options: {
+              overrideSystem,
+              overrideModel,
+            },
+          },
         });
       } else if (toolToUse) {
         console.log('[PagePanel] 💬 ROUTING TO: askWithTool (template mode with tool)');
