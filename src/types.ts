@@ -169,6 +169,8 @@ export enum CommandType {
   GetPageText,
   GetPageLinks,
   ScrollPage,
+  ASK_AGENT,
+  AGENT_STREAM,
 }
 export interface TabMessage {
   cmd: CommandType;
