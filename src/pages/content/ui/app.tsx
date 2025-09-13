@@ -156,7 +156,7 @@ export default function App() {
     }
   }
 
-  const onBackgroundMessage = function (message: TabMessage, _sender, _sendResponse) {
+  const onBackgroundMessage = function (message: TabMessage, _sender, sendResponse) {
     if (message.cmd === CommandType.ChatPopupDisplay) {
       const currentUrl = window.location.href;
       const fromShortcut = message.fromShortcut || false;
@@ -176,6 +176,55 @@ export default function App() {
         const selection = document.getSelection()?.toString().trim() || '';
         showChat(selection);
       }
+    } 
+    // Handle agent tool commands
+    else if (message.cmd === CommandType.GetPageText) {
+      console.log('[Content Script] GetPageText command received:', message);
+      try {
+        // Get all visible text content from the page
+        const bodyText = document.body.innerText || document.body.textContent || '';
+        console.log('[Content Script] Page text extracted, length:', bodyText.length);
+        const response = { success: true, data: { text: bodyText.trim() } };
+        console.log('[Content Script] Sending response:', { success: true, textLength: bodyText.trim().length });
+        sendResponse(response);
+      } catch (error) {
+        console.error('[Content Script] Error getting page text:', error);
+        const errorResponse = { success: false, error: error.message };
+        console.log('[Content Script] Sending error response:', errorResponse);
+        sendResponse(errorResponse);
+      }
+      return true; // Keep message channel open for async response
+    }
+    else if (message.cmd === CommandType.GetPageLinks) {
+      try {
+        // Get all links from the page
+        const links = Array.from(document.querySelectorAll('a[href]')).map(link => {
+          const anchor = link as HTMLAnchorElement;
+          return {
+            text: anchor.textContent?.trim() || '',
+            href: anchor.href,
+            title: anchor.title || ''
+          };
+        }).filter(link => link.text || link.title); // Only include links with text or title
+        
+        sendResponse({ success: true, data: { links } });
+      } catch (error) {
+        console.error('Error getting page links:', error);
+        sendResponse({ success: false, error: error.message });
+      }
+      return true; // Keep message channel open for async response
+    }
+    else if (message.cmd === CommandType.ScrollPage) {
+      try {
+        const { x = 0, y = 0 } = message.data || {};
+        // Scroll the page by the specified offset
+        window.scrollBy(x, y);
+        sendResponse({ success: true, data: { scrolled: { x, y } } });
+      } catch (error) {
+        console.error('Error scrolling page:', error);
+        sendResponse({ success: false, error: error.message });
+      }
+      return true; // Keep message channel open for async response
     }
   };
 
