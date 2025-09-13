@@ -1,18 +1,20 @@
-import { ChatOpenAI } from '@langchain/openai';
-
 import { QuoteContext } from '@src/agents/quote';
-import { HumanMessage, AIMessage, BaseMessage } from '@langchain/core/messages';
-import configStorage from '@src/shared/storages/configStorage';
+import { HumanMessage, AIMessage, BaseMessage, ToolMessage } from '@langchain/core/messages';
 import { createContext } from 'react';
 import {
   ToolsPromptInterface,
   SystemInvisibleMessage,
   HumanAskMessage,
   AIThinkingMessage,
-  AIReasoningMessage,
+  AIToolPendingMessage,
+  AIToolExecutingMessage,
+  AIToolResultMessage,
 } from '@src/types';
 import { StorageManager } from '@src/utils/StorageManager';
 import { tools } from '@src/components/controls/ToolDropdown';
+import { CoreMessage } from 'ai';
+import { createOpenAI } from '@ai-sdk/openai';
+import { streamText } from 'ai';
 
 export interface SendOptions {
   overrideSystem?: string;
@@ -20,7 +22,6 @@ export interface SendOptions {
 }
 
 export interface PageChatInterface {
-  model: ChatOpenAI;
   history: BaseMessage[];
   init(): void;
   askWithQuotes(_quotes: QuoteContext[], _userPrompt: null | string, _options?: SendOptions): Promise<void>;
@@ -31,41 +32,31 @@ export interface PageChatInterface {
     _userPrompt: null | string,
     _options?: SendOptions,
   ): Promise<void>;
+  askWithAgent(
+    _userPrompt: string,
+    _pageContext: QuoteContext,
+    _quotes: QuoteContext[],
+    _options?: SendOptions,
+  ): Promise<void>;
   setOnDataListener(_callback: (_data: BaseMessage[]) => void): void;
   removeOnDataListener(): void;
 }
 
 export class PageChatService implements PageChatInterface {
-  model: ChatOpenAI;
-  history: BaseMessage[] | HumanAskMessage[];
-  _onDataListener: (_data: BaseMessage[]) => void;
+  history: BaseMessage[] = [];
+  _onDataListener: ((data: BaseMessage[]) => void) | null = null;
   private currentAbortController: AbortController | null = null;
-  private currentStreamingMessageId: string | null = null;
 
   constructor() {
-    this.history = [];
-    this.history.length = 0;
     this.initSystemMessage();
-    this.model = new ChatOpenAI({
-      temperature: 0.2,
-      topP: 0.95,
-      modelName: 'free',
-      openAIApiKey: 'sk-example', //必须得是非空字符串，否则会报错
-      configuration: {
-        baseURL: 'https://extapi.askman.dev/v1',
-      },
-    });
-    this.init();
   }
 
   async initSystemMessage() {
     try {
-      // Get the current system preset
       const currentPreset = await StorageManager.getCurrentSystemPreset();
       const presets = await StorageManager.getSystemPresets();
       const preset = presets.find(p => p.name === currentPreset);
-
-      if (preset && preset.hbs) {
+      if (preset?.hbs) {
         this.history.push(new SystemInvisibleMessage(preset.hbs));
       }
     } catch (error) {
@@ -73,400 +64,249 @@ export class PageChatService implements PageChatInterface {
     }
   }
 
-  async init() {
-    try {
-      const configs = await configStorage.getModelConfig();
-
-      // Find default model or use first available
-      let selectedConfig = null;
-      let selectedModel = null;
-
-      // First, look for a model with default=true
-      for (const config of configs) {
-        const defaultModel = config.config.models.find(m => m.default === true);
-        if (defaultModel) {
-          selectedConfig = config;
-          selectedModel = defaultModel;
-          break;
-        }
-      }
-
-      // Fallback to first available model
-      if (!selectedConfig && configs.length > 0) {
-        selectedConfig = configs[0];
-        selectedModel = selectedConfig.config.models[0];
-      }
-
-      if (selectedConfig && selectedModel) {
-        this.model = new ChatOpenAI({
-          temperature: 0.2,
-          topP: 0.95,
-          modelName: selectedModel.name,
-          openAIApiKey: selectedConfig.config.api_key,
-          configuration: {
-            baseURL: selectedConfig.config.base_url,
-          },
-        });
-      }
-    } catch (error) {
-      console.error('Error initializing PageChatService:', error);
-    }
+  init() {
+    console.log('PageChatService initialized');
   }
 
-  async askWithQuotes(quotes: QuoteContext[], userPrompt: null | string, options?: SendOptions) {
-    if (!userPrompt || userPrompt.trim() === '') {
+  async askWithQuotes(quotes: QuoteContext[], userPrompt: string | null, options?: SendOptions) {
+    if (!userPrompt?.trim()) return;
+
+    const noContextTool = tools.find(t => t.name === 'No Context');
+    if (!noContextTool) {
+      console.error('[PageChatService] No Context tool not found');
       return;
     }
 
-    // Debug logging can be enabled for development
-    // console.log('[PageChatService] askWithQuotes called with No Context tool');
-
-    // Find the "No Context" tool
-    const noContextTool = tools.find(t => t.name === 'No Context');
-
-    if (!noContextTool) {
-      console.error('[PageChatService] No Context 工具未找到');
-      throw new Error('No Context tool not found');
-    }
-
-    // console.log('[PageChatService] Found No Context tool, calling askWithTool');
-
-    // Use the No Context tool directly - this ensures we use the same template logic
-    return this.askWithTool(
-      noContextTool,
-      new QuoteContext(), // Empty pageContext since quotes contain the needed info
-      quotes,
-      userPrompt,
-      options,
-    );
+    return this.askWithTool(noContextTool, new QuoteContext(), quotes, userPrompt, options);
   }
 
   async askWithTool(
     tool: ToolsPromptInterface,
     pageContext: QuoteContext,
     quotes: QuoteContext[],
-    userPrompt: null | string,
+    userPrompt: string | null,
     options?: SendOptions,
   ) {
-    if (!userPrompt || userPrompt.trim() === '') {
-      return;
-    }
+    if (!userPrompt?.trim()) return;
 
     try {
-      // Override model if specified
-      if (options?.overrideModel) {
-        await this.switchToModel(options.overrideModel);
-      }
+      const context = { chat: { input: userPrompt }, page: { ...pageContext }, quotes };
+      const renderedTemplate = (tool.template as (...args: unknown[]) => string)?.(context) || '';
 
-      // Process template - fix page property mapping for Handlebars template
-      const context = {
-        chat: { input: userPrompt },
-        page: {
-          title: pageContext.pageTitle,
-          url: pageContext.pageUrl,
-          content: pageContext.pageContent,
-          selection: pageContext.selection,
-        },
-        quotes: quotes,
-      };
-
-      // console.log('[PageChatService] 模板渲染上下文:', context);
-      const renderedTemplate = (tool.template as (..._args: unknown[]) => string)?.(context) || '';
-      // console.log('[PageChatService] 渲染结果:', renderedTemplate);
-
-      // Create human ask message with rendered template
-      const humanAskMessage = new HumanAskMessage({
-        content: userPrompt,
-        name: 'user',
-        rendered: renderedTemplate,
-      });
+      const humanAskMessage = new HumanAskMessage({ content: userPrompt, name: 'user', rendered: renderedTemplate });
       this.history.push(humanAskMessage);
-
-      // Immediately update UI to show user message
       this._onDataListener?.(this.history);
 
-      // Prepare messages for the model - transform all HumanAskMessage to HumanMessage
-      const messages = [...this.history];
-      // Transform all HumanAskMessage to HumanMessage using their rendered content
-      for (let i = 0; i < messages.length; i++) {
-        const msg = messages[i];
-        if (msg instanceof HumanAskMessage) {
-          // For the latest message, use the current renderedTemplate
-          if (i === messages.length - 1) {
-            messages[i] = new HumanMessage(renderedTemplate);
-          }
-          // For historical messages, use their stored rendered content
-          else if (msg.rendered) {
-            messages[i] = new HumanMessage(msg.rendered);
-          }
-        }
+      const messages = this.convertToCoreMessages(options?.overrideSystem);
+      if (messages.length > 0 && messages[messages.length - 1].role === 'user') {
+        messages[messages.length - 1].content = renderedTemplate;
       }
 
-      // Add system override if provided, replacing any existing system messages
-      if (options?.overrideSystem) {
-        // Remove existing system messages
-        const filteredMessages = messages.filter(msg => !(msg instanceof SystemInvisibleMessage));
-        // Add new system message at the beginning
-        messages.splice(0, messages.length, new SystemInvisibleMessage(options.overrideSystem), ...filteredMessages);
-      }
+      const thinkingMessage = new AIThinkingMessage();
+      this._onDataListener?.([...this.history, thinkingMessage]);
 
-      // Show thinking indicator
-      const thinkingMessage2 = new AIThinkingMessage();
-      const thinkingHistory2 = [...this.history, thinkingMessage2];
-      this._onDataListener?.(thinkingHistory2);
-
-      // Get current model configuration for custom streaming
-      const configs = await configStorage.getModelConfig();
-      let apiKey = 'sk-example';
-      let baseURL = 'https://extapi.askman.dev/v1';
-      let modelName = 'free';
-
-      // Find the current model config
-      if (options?.overrideModel) {
-        for (const config of configs) {
-          const model = config.config.models.find(
-            m => m.name === options.overrideModel || `${config.provider}/${m.name}` === options.overrideModel,
-          );
-          if (model) {
-            apiKey = config.config.api_key;
-            baseURL = config.config.base_url;
-            modelName = model.name;
-            break;
-          }
-        }
-      } else {
-        // Use default model from storage
-        const currentModel = await configStorage.getCurrentModel();
-        if (currentModel) {
-          for (const config of configs) {
-            const model = config.config.models.find(
-              m => m.name === currentModel || `${config.provider}/${m.name}` === currentModel,
-            );
-            if (model) {
-              apiKey = config.config.api_key;
-              baseURL = config.config.base_url;
-              modelName = model.name;
-              break;
-            }
-          }
-        }
-      }
-
-      // Use custom streaming to handle reasoning + content phases
-      const abortSignal = this.currentAbortController?.signal;
-      const finalMessage2 = await this.streamWithReasoning(messages, apiKey, baseURL, modelName, abortSignal);
-
-      // Add final reasoning message to history (keep it as AIReasoningMessage to preserve gray styling)
-      this.history.push(finalMessage2);
-      this._onDataListener?.(this.history);
+      await this.streamResponse(messages, options?.overrideModel);
     } catch (error) {
       console.error('Error in askWithTool:', error);
-      const errorMessage = new AIMessage(`Error: ${error.message}`);
-      this.history.push(errorMessage);
+      this.history.push(new AIMessage(`Error: ${error.message}`));
       this._onDataListener?.(this.history);
     }
   }
 
-  // Custom streaming method to access raw chunks with reasoning data
-  private async streamWithReasoning(
-    messages: BaseMessage[],
-    apiKey: string,
-    baseURL: string,
-    modelName: string,
-    abortSignal?: AbortSignal,
-  ): Promise<AIReasoningMessage> {
-    const reasoningMessage = new AIReasoningMessage();
+  async askWithAgent(
+    userPrompt: string,
+    pageContext: QuoteContext,
+    quotes: QuoteContext[],
+    options?: SendOptions,
+  ) {
+    if (!userPrompt?.trim()) return;
 
     try {
-      // Convert messages to API format
-      const apiMessages = messages
-        .filter(
-          msg =>
-            !(msg instanceof SystemInvisibleMessage) ||
-            (typeof msg.content === 'string' ? msg.content.trim() !== '' : true),
-        )
-        .map(msg => {
-          if (msg instanceof SystemInvisibleMessage) {
-            return { role: 'system', content: msg.content };
-          } else if (msg instanceof HumanMessage) {
-            return { role: 'user', content: msg.content };
-          } else if (msg instanceof AIMessage) {
-            return { role: 'assistant', content: msg.content };
-          }
-          return { role: 'user', content: String(msg.content) };
-        });
+      const humanAskMessage = new HumanAskMessage({ content: userPrompt, name: 'user', rendered: userPrompt });
+      this.history.push(humanAskMessage);
+      this._onDataListener?.(this.history);
 
-      // Create or use provided abort controller
-      const controller = new AbortController();
-      this.currentAbortController = controller;
+      const messages = this.convertToCoreMessages(options?.overrideSystem);
 
-      // Chain provided abort signal if exists
-      if (abortSignal) {
-        abortSignal.addEventListener('abort', () => controller.abort());
-      }
+      const thinkingMessage = new AIThinkingMessage();
+      this._onDataListener?.([...this.history, thinkingMessage]);
 
-      // Make direct API request (ensure no double slashes)
-      const cleanBaseURL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
-      const response = await fetch(`${cleanBaseURL}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: modelName,
-          messages: apiMessages,
-          stream: true,
-          temperature: 0.2,
-          top_p: 0.95,
-        }),
-        signal: controller.signal,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('No response body reader available');
-      }
-
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let hasFirstChunk = false;
-      let accumulatedReasoning = '';
-      let accumulatedContent = '';
-
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-
-        // Keep the last incomplete line in buffer
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6).trim();
-            if (data === '[DONE]') continue;
-
-            try {
-              const chunk = JSON.parse(data);
-              const delta = chunk.choices?.[0]?.delta;
-
-              if (delta) {
-                let shouldUpdate = false;
-
-                // Handle reasoning phase (only when reasoning is present and content is empty)
-                if (delta.reasoning && typeof delta.reasoning === 'string' && !delta.content) {
-                  accumulatedReasoning += delta.reasoning;
-                  reasoningMessage.updateReasoning(accumulatedReasoning);
-                  shouldUpdate = true;
-                }
-
-                // Handle content phase (only when content is present)
-                if (delta.content && typeof delta.content === 'string') {
-                  accumulatedContent += delta.content;
-                  reasoningMessage.updateContent(accumulatedContent);
-                  shouldUpdate = true;
-                }
-
-                // Update UI only when we have actual changes
-                if (shouldUpdate) {
-                  if (!hasFirstChunk) {
-                    hasFirstChunk = true;
-                  }
-                  const tempHistory = [...this.history, reasoningMessage];
-                  this._onDataListener?.(tempHistory);
-                }
-              }
-            } catch (parseError) {
-              console.error('Error parsing chunk:', parseError);
-            }
-          }
-        }
-      }
-
-      reader.releaseLock();
-
-      // Stream completed naturally - clean up state
+      const { pageTools } = await import('./tools/page-tools');
+      await this.streamResponseWithTools(messages, pageTools, options?.overrideModel);
     } catch (error) {
-      if (error.name === 'AbortError') {
-        // Mark message as interrupted but don't show error
-        reasoningMessage.markAsInterrupted();
-        return reasoningMessage;
-      }
-      console.error('Error in custom streaming:', error);
-      reasoningMessage.updateContent(`Error: ${error.message}`);
-    } finally {
-      // Always clean up streaming state when method ends
-      this.currentAbortController = null;
-      this.currentStreamingMessageId = null;
+      console.error('Error in askWithAgent:', error);
+      this.history.push(new AIMessage(`Error: ${error.message}`));
+      this._onDataListener?.(this.history);
     }
-
-    return reasoningMessage;
   }
 
-  private async switchToModel(modelName: string) {
-    try {
-      const configs = await configStorage.getModelConfig();
+  private convertToCoreMessages(overrideSystem?: string): CoreMessage[] {
+    const messages: CoreMessage[] = [];
+    const systemMessage = overrideSystem || this.history.find(m => m instanceof SystemInvisibleMessage)?.content as string;
+    if (systemMessage) {
+      messages.push({ role: 'system', content: systemMessage });
+    }
 
-      for (const config of configs) {
-        const model = config.config.models.find(
-          m => m.name === modelName || `${config.provider}/${m.name}` === modelName,
-        );
+    this.history.forEach(msg => {
+      if (msg instanceof HumanAskMessage) {
+        messages.push({ role: 'user', content: msg.rendered || msg.content as string });
+      } else if (msg instanceof HumanMessage) {
+        messages.push({ role: 'user', content: msg.content as string });
+      } else if (msg instanceof AIMessage && !(msg instanceof AIThinkingMessage)) {
+        messages.push({ role: 'assistant', content: msg.content as string });
+      } else if (msg instanceof ToolMessage) {
+        messages.push({ role: 'tool', content: [{ type: 'tool-result', toolCallId: msg.tool_call_id as string, toolName: msg.additional_kwargs.toolName as string, output: JSON.parse(msg.content as string) }] });
+      }
+    });
 
+    return messages;
+  }
+
+  private async getModelProvider(overrideModel?: string) {
+    const modelConfigs = await StorageManager.getModelConfig();
+    let selectedProvider = null;
+    let selectedModel = null;
+
+    if (overrideModel) {
+      for (const providerConfig of modelConfigs) {
+        const model = providerConfig.config.models.find(m => `${providerConfig.provider}/${m.name}` === overrideModel || m.name === overrideModel);
         if (model) {
-          this.model = new ChatOpenAI({
-            temperature: 0.2,
-            topP: 0.95,
-            modelName: model.name,
-            openAIApiKey: config.config.api_key,
-            configuration: {
-              baseURL: config.config.base_url,
-            },
-          });
+          selectedProvider = providerConfig;
+          selectedModel = model;
           break;
         }
       }
+    }
+
+    if (!selectedProvider) {
+      for (const providerConfig of modelConfigs) {
+        const model = providerConfig.config.models.find(m => m.default);
+        if (model) {
+          selectedProvider = providerConfig;
+          selectedModel = model;
+          break;
+        }
+      }
+    }
+
+    if (!selectedProvider) {
+      selectedProvider = modelConfigs[0];
+      selectedModel = selectedProvider.config.models[0];
+    }
+
+    if (!selectedProvider || !selectedModel) throw new Error('No suitable AI model configured');
+
+    const { base_url: baseURL, api_key: apiKey } = selectedProvider.config;
+    return { customProvider: createOpenAI({ baseURL, apiKey }), selectedModel };
+  }
+
+  private async streamResponse(messages: CoreMessage[], overrideModel?: string) {
+    try {
+      const { customProvider, selectedModel } = await this.getModelProvider(overrideModel);
+      const stream = await streamText({
+        model: customProvider.chat(selectedModel.name),
+        messages,
+        temperature: 0.2,
+      });
+
+      let accumulatedText = '';
+      const aiMessage = new AIMessage('');
+      for await (const chunk of stream.textStream) {
+        accumulatedText += chunk;
+        aiMessage.content = accumulatedText;
+        this._onDataListener?.([...this.history, aiMessage]);
+      }
+
+      this.history.push(aiMessage);
+      this._onDataListener?.(this.history);
     } catch (error) {
-      console.error('Error switching model:', error);
+      console.error('Error in streamResponse:', error);
+      throw error;
     }
   }
 
-  setOnDataListener(callback: (_data: BaseMessage[]) => void): void {
+  private async streamResponseWithTools(messages: CoreMessage[], tools: Record<string, any>, overrideModel?: string) {
+    try {
+      const { customProvider, selectedModel } = await this.getModelProvider(overrideModel);
+
+      const stream = await streamText({
+        model: customProvider.chat(selectedModel.name),
+        messages,
+        tools,
+        temperature: 0.2,
+      });
+
+      let accumulatedText = '';
+      let finalAIMessage: AIMessage | null = null;
+      let toolExecutionMessages: BaseMessage[] = [];
+
+      for await (const part of stream.fullStream) {
+        console.log('[Stream Event]', (part as any).type, part);
+
+        switch ((part as any).type) {
+          case 'text-delta':
+            accumulatedText += (part as any).text;
+            if (!finalAIMessage) finalAIMessage = new AIMessage('');
+            finalAIMessage.content = accumulatedText;
+            this._onDataListener?.([...this.history, ...toolExecutionMessages, finalAIMessage]);
+            break;
+
+          case 'tool-call':
+            toolExecutionMessages.push(new AIToolPendingMessage((part as any).toolName, (part as any).args));
+            this._onDataListener?.([...this.history, ...toolExecutionMessages]);
+            break;
+
+          case 'tool-result':
+            toolExecutionMessages = toolExecutionMessages.filter(m => !(m instanceof AIToolPendingMessage && (m as AIToolPendingMessage).toolName === (part as any).toolName));
+            toolExecutionMessages.push(new AIToolResultMessage((part as any).toolName, (part as any).result));
+            this.history.push(new ToolMessage({
+                content: JSON.stringify((part as any).result),
+                tool_call_id: (part as any).toolCallId,
+                additional_kwargs: { toolName: (part as any).toolName },
+            }));
+            this._onDataListener?.([...this.history, ...toolExecutionMessages]);
+            break;
+
+          case 'finish':
+            console.log('[Stream Finish]', (part as any).finishReason, (part as any).usage);
+            break;
+
+          default:
+            // Handle other event types if necessary
+            break;
+        }
+      }
+
+      if (finalAIMessage) {
+        this.history.push(finalAIMessage);
+      }
+      this._onDataListener?.(this.history);
+
+    } catch (error) {
+      console.error('Error in streamResponseWithTools:', error);
+      this.history.push(new AIMessage(`Error: ${error.message}`));
+      this._onDataListener?.(this.history);
+    }
+  }
+
+  setOnDataListener(callback: (data: BaseMessage[]) => void) {
     this._onDataListener = callback;
   }
 
-  removeOnDataListener(): void {
+  removeOnDataListener() {
     this._onDataListener = null;
   }
 
-  // Streaming control methods
-  abortCurrentStream(): void {
+  abortCurrentStream() {
     if (this.currentAbortController) {
       this.currentAbortController.abort();
       this.currentAbortController = null;
-      this.currentStreamingMessageId = null;
     }
   }
 
   isStreaming(): boolean {
-    return this.currentAbortController !== null;
-  }
-
-  getCurrentStreamingMessageId(): string | null {
-    return this.currentStreamingMessageId;
-  }
-
-  setCurrentStreamingMessageId(messageId: string | null): void {
-    this.currentStreamingMessageId = messageId;
+    return !!this.currentAbortController;
   }
 }
 
-// Create context for React components
-export const PageChatContext = createContext<PageChatService>(null);
+export const PageChatContext = createContext<PageChatService | null>(null);

@@ -109,6 +109,41 @@ export class AIReasoningMessage extends AIMessage {
   }
 }
 
+// Tool execution progress message types
+export class AIToolPendingMessage extends AIMessage {
+  toolName: string;
+  toolArgs?: any;
+  isToolPending = true;
+
+  constructor(toolName: string, args?: any) {
+    super(`准备执行工具: ${toolName}`);
+    this.toolName = toolName;
+    this.toolArgs = args;
+  }
+}
+
+export class AIToolExecutingMessage extends AIMessage {
+  toolName: string;
+  isToolExecuting = true;
+
+  constructor(toolName: string) {
+    super(`正在执行: ${toolName}...`);
+    this.toolName = toolName;
+  }
+}
+
+export class AIToolResultMessage extends AIMessage {
+  toolName: string;
+  result: any;
+  isToolResult = true;
+
+  constructor(toolName: string, result: any) {
+    super(`工具 ${toolName} 执行完成`);
+    this.toolName = toolName;
+    this.result = result;
+  }
+}
+
 export interface AgentContext {
   selection?: string;
   pageUrl?: string;
@@ -130,6 +165,10 @@ export enum CommandType {
   ChatPopupDisplay,
   ChatToolbarDisplay,
   OpenOptionsPage,
+  // Agent tools
+  GetPageText,
+  GetPageLinks,
+  ScrollPage,
 }
 export interface TabMessage {
   cmd: CommandType;
@@ -138,6 +177,8 @@ export interface TabMessage {
   fromShortcut?: boolean; // 是否由快捷键触发
   linkText?: string; // 被点击的链接文本
   linkUrl?: string; // 被点击的链接URL
+  data?: any; // 用于传递工具调用的数据，如滚动偏移量
+  timestamp?: number; // 用于工具调用的时间戳
 }
 
 export interface PromptTool {

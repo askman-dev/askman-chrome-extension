@@ -13,6 +13,9 @@ export enum MessageType {
   CODE = 'code',
   THINKING = 'thinking',
   REASONING = 'reasoning',
+  TOOL_PENDING = 'tool_pending',
+  TOOL_EXECUTING = 'tool_executing',
+  TOOL_RESULT = 'tool_result',
 }
 
 export interface MessageItemProps {
@@ -24,6 +27,10 @@ export interface MessageItemProps {
   content?: string;
   hasReasoning?: boolean;
   hasContent?: boolean;
+  // Tool progress properties
+  toolName?: string;
+  toolArgs?: any;
+  result?: any;
 }
 
 function decodeEntities(text: string): string {
@@ -33,7 +40,7 @@ function decodeEntities(text: string): string {
 }
 
 export function MessageItem(props: MessageItemProps) {
-  const { type, text, role, reasoning, content, hasReasoning, hasContent } = props;
+  const { type, text, role, reasoning, content, hasReasoning, hasContent, toolName, toolArgs, result } = props;
   const [codeHover, setCodeHover] = useState<number | null>(null);
   const { isVisible, handlers } = useCopyButton(type !== MessageType.CODE);
   let messageItem = <div>{text}</div>;
@@ -134,6 +141,38 @@ export function MessageItem(props: MessageItemProps) {
           {hasContent && <div className="text-black border-t border-gray-200 pt-2">{TextWithLineBreaks(content)}</div>}
           {!hasReasoning && !hasContent && <div>{TextWithLineBreaks(text)}</div>}
         </div>
+      );
+      break;
+    case MessageType.TOOL_PENDING:
+      messageItem = (
+        <div className="flex items-center gap-2 text-gray-600 py-1">
+          <span className="animate-pulse text-lg">⚙️</span>
+          <span className="text-sm">准备执行工具: <span className="font-medium">{toolName}</span></span>
+        </div>
+      );
+      break;
+    case MessageType.TOOL_EXECUTING:
+      messageItem = (
+        <div className="flex items-center gap-2 text-blue-600 py-1">
+          <span className="animate-spin text-lg">⚙️</span>
+          <span className="text-sm">执行中: <span className="font-medium">{toolName}</span></span>
+        </div>
+      );
+      break;
+    case MessageType.TOOL_RESULT:
+      messageItem = (
+        <details className="bg-gray-50 border border-gray-200 rounded-lg p-3 my-2">
+          <summary className="cursor-pointer text-green-600 font-medium hover:text-green-700 flex items-center gap-2">
+            <span>✅</span>
+            <span>{toolName} 执行完成</span>
+            <span className="text-xs text-gray-500 ml-auto">点击查看详情</span>
+          </summary>
+          <div className="mt-3 pt-3 border-t border-gray-200">
+            <pre className="text-xs text-gray-700 bg-white p-2 rounded border overflow-auto max-h-40">
+              {typeof result === 'string' ? result : JSON.stringify(result, null, 2)}
+            </pre>
+          </div>
+        </details>
       );
       break;
     default:
