@@ -442,7 +442,7 @@ export function PagePanel(props: PagePanelProps) {
                 id: `history-${idx}`,
                 text: '',
                 toolName: message.toolName,
-                toolArgs: message.toolArgs,
+                toolInput: message.toolInput,
                 role: 'assistant',
                 name: 'AIToolPendingMessage',
               };
@@ -548,7 +548,7 @@ export function PagePanel(props: PagePanelProps) {
                 id: `history-${idx}`,
                 text: '',
                 toolName: message.toolName,
-                toolArgs: message.toolArgs,
+                toolInput: message.toolInput,
                 role: 'assistant',
                 name: 'AIToolPendingMessage',
               };
