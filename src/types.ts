@@ -112,13 +112,13 @@ export class AIReasoningMessage extends AIMessage {
 // Tool execution progress message types
 export class AIToolPendingMessage extends AIMessage {
   toolName: string;
-  toolArgs?: any;
+  toolInput?: any;
   isToolPending = true;
 
-  constructor(toolName: string, args?: any) {
+  constructor(toolName: string, input?: any) {
     super(`准备执行工具: ${toolName}`);
     this.toolName = toolName;
-    this.toolArgs = args;
+    this.toolInput = input;
   }
 }
 
