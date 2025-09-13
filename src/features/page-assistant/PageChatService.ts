@@ -6,14 +6,12 @@ import {
   SystemInvisibleMessage,
   HumanAskMessage,
   AIThinkingMessage,
-  AIToolPendingMessage,
-  AIToolExecutingMessage,
-  AIToolResultMessage,
 } from '@src/types';
 import { StorageManager } from '@src/utils/StorageManager';
 import { tools } from '@src/components/controls/ToolDropdown';
-import { CoreMessage, streamText, ToolCallPart } from 'ai';
+import { CoreMessage, streamText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
+import { stepCountIs } from 'ai';
 
 export interface SendOptions {
   overrideSystem?: string;
@@ -32,10 +30,10 @@ export interface PageChatInterface {
     _options?: SendOptions,
   ): Promise<void>;
   askWithAgent(
-    _userPrompt: string,
-    _pageContext: QuoteContext,
-    _quotes: QuoteContext[],
-    _options?: SendOptions,
+    userPrompt: string,
+    pageContext: QuoteContext,
+    quotes: QuoteContext[],
+    options?: SendOptions,
   ): Promise<void>;
   setOnDataListener(_callback: (_data: BaseMessage[]) => void): void;
   removeOnDataListener(): void;
@@ -45,7 +43,6 @@ export class PageChatService implements PageChatInterface {
   history: BaseMessage[] = [];
   _onDataListener: ((data: BaseMessage[]) => void) | null = null;
   private currentAbortController: AbortController | null = null;
-  private static readonly MAX_CONVERSATION_DEPTH = 5;
 
   constructor() {
     this.initSystemMessage();
@@ -228,84 +225,58 @@ export class PageChatService implements PageChatInterface {
   private async streamResponseWithTools(messages: CoreMessage[], tools: Record<string, any>, overrideModel?: string) {
     try {
       const { customProvider, selectedModel } = await this.getModelProvider(overrideModel);
-      await this.executeConversationLoop(messages, tools, customProvider, selectedModel, 0);
+
+      const result = await streamText({
+        model: customProvider.chat(selectedModel.name),
+        messages,
+        tools,
+        stopWhen: stepCountIs(10),
+        onFinish: async ({ text, finishReason, usage, response, steps, totalUsage }) => {
+          console.log(text);
+          console.log('🛑 AI finished processing. Reason:', finishReason);
+          console.log('Usage for this request:', usage);
+          console.log('Total usage this session:', totalUsage);
+          console.log('Full response object:', response);
+          console.log('Steps taken:', steps);
+          console.log('🛑 AI processing finished.');
+
+          const responseMessages = response.messages;
+          const newHistory = responseMessages.map(msg => {
+            if (msg.role === 'assistant') {
+              if (typeof msg.content === 'string') {
+                return new AIMessage(msg.content);
+              }
+              return new AIMessage(msg.content.map(part => (part as any).text).join(''));
+            }
+            if (msg.role === 'tool') {
+              return new ToolMessage({ content: JSON.stringify(msg.content), tool_call_id: (msg.content[0] as any).toolCallId as string });
+            }
+          }).filter(Boolean);
+
+          this.history.push(...newHistory);
+          this._onDataListener?.(this.history);
+        }
+      });
+
+      let accumulatedText = '';
+      let finalAIMessage: AIMessage | null = null;
+
+      for await (const part of result.fullStream) {
+        switch (part.type) {
+          case 'text-delta': {
+            accumulatedText += part.text;
+            if (!finalAIMessage) finalAIMessage = new AIMessage('');
+            finalAIMessage.content = accumulatedText;
+            this._onDataListener?.([...this.history, finalAIMessage]);
+            break;
+          }
+        }
+      }
+
     } catch (error) {
       console.error('Error in streamResponseWithTools:', error);
       this.history.push(new AIMessage(`Error: ${error.message}`));
       this._onDataListener?.(this.history);
-    }
-  }
-
-  private async executeConversationLoop(
-    messages: CoreMessage[],
-    tools: Record<string, any>,
-    customProvider: any,
-    selectedModel: any,
-    depth: number,
-  ) {
-    if (depth >= PageChatService.MAX_CONVERSATION_DEPTH) {
-      console.log('Max conversation depth reached');
-      return;
-    }
-
-    const stream = await streamText({
-      model: customProvider.chat(selectedModel.name),
-      messages,
-      tools,
-      temperature: 0.2,
-    });
-
-    let accumulatedText = '';
-    let finalAIMessage: AIMessage | null = null;
-    const toolCalls: ToolCallPart[] = [];
-
-    for await (const part of stream.fullStream) {
-      switch (part.type) {
-        case 'text-delta': {
-          accumulatedText += part.text;
-          if (!finalAIMessage) finalAIMessage = new AIMessage('');
-          finalAIMessage.content = accumulatedText;
-          this._onDataListener?.([...this.history, finalAIMessage]);
-          break;
-        }
-
-        case 'tool-call': {
-          toolCalls.push(part);
-          break;
-        }
-      }
-    }
-
-    if (toolCalls.length > 0) {
-      const toolMessages: CoreMessage[] = [];
-      for (const toolCall of toolCalls) {
-        const toolResult = await this.executeTool(toolCall, tools);
-        toolMessages.push({ role: 'tool', content: [{ type: 'tool-result', toolCallId: toolCall.toolCallId, toolName: toolCall.toolName, output: toolResult }] });
-      }
-      await this.executeConversationLoop([...messages, ...toolMessages], tools, customProvider, selectedModel, depth + 1);
-    } else if (finalAIMessage) {
-      this.history.push(finalAIMessage);
-      this._onDataListener?.(this.history);
-    }
-  }
-
-  private async executeTool(toolCall: ToolCallPart, tools: Record<string, any>): Promise<any> {
-    const { toolName, args } = toolCall as any;
-    const tool = tools[toolName];
-
-    if (!tool) {
-      throw new Error(`Tool not found: ${toolName}`);
-    }
-
-    this._onDataListener?.([...this.history, new AIToolPendingMessage(toolName, args)]);
-
-    try {
-      const result = await tool.execute(args);
-      this._onDataListener?.([...this.history, new AIToolResultMessage(toolName, result)]);
-      return result;
-    } catch (error) {
-      console.error(`Error executing tool ${toolName}:`, error);
-      throw error;
     }
   }
 

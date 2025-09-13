@@ -7,7 +7,7 @@ import { CommandType } from '@src/types';
  */
 export const getPageTextTool = tool({
   description: 'Get all text content from the current page',
-  inputSchema: z.object({}),
+  inputSchema: z.void(),
   execute: async () => {
     console.log('🚨🚨🚨 [Tool Execute] getPageText sending message to content script');
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -29,7 +29,7 @@ export const getPageTextTool = tool({
  */
 export const getPageLinksTool = tool({
   description: 'Get all links from the current page',
-  inputSchema: z.object({}),
+  inputSchema: z.void(),
   execute: async () => {
     console.log('🚨🚨🚨 [Tool Execute] getPageLinks sending message to content script');
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
