@@ -12,14 +12,8 @@ import {
 } from '@src/types';
 import { StorageManager } from '@src/utils/StorageManager';
 import { tools } from '@src/components/controls/ToolDropdown';
-import { CoreMessage, streamText, ToolCallPart, ToolResultPart } from 'ai';
+import { CoreMessage, streamText, ToolCallPart } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
-
-interface FinishPart {
-  type: 'finish';
-  finishReason: string;
-  usage: any;
-}
 
 export interface SendOptions {
   overrideSystem?: string;
@@ -51,6 +45,7 @@ export class PageChatService implements PageChatInterface {
   history: BaseMessage[] = [];
   _onDataListener: ((data: BaseMessage[]) => void) | null = null;
   private currentAbortController: AbortController | null = null;
+  private static readonly MAX_CONVERSATION_DEPTH = 5;
 
   constructor() {
     this.initSystemMessage();
@@ -233,72 +228,84 @@ export class PageChatService implements PageChatInterface {
   private async streamResponseWithTools(messages: CoreMessage[], tools: Record<string, any>, overrideModel?: string) {
     try {
       const { customProvider, selectedModel } = await this.getModelProvider(overrideModel);
-
-      const stream = await streamText({
-        model: customProvider.chat(selectedModel.name),
-        messages,
-        tools,
-        temperature: 0.2,
-      });
-
-      let accumulatedText = '';
-      let finalAIMessage: AIMessage | null = null;
-      let toolExecutionMessages: BaseMessage[] = [];
-
-      for await (const part of stream.fullStream) {
-        console.log('[Stream Event]', part.type, part);
-
-        switch (part.type) {
-          case 'text-delta': {
-            accumulatedText += part.text;
-            if (!finalAIMessage) finalAIMessage = new AIMessage('');
-            finalAIMessage.content = accumulatedText;
-            this._onDataListener?.([...this.history, ...toolExecutionMessages, finalAIMessage]);
-            break;
-          }
-
-          case 'tool-call': {
-            const toolCallPart = part as any;
-            toolExecutionMessages.push(new AIToolPendingMessage(toolCallPart.toolName, toolCallPart.input));
-            this._onDataListener?.([...this.history, ...toolExecutionMessages]);
-            break;
-          }
-
-          case 'tool-result': {
-            const toolResultPart = part as any;
-            toolExecutionMessages = toolExecutionMessages.filter(m => !(m instanceof AIToolPendingMessage && (m as AIToolPendingMessage).toolName === toolResultPart.toolName));
-            toolExecutionMessages.push(new AIToolResultMessage(toolResultPart.toolName, toolResultPart.output));
-            this.history.push(new ToolMessage({
-                content: JSON.stringify(toolResultPart.output),
-                tool_call_id: toolResultPart.toolCallId,
-                additional_kwargs: { toolName: toolResultPart.toolName },
-            }));
-            this._onDataListener?.([...this.history, ...toolExecutionMessages]);
-            break;
-          }
-
-          case 'finish': {
-            const finishPart = part as any;
-            console.log('[Stream Finish]', finishPart.finishReason, finishPart.usage);
-            break;
-          }
-
-          default: {
-            // Handle other event types if necessary
-            break;
-          }
-        }
-      }
-
-      if (finalAIMessage) {
-        this.history.push(finalAIMessage);
-      }
-      this._onDataListener?.(this.history);
-
+      await this.executeConversationLoop(messages, tools, customProvider, selectedModel, 0);
     } catch (error) {
       console.error('Error in streamResponseWithTools:', error);
       this.history.push(new AIMessage(`Error: ${error.message}`));
       this._onDataListener?.(this.history);
+    }
+  }
+
+  private async executeConversationLoop(
+    messages: CoreMessage[],
+    tools: Record<string, any>,
+    customProvider: any,
+    selectedModel: any,
+    depth: number,
+  ) {
+    if (depth >= PageChatService.MAX_CONVERSATION_DEPTH) {
+      console.log('Max conversation depth reached');
+      return;
+    }
+
+    const stream = await streamText({
+      model: customProvider.chat(selectedModel.name),
+      messages,
+      tools,
+      temperature: 0.2,
+    });
+
+    let accumulatedText = '';
+    let finalAIMessage: AIMessage | null = null;
+    const toolCalls: ToolCallPart[] = [];
+
+    for await (const part of stream.fullStream) {
+      switch (part.type) {
+        case 'text-delta': {
+          accumulatedText += part.text;
+          if (!finalAIMessage) finalAIMessage = new AIMessage('');
+          finalAIMessage.content = accumulatedText;
+          this._onDataListener?.([...this.history, finalAIMessage]);
+          break;
+        }
+
+        case 'tool-call': {
+          toolCalls.push(part);
+          break;
+        }
+      }
+    }
+
+    if (toolCalls.length > 0) {
+      const toolMessages: CoreMessage[] = [];
+      for (const toolCall of toolCalls) {
+        const toolResult = await this.executeTool(toolCall, tools);
+        toolMessages.push({ role: 'tool', content: [{ type: 'tool-result', toolCallId: toolCall.toolCallId, toolName: toolCall.toolName, output: toolResult }] });
+      }
+      await this.executeConversationLoop([...messages, ...toolMessages], tools, customProvider, selectedModel, depth + 1);
+    } else if (finalAIMessage) {
+      this.history.push(finalAIMessage);
+      this._onDataListener?.(this.history);
+    }
+  }
+
+  private async executeTool(toolCall: ToolCallPart, tools: Record<string, any>): Promise<any> {
+    const { toolName, args } = toolCall as any;
+    const tool = tools[toolName];
+
+    if (!tool) {
+      throw new Error(`Tool not found: ${toolName}`);
+    }
+
+    this._onDataListener?.([...this.history, new AIToolPendingMessage(toolName, args)]);
+
+    try {
+      const result = await tool.execute(args);
+      this._onDataListener?.([...this.history, new AIToolResultMessage(toolName, result)]);
+      return result;
+    } catch (error) {
+      console.error(`Error executing tool ${toolName}:`, error);
+      throw error;
     }
   }
 
