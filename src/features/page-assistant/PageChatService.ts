@@ -12,9 +12,14 @@ import {
 } from '@src/types';
 import { StorageManager } from '@src/utils/StorageManager';
 import { tools } from '@src/components/controls/ToolDropdown';
-import { CoreMessage } from 'ai';
+import { CoreMessage, streamText, ToolCallPart, ToolResultPart } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+
+interface FinishPart {
+  type: 'finish';
+  finishReason: string;
+  totalUsage: any;
+}
 
 export interface SendOptions {
   overrideSystem?: string;
@@ -241,39 +246,47 @@ export class PageChatService implements PageChatInterface {
       let toolExecutionMessages: BaseMessage[] = [];
 
       for await (const part of stream.fullStream) {
-        console.log('[Stream Event]', (part as any).type, part);
+        console.log('[Stream Event]', part.type, part);
 
-        switch ((part as any).type) {
-          case 'text-delta':
-            accumulatedText += (part as any).text;
+        switch (part.type) {
+          case 'text-delta': {
+            accumulatedText += part.text;
             if (!finalAIMessage) finalAIMessage = new AIMessage('');
             finalAIMessage.content = accumulatedText;
             this._onDataListener?.([...this.history, ...toolExecutionMessages, finalAIMessage]);
             break;
+          }
 
-          case 'tool-call':
-            toolExecutionMessages.push(new AIToolPendingMessage((part as any).toolName, (part as any).args));
+          case 'tool-call': {
+            const toolCallPart = part as ToolCallPart;
+            toolExecutionMessages.push(new AIToolPendingMessage(toolCallPart.toolName, toolCallPart.input));
             this._onDataListener?.([...this.history, ...toolExecutionMessages]);
             break;
+          }
 
-          case 'tool-result':
-            toolExecutionMessages = toolExecutionMessages.filter(m => !(m instanceof AIToolPendingMessage && (m as AIToolPendingMessage).toolName === (part as any).toolName));
-            toolExecutionMessages.push(new AIToolResultMessage((part as any).toolName, (part as any).result));
+          case 'tool-result': {
+            const toolResultPart = part as ToolResultPart;
+            toolExecutionMessages = toolExecutionMessages.filter(m => !(m instanceof AIToolPendingMessage && (m as AIToolPendingMessage).toolName === toolResultPart.toolName));
+            toolExecutionMessages.push(new AIToolResultMessage(toolResultPart.toolName, toolResultPart.output));
             this.history.push(new ToolMessage({
-                content: JSON.stringify((part as any).result),
-                tool_call_id: (part as any).toolCallId,
-                additional_kwargs: { toolName: (part as any).toolName },
+                content: JSON.stringify(toolResultPart.output),
+                tool_call_id: toolResultPart.toolCallId,
+                additional_kwargs: { toolName: toolResultPart.toolName },
             }));
             this._onDataListener?.([...this.history, ...toolExecutionMessages]);
             break;
+          }
 
-          case 'finish':
-            console.log('[Stream Finish]', (part as any).finishReason, (part as any).usage);
+          case 'finish': {
+            const finishPart = part as FinishPart;
+            console.log('[Stream Finish]', finishPart.finishReason, finishPart.totalUsage);
             break;
+          }
 
-          default:
+          default: {
             // Handle other event types if necessary
             break;
+          }
         }
       }
 
