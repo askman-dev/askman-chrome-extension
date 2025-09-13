@@ -25,6 +25,9 @@ import {
   SystemInvisibleMessage,
   AIThinkingMessage,
   AIReasoningMessage,
+  AIToolPendingMessage,
+  AIToolExecutingMessage,
+  AIToolResultMessage,
   CommandType,
 } from '@src/types';
 import { StorageManager } from '@src/utils/StorageManager';
@@ -135,6 +138,7 @@ export function PagePanel(props: PagePanelProps) {
 
   // Streaming control state
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isAgentMode, setIsAgentMode] = useState(false);
 
   // Load height expansion state from storage on mount
   useEffect(() => {
@@ -432,6 +436,35 @@ export function PagePanel(props: PagePanelProps) {
                 role: 'assistant',
                 name: 'AIReasoningMessage',
               };
+            } else if (message instanceof AIToolPendingMessage) {
+              return {
+                type: 'tool_pending',
+                id: `history-${idx}`,
+                text: '',
+                toolName: message.toolName,
+                toolArgs: message.toolArgs,
+                role: 'assistant',
+                name: 'AIToolPendingMessage',
+              };
+            } else if (message instanceof AIToolExecutingMessage) {
+              return {
+                type: 'tool_executing',
+                id: `history-${idx}`,
+                text: '',
+                toolName: message.toolName,
+                role: 'assistant',
+                name: 'AIToolExecutingMessage',
+              };
+            } else if (message instanceof AIToolResultMessage) {
+              return {
+                type: 'tool_result',
+                id: `history-${idx}`,
+                text: '',
+                toolName: message.toolName,
+                result: message.result,
+                role: 'assistant',
+                name: 'AIToolResultMessage',
+              };
             } else if (typeof message.content == 'string') {
               return { type: 'text', id: `history-${idx}`, text: message.content, role: role, name: 'AIMessage' };
             } else if (message.content instanceof Array) {
@@ -508,6 +541,35 @@ export function PagePanel(props: PagePanelProps) {
                 hasContent: message.hasContent(),
                 role: 'assistant',
                 name: 'AIReasoningMessage',
+              };
+            } else if (message instanceof AIToolPendingMessage) {
+              return {
+                type: 'tool_pending',
+                id: `history-${idx}`,
+                text: '',
+                toolName: message.toolName,
+                toolArgs: message.toolArgs,
+                role: 'assistant',
+                name: 'AIToolPendingMessage',
+              };
+            } else if (message instanceof AIToolExecutingMessage) {
+              return {
+                type: 'tool_executing',
+                id: `history-${idx}`,
+                text: '',
+                toolName: message.toolName,
+                role: 'assistant',
+                name: 'AIToolExecutingMessage',
+              };
+            } else if (message instanceof AIToolResultMessage) {
+              return {
+                type: 'tool_result',
+                id: `history-${idx}`,
+                text: '',
+                toolName: message.toolName,
+                result: message.result,
+                role: 'assistant',
+                name: 'AIToolResultMessage',
               };
             } else if (typeof message.content == 'string') {
               return { type: 'text', id: `history-${idx}`, text: message.content, role: role, name: 'AIMessage' };
@@ -726,19 +788,37 @@ export function PagePanel(props: PagePanelProps) {
     }
     setIsStreaming(true);
 
-    // Debug logging for development
-    // console.log('[PagePanel] onSend called with:', { userInput: currentInput, toolToUse, quotesCount: initQuotes?.length });
-
+    // 🚨 CRITICAL PATH DEBUGGING - 确认用户请求走的逻辑路径
+    console.log('[PagePanel] ====== SEND REQUEST ROUTING DEBUG ======');
+    console.log('[PagePanel] User input:', currentInput);
+    console.log('[PagePanel] isAgentMode:', isAgentMode);
+    console.log('[PagePanel] toolToUse:', toolToUse ? {
+      name: toolToUse.name,
+      template: typeof toolToUse.template === 'string' ? toolToUse.template.substring(0, 50) + '...' : 'N/A'
+    } : null);
+    console.log('[PagePanel] initQuotes count:', initQuotes?.length || 0);
+    console.log('[PagePanel] overrideSystem:', overrideSystem ? 'YES' : 'NO');
+    console.log('[PagePanel] overrideModel:', overrideModel || 'default');
+    
     try {
-      if (toolToUse) {
-        // console.log('[PagePanel] calling askWithTool');
-        // console.log('[PagePanel] pageContext内容:', pageContext);
+      if (isAgentMode) {
+        console.log('[PagePanel] 🤖 ROUTING TO: askWithAgent (tool calling mode)');
+        // Agent mode: Use askWithAgent for tool calling capabilities
+        await chatContext.askWithAgent(currentInput, pageContext, initQuotes, {
+          overrideSystem,
+          overrideModel,
+        });
+      } else if (toolToUse) {
+        console.log('[PagePanel] 💬 ROUTING TO: askWithTool (template mode with tool)');
+        console.log('[PagePanel] Selected tool:', toolToUse.name);
+        // Ask mode with tool template: Use askWithTool
         await chatContext.askWithTool(toolToUse, pageContext, initQuotes, currentInput, {
           overrideSystem,
           overrideModel,
         });
       } else {
-        // console.log('[PagePanel] calling askWithQuotes');
+        console.log('[PagePanel] 📝 ROUTING TO: askWithQuotes (simple ask mode)');
+        // Ask mode without tool: Use askWithQuotes
         await chatContext.askWithQuotes(initQuotes!, currentInput, {
           overrideSystem,
           overrideModel,
@@ -882,6 +962,21 @@ export function PagePanel(props: PagePanelProps) {
               }}
             />
           </div>
+        </div>
+
+        {/* Ask/Agent Mode Toggle */}
+        <div className="flex items-center gap-1 px-2">
+          <button
+            onClick={() => setIsAgentMode(!isAgentMode)}
+            className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium transition-colors duration-200 ${
+              isAgentMode
+                ? 'bg-black text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+            title={isAgentMode ? 'Switch to Ask mode (template-based)' : 'Switch to Agent mode (tool calling)'}
+          >
+            {isAgentMode ? '🤖 Agent' : '💬 Ask'}
+          </button>
         </div>
 
         <div className="grow"></div>
@@ -1181,7 +1276,7 @@ export function PagePanel(props: PagePanelProps) {
                   title="Stop streaming">
                   <StopIcon className="w-4 h-4" />
                 </button>
-              ) : (
+              ) : !isAgentMode ? (
                 <ToolDropdown
                   initOpen={isToolDropdownOpen}
                   statusListener={updateToolDropdownStatus}
@@ -1195,6 +1290,13 @@ export function PagePanel(props: PagePanelProps) {
                   }}
                   buttonDisplay="➤"
                 />
+              ) : (
+                <div
+                  className="inline-flex items-center justify-center w-8 h-8 text-gray-400 rounded transition-colors duration-200"
+                  title="Agent mode: AI will automatically select tools"
+                >
+                  <span className="text-sm">🤖</span>
+                </div>
               )}
             </div>
           </div>
