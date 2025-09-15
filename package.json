@@ -49,7 +49,7 @@
     "handlebars": "^4.7.8",
     "highlight.js": "^11.9.0",
     "loglevel": "^1.9.2",
-    "lucide-react": "^0.536.0",
+    "lucide-react": "^0.544.0",
     "monaco-editor": "^0.51.0",
     "monaco-editor-core": "^0.51.0",
     "react": "18.2.0",
