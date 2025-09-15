@@ -40,7 +40,18 @@ function decodeEntities(text: string): string {
 }
 
 export function MessageItem(props: MessageItemProps) {
-  const { type, text, role, reasoning, content, hasReasoning, hasContent, toolName, toolArgs: _toolArgs, result } = props;
+  const {
+    type,
+    text,
+    role,
+    reasoning,
+    content,
+    hasReasoning,
+    hasContent,
+    toolName,
+    toolArgs: _toolArgs,
+    result,
+  } = props;
   const [codeHover, setCodeHover] = useState<number | null>(null);
   const { isVisible, handlers } = useCopyButton(type !== MessageType.CODE);
   let messageItem = <div>{text}</div>;
@@ -146,26 +157,35 @@ export function MessageItem(props: MessageItemProps) {
     case MessageType.TOOL_PENDING:
       messageItem = (
         <div className="flex items-center gap-2 text-gray-600 py-1">
-          <span className="animate-pulse text-lg">⚙️</span>
-          <span className="text-sm">准备执行工具: <span className="font-medium">{toolName}</span></span>
+          <span className="animate-pulse text-lg">🔄</span>
+          <span className="text-sm">
+            Preparing <span className="font-medium">{toolName}</span>
+          </span>
         </div>
       );
       break;
     case MessageType.TOOL_EXECUTING:
       messageItem = (
-        <div className="flex items-center gap-2 text-blue-600 py-1">
-          <span className="animate-spin text-lg">⚙️</span>
-          <span className="text-sm">执行中: <span className="font-medium">{toolName}</span></span>
+        <div className="flex items-center gap-2 text-gray-600 py-1">
+          <span className="animate-spin text-lg">⚡</span>
+          <span className="text-sm">
+            Executing <span className="font-medium">{toolName}</span>
+          </span>
         </div>
       );
       break;
     case MessageType.TOOL_RESULT:
       messageItem = (
         <details className="bg-gray-50 border border-gray-200 rounded-lg p-3 my-2">
-          <summary className="cursor-pointer text-green-600 font-medium hover:text-green-700 flex items-center gap-2">
-            <span>✅</span>
-            <span>{toolName} 执行完成</span>
-            <span className="text-xs text-gray-500 ml-auto">点击查看详情</span>
+          <summary className="cursor-pointer text-gray-600 font-medium hover:text-gray-700 flex items-center gap-2">
+            <span>✓</span>
+            <span>{toolName} completed</span>
+            <span className="text-xs text-gray-500 ml-auto flex items-center gap-1">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+              View details
+            </span>
           </summary>
           <div className="mt-3 pt-3 border-t border-gray-200">
             <pre className="text-xs text-gray-700 bg-white p-2 rounded border overflow-auto max-h-40">

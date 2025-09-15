@@ -7,7 +7,7 @@ import { z } from 'zod';
 export const getPageTextTool = tool({
   description: 'Get all text content from the current page',
   inputSchema: z.object({
-    _noop: z.boolean().optional().describe('Internal placeholder - leave empty')
+    _noop: z.boolean().optional().describe('Internal placeholder - leave empty'),
   }),
   execute: async () => {
     console.log('🚨🚨🚨 [Tool Execute] getPageText DIRECTLY in content script');
@@ -15,13 +15,8 @@ export const getPageTextTool = tool({
       hasDocument: typeof document !== 'undefined',
       hasBody: typeof document?.body !== 'undefined',
       location: typeof window !== 'undefined' ? window.location.href : 'NO WINDOW',
-      context: typeof chrome !== 'undefined' ? 'CHROME_EXTENSION' : 'UNKNOWN'
+      context: typeof chrome !== 'undefined' ? 'CHROME_EXTENSION' : 'UNKNOWN',
     });
-
-    // 添加 2 秒延迟以展示工具状态流转: 准备执行 → 执行中 → 执行完成
-    console.log('🚨🚨🚨 [Tool Execute] Starting 2-second delay to demonstrate tool states...');
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    console.log('🚨🚨🚨 [Tool Execute] 2-second delay completed, now fetching page text...');
 
     try {
       // Direct DOM access in content script
@@ -30,7 +25,7 @@ export const getPageTextTool = tool({
       console.log('🚨🚨🚨 [Tool Execute] getPageText RETURNING:', {
         success: true,
         textLength: trimmedText.length,
-        preview: trimmedText.substring(0, 100)
+        preview: trimmedText.substring(0, 100),
       });
       return trimmedText;
     } catch (error) {
@@ -46,25 +41,27 @@ export const getPageTextTool = tool({
 export const getPageLinksTool = tool({
   description: 'Get all links from the current page',
   inputSchema: z.object({
-    _noop: z.boolean().optional().describe('Internal placeholder - leave empty')
+    _noop: z.boolean().optional().describe('Internal placeholder - leave empty'),
   }),
   execute: async () => {
     console.log('🚨🚨🚨 [Tool Execute] getPageLinks DIRECTLY in content script');
     try {
       // Direct DOM access in content script
-      const links = Array.from(document.querySelectorAll('a[href]')).map(link => {
-        const anchor = link as HTMLAnchorElement;
-        return {
-          text: anchor.textContent?.trim() || '',
-          href: anchor.href,
-          title: anchor.title || ''
-        };
-      }).filter(link => link.text || link.title); // Only include links with text or title
-      
+      const links = Array.from(document.querySelectorAll('a[href]'))
+        .map(link => {
+          const anchor = link as HTMLAnchorElement;
+          return {
+            text: anchor.textContent?.trim() || '',
+            href: anchor.href,
+            title: anchor.title || '',
+          };
+        })
+        .filter(link => link.text || link.title); // Only include links with text or title
+
       console.log('🚨🚨🚨 [Tool Execute] getPageLinks RETURNING:', {
         success: true,
         linkCount: links.length,
-        firstLinks: links.slice(0, 3)
+        firstLinks: links.slice(0, 3),
       });
       return links;
     } catch (error) {
@@ -95,7 +92,7 @@ export const scrollPageTool = tool({
         success: true,
         message,
         beforeScroll,
-        afterScroll
+        afterScroll,
       });
       return message;
     } catch (error) {

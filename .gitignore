@@ -25,6 +25,7 @@ public/manifest.json
 .cursor
 .cursorrules.crush/
 .crush/
+.gemini-clipboard
 
 # IDE configurations
 .cursorrules
