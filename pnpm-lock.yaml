@@ -124,8 +124,8 @@ importers:
         specifier: 19.6.1
         version: 19.6.1(@types/node@22.8.7)(typescript@5.6.2)
       '@commitlint/config-conventional':
-        specifier: 18.1.0
-        version: 18.1.0
+        specifier: 19.8.1
+        version: 19.8.1
       '@rollup/plugin-typescript':
         specifier: 11.1.5
         version: 11.1.5(rollup@4.50.1)(tslib@2.6.2)(typescript@5.6.2)
@@ -414,8 +414,8 @@ packages:
     engines: {node: '>=v18'}
     hasBin: true
 
-  '@commitlint/config-conventional@18.1.0':
-    resolution: {integrity: sha512-8vvvtV3GOLEMHeKc8PjRL1lfP1Y4B6BG0WroFd9PJeRiOc3nFX1J0wlJenLURzl9Qus6YXVGWf+a/ZlbCKT3AA==}
+  '@commitlint/config-conventional@19.8.1':
+    resolution: {integrity: sha512-/AZHJL6F6B/G959CsMAzrPKKZjeEiAVifRyEwXxcT6qtqbPwGw+iQxmNS+Bu+i09OCtdNRW6pNpBvgPrtMr9EQ==}
     engines: {node: '>=v18'}
 
   '@commitlint/config-validator@19.5.0':
@@ -476,6 +476,10 @@ packages:
 
   '@commitlint/types@19.5.0':
     resolution: {integrity: sha512-DSHae2obMSMkAtTBSOulg5X7/z+rGLxcXQIkg3OmWvY6wifojge5uVMydfhUvs7yQj+V7jNmRZ2Xzl8GJyqRgg==}
+    engines: {node: '>=v18'}
+
+  '@commitlint/types@19.8.1':
+    resolution: {integrity: sha512-/yCrWGCoA1SVKOks25EGadP9Pnj0oAIHGpl2wH2M2Y46dPM2ueb8wyCVOD7O3WCTkaJ0IkKvzhl1JY7+uCT2Dw==}
     engines: {node: '>=v18'}
 
   '@esbuild/aix-ppc64@0.21.5':
@@ -5611,8 +5615,9 @@ snapshots:
       - '@types/node'
       - typescript
 
-  '@commitlint/config-conventional@18.1.0':
+  '@commitlint/config-conventional@19.8.1':
     dependencies:
+      '@commitlint/types': 19.8.1
       conventional-changelog-conventionalcommits: 7.0.2
 
   '@commitlint/config-validator@19.5.0':
@@ -5703,6 +5708,11 @@ snapshots:
       find-up: 7.0.0
 
   '@commitlint/types@19.5.0':
+    dependencies:
+      '@types/conventional-commits-parser': 5.0.1
+      chalk: 5.4.1
+
+  '@commitlint/types@19.8.1':
     dependencies:
       '@types/conventional-commits-parser': 5.0.1
       chalk: 5.4.1
