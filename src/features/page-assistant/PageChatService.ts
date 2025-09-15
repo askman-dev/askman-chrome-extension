@@ -6,13 +6,12 @@ import {
   SystemInvisibleMessage,
   HumanAskMessage,
   AIThinkingMessage,
-  AIToolPendingMessage,
   AIToolExecutingMessage,
   AIToolResultMessage,
 } from '@src/types';
 import { StorageManager } from '@src/utils/StorageManager';
 import { tools } from '@src/components/controls/ToolDropdown';
-import { CoreMessage, streamText } from 'ai';
+import { CoreMessage, streamText, Tool } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { stepCountIs } from 'ai';
 
@@ -113,12 +112,7 @@ export class PageChatService implements PageChatInterface {
     }
   }
 
-  async askWithAgent(
-    userPrompt: string,
-    _pageContext: QuoteContext,
-    _quotes: QuoteContext[],
-    options?: SendOptions,
-  ) {
+  async askWithAgent(userPrompt: string, _pageContext: QuoteContext, _quotes: QuoteContext[], options?: SendOptions) {
     if (!userPrompt?.trim()) return;
 
     console.log('[PageChatService] 🤖 askWithAgent called with:', { userPrompt, _pageContext, _quotes, options });
@@ -138,7 +132,7 @@ export class PageChatService implements PageChatInterface {
       const { pageTools } = await import('./tools/page-tools');
       await this.streamResponseWithTools(messages, pageTools, options?.overrideModel, thinkingMessage);
     } catch (error) {
-      console.error('[PageChatService] Error in askWithAgent:', error);
+      console.error('Error in askWithAgent:', error);
       this.history.push(new AIMessage(`Error: ${error.message}`));
       this._onDataListener?.(this.history);
     }
@@ -146,20 +140,31 @@ export class PageChatService implements PageChatInterface {
 
   private convertToCoreMessages(overrideSystem?: string): CoreMessage[] {
     const messages: CoreMessage[] = [];
-    const systemMessage = overrideSystem || this.history.find(m => m instanceof SystemInvisibleMessage)?.content as string;
+    const systemMessage =
+      overrideSystem || (this.history.find(m => m instanceof SystemInvisibleMessage)?.content as string);
     if (systemMessage) {
       messages.push({ role: 'system', content: systemMessage });
     }
 
     this.history.forEach(msg => {
       if (msg instanceof HumanAskMessage) {
-        messages.push({ role: 'user', content: msg.rendered || msg.content as string });
+        messages.push({ role: 'user', content: msg.rendered || (msg.content as string) });
       } else if (msg instanceof HumanMessage) {
         messages.push({ role: 'user', content: msg.content as string });
       } else if (msg instanceof AIMessage && !(msg instanceof AIThinkingMessage)) {
         messages.push({ role: 'assistant', content: msg.content as string });
       } else if (msg instanceof ToolMessage) {
-        messages.push({ role: 'tool', content: [{ type: 'tool-result', toolCallId: msg.tool_call_id as string, toolName: msg.additional_kwargs.toolName as string, output: JSON.parse(msg.content as string) }] });
+        messages.push({
+          role: 'tool',
+          content: [
+            {
+              type: 'tool-result',
+              toolCallId: msg.tool_call_id as string,
+              toolName: msg.additional_kwargs.toolName as string,
+              output: JSON.parse(msg.content as string),
+            },
+          ],
+        });
       }
     });
 
@@ -173,7 +178,9 @@ export class PageChatService implements PageChatInterface {
 
     if (overrideModel) {
       for (const providerConfig of modelConfigs) {
-        const model = providerConfig.config.models.find(m => `${providerConfig.provider}/${m.name}` === overrideModel || m.name === overrideModel);
+        const model = providerConfig.config.models.find(
+          m => `${providerConfig.provider}/${m.name}` === overrideModel || m.name === overrideModel,
+        );
         if (model) {
           selectedProvider = providerConfig;
           selectedModel = model;
@@ -229,11 +236,15 @@ export class PageChatService implements PageChatInterface {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async streamResponseWithTools(messages: CoreMessage[], tools: Record<string, any>, overrideModel?: string, initialThinkingMessage?: AIThinkingMessage) {
+  private async streamResponseWithTools(
+    messages: CoreMessage[],
+    tools: Record<string, Tool>,
+    overrideModel?: string,
+    initialThinkingMessage?: AIThinkingMessage,
+  ) {
     try {
       const { customProvider, selectedModel } = await this.getModelProvider(overrideModel);
-      
+
       console.log('[PageChatService] 🤖 Using model:', selectedModel.name, 'from provider:', customProvider);
 
       const result = await streamText({
@@ -241,12 +252,12 @@ export class PageChatService implements PageChatInterface {
         messages,
         tools,
         stopWhen: stepCountIs(10),
-        onFinish: async ({ _text, finishReason, usage, _response, steps, totalUsage }) => {
+        onFinish: async ({ finishReason, usage, steps, totalUsage }) => {
           console.log('[PageChatService] 🛑 AI finished processing. Reason:', finishReason);
           console.log('[PageChatService] Usage for this request:', usage);
           console.log('[PageChatService] Total usage this session:', totalUsage);
           console.log('[PageChatService] Steps taken:', steps);
-        }
+        },
       });
 
       let accumulatedText = '';
@@ -270,9 +281,9 @@ export class PageChatService implements PageChatInterface {
         const displayMessages = [...this.history];
 
         for (const segment of messageSegments) {
-          if (segment.type === 'text' && segment.content.trim()) {
+          if (segment.type === 'text' && typeof segment.content === 'string' && segment.content.trim()) {
             displayMessages.push(new AIMessage(segment.content));
-          } else if (segment.type === 'tool') {
+          } else if (segment.type === 'tool' && segment.content instanceof BaseMessage) {
             displayMessages.push(segment.content);
           }
         }
@@ -295,23 +306,28 @@ export class PageChatService implements PageChatInterface {
             accumulatedText += part.text;
             currentTextBuffer += part.text;
             console.log('[PageChatService] 📝 Text delta received:', part.text, 'accumulated:', accumulatedText.length);
-            
-            // 工具完成后的思考状态处理
+
+            // 工具完成后的思考状态处理 (此逻辑已移至 tool-result 阶段)
             if (hasToolsCompleted && !finalAIMessage && !showInitialThinking) {
               if (!thinkingAfterTools) {
+                // thinkingAfterTools 实例现在由 tool-result 创建和显示
+                // 此处仅需确保变量同步，以便后续逻辑可以正确判断
                 thinkingAfterTools = new AIThinkingMessage();
-                console.log('[PageChatService] 💭 显示工具完成后的思考状态');
-                this._onDataListener?.([...this.history, ...Array.from(currentToolCalls.values()), thinkingAfterTools]);
               }
             }
-            
+
             // 初始 thinking 管理：确保至少显示 500ms 且有足够内容才移除
             if (showInitialThinking && initialThinkingMessage) {
               const elapsed = Date.now() - thinkingStartTime;
-              
+
               if (elapsed < 500 || accumulatedText.length < 8) {
                 // 继续显示 thinking（时间不够或内容太少）
-                console.log('[PageChatService] 💭 保持显示初始 thinking，elapsed:', elapsed, 'length:', accumulatedText.length);
+                console.log(
+                  '[PageChatService] 💭 保持显示初始 thinking，elapsed:',
+                  elapsed,
+                  'length:',
+                  accumulatedText.length,
+                );
                 this._onDataListener?.([...this.history, initialThinkingMessage]);
               } else {
                 // 有足够内容且时间够了，移除 thinking
@@ -346,96 +362,45 @@ export class PageChatService implements PageChatInterface {
             if (currentTextBuffer.trim()) {
               messageSegments.push({
                 type: 'text',
-                content: currentTextBuffer
+                content: currentTextBuffer,
               });
               console.log('[PageChatService] 📝 Pushed text segment before tool, length:', currentTextBuffer.length);
               currentTextBuffer = ''; // 清空缓冲区
             }
 
-            // 显示工具准备状态
+            // 直接显示工具正在执行状态
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const toolPendingMsg = new AIToolPendingMessage(part.toolName, (part as any).input);
-            currentToolCalls.set(part.toolCallId, toolPendingMsg);
+            const toolExecutingMsg = new AIToolExecutingMessage(part.toolName);
+            currentToolCalls.set(part.toolCallId, toolExecutingMsg);
 
             // 添加工具 segment
             messageSegments.push({
               type: 'tool',
-              content: toolPendingMsg,
-              toolId: part.toolCallId
+              content: toolExecutingMsg,
+              toolId: part.toolCallId,
             });
             console.log('[PageChatService] 📝 Added tool segment, total segments:', messageSegments.length);
 
             // 构建并发送显示消息
             const displayMessages = buildDisplayMessages();
-            console.log('[PageChatService] 📤 Sending pending state to UI, tool count:',
-              displayMessages.filter(m => m.constructor.name.includes('Tool')).length);
+            console.log(
+              '[PageChatService] 📤 Sending executing state to UI, tool count:',
+              displayMessages.filter(m => m.constructor.name.includes('Tool')).length,
+            );
             // 强制创建新的数组引用以确保React状态更新
             const forceNewArray = [...displayMessages];
             this._onDataListener?.(forceNewArray);
-
-            // 立即更新为 "正在执行" 状态
-            const toolCallId = part.toolCallId; // 捕获当前的 toolCallId
-            const timeoutStart = Date.now();
-            console.log('[PageChatService] ⏰ Setting timeout at:', timeoutStart);
-            setTimeout(() => {
-              const capturedToolCallId = toolCallId;
-              console.log('[PageChatService] ⏰ Timeout executing at:', Date.now(), 'delay:', Date.now() - timeoutStart);
-
-              // 1. 记录更新前的状态
-              const existingTool = currentToolCalls.get(capturedToolCallId);
-              console.log('[PageChatService] 🔍 setTimeout triggered for tool:', capturedToolCallId);
-              console.log('[PageChatService] 📊 BEFORE setTimeout update - existing tool:', {
-                exists: !!existingTool,
-                type: existingTool?.constructor.name,
-                content: typeof existingTool?.content === 'string' ? existingTool.content.substring(0, 50) + '...' : existingTool?.content,
-                currentStatus: existingTool?.constructor.name === 'Dr' ? 'completed' :
-                              existingTool?.constructor.name === 'xr' ? 'executing' : 'pending'
-              });
-
-              // 2. 决策逻辑：检查是否应该更新
-              const shouldUpdate = existingTool && existingTool.constructor.name !== 'Dr';
-              console.log('[PageChatService] 🤔 Should update to executing?', shouldUpdate,
-                'Reason:', existingTool?.constructor.name === 'Dr' ? 'Already completed' : 'Still pending');
-
-              if (shouldUpdate) {
-                // 3. 执行更新
-                console.log('[PageChatService] ✏️ UPDATING to executing state for tool:', part.toolName);
-                const toolExecutingMsg = new AIToolExecutingMessage(part.toolName);
-                currentToolCalls.set(capturedToolCallId, toolExecutingMsg);
-
-                // 4. 更新对应的 segment
-                const segmentIndex = messageSegments.findIndex(s => s.type === 'tool' && s.toolId === capturedToolCallId);
-                if (segmentIndex !== -1) {
-                  messageSegments[segmentIndex].content = toolExecutingMsg;
-                  console.log('[PageChatService] 📊 Updated segment at index:', segmentIndex);
-                }
-
-                // 5. 记录更新后的状态
-                const afterUpdate = currentToolCalls.get(capturedToolCallId);
-                console.log('[PageChatService] 📊 AFTER setTimeout update:', {
-                  type: afterUpdate?.constructor.name,
-                  content: typeof afterUpdate?.content === 'string' ? afterUpdate.content.substring(0, 50) + '...' : afterUpdate?.content,
-                  mapSize: currentToolCalls.size
-                });
-              } else {
-                console.log('[PageChatService] ⏭️ SKIPPING setTimeout update - tool already in final state');
-                return; // 跳过后续的 UI 更新
-              }
-
-              // 构建并发送显示消息
-              const updatedMessages = buildDisplayMessages();
-              console.log('[PageChatService] 📤 Sending executing state to UI, tool count:',
-                updatedMessages.filter(m => m.constructor.name.includes('Tool')).length);
-              // 强制创建新的数组引用以确保React状态更新
-              const forceNewArray = [...updatedMessages];
-              this._onDataListener?.(forceNewArray);
-            }, 100); // 短暂延迟，让用户看到 "准备执行" 状态
             break;
           }
           case 'tool-result': {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const toolOutput = (part as any).output;
-            console.log('[PageChatService] ✅ Tool result for:', part.toolName, 'output length:', typeof toolOutput === 'string' ? toolOutput.length : 'non-string');
+            console.log(
+              '[PageChatService] ✅ Tool result for:',
+              part.toolName,
+              'output length:',
+              typeof toolOutput === 'string' ? toolOutput.length : 'non-string',
+            );
             console.log('[PageChatService] 🔑 Tool result ID:', part.toolCallId);
 
             // 1. 记录更新前的状态
@@ -444,9 +409,12 @@ export class PageChatService implements PageChatInterface {
               toolId: part.toolCallId,
               existingToolExists: !!existingTool,
               existingType: existingTool?.constructor.name,
-              existingContent: typeof existingTool?.content === 'string' ? existingTool.content.substring(0, 50) + '...' : existingTool?.content,
+              existingContent:
+                typeof existingTool?.content === 'string'
+                  ? existingTool.content.substring(0, 50) + '...'
+                  : existingTool?.content,
               currentMapIds: Array.from(currentToolCalls.keys()),
-              currentMapSize: currentToolCalls.size
+              currentMapSize: currentToolCalls.size,
             });
 
             // 2. 执行更新
@@ -465,34 +433,49 @@ export class PageChatService implements PageChatInterface {
             // 3. 记录更新后的状态
             console.log('[PageChatService] 📊 AFTER tool-result update:', {
               newType: toolResultMsg.constructor.name,
-              newContent: typeof toolResultMsg.content === 'string' ? toolResultMsg.content.substring(0, 50) + '...' : toolResultMsg.content,
+              newContent:
+                typeof toolResultMsg.content === 'string'
+                  ? toolResultMsg.content.substring(0, 50) + '...'
+                  : toolResultMsg.content,
               mapSize: currentToolCalls.size,
               mapContents: Array.from(currentToolCalls.entries()).map(([id, msg]) => ({
                 id: id.substring(0, 12) + '...',
                 type: msg.constructor.name,
-                content: typeof msg.content === 'string' ? msg.content.substring(0, 30) + '...' : '[Complex]'
-              }))
+                content: typeof msg.content === 'string' ? msg.content.substring(0, 30) + '...' : '[Complex]',
+              })),
             });
             console.log('[PageChatService] 🎯 Tool result message type:', toolResultMsg.constructor.name);
-            console.log('[PageChatService] 🗃️ Map contents after update:',
-              Array.from(currentToolCalls.entries()).map(([id, msg]) => ({id, type: msg.constructor.name})));
+            console.log(
+              '[PageChatService] 🗃️ Map contents after update:',
+              Array.from(currentToolCalls.entries()).map(([id, msg]) => ({ id, type: msg.constructor.name })),
+            );
             console.log('[PageChatService] 🎯 Tool result message content:', toolResultMsg.content);
-            
+
             // 构建并发送显示消息
             const displayMessages = buildDisplayMessages();
 
-            console.log('[PageChatService] 🔧 Tool messages to add in tool-result:',
-              Array.from(currentToolCalls.values()).map(m => ({type: m.constructor.name, content: m.content})));
+            // 工具执行完，显示 thinking
+            const thinkingAfterTools = new AIThinkingMessage();
+            displayMessages.push(thinkingAfterTools);
+
+            console.log(
+              '[PageChatService] 🔧 Tool messages to add in tool-result:',
+              Array.from(currentToolCalls.values()).map(m => ({ type: m.constructor.name, content: m.content })),
+            );
 
             console.log('[PageChatService] 📤 Sending updated messages to UI, total count:', displayMessages.length);
-            console.log('[PageChatService] 📋 Tool states in final array:',
-              displayMessages.filter(m => m.constructor.name.includes('Tool')).map(m => m.constructor.name));
-            console.log('[PageChatService] 🔍 All messages being sent:',
+            console.log(
+              '[PageChatService] 📋 Tool states in final array:',
+              displayMessages.filter(m => m.constructor.name.includes('Tool')).map(m => m.constructor.name),
+            );
+            console.log(
+              '[PageChatService] 🔍 All messages being sent:',
               displayMessages.map((m, i) => ({
                 index: i,
                 type: m.constructor.name,
-                content: typeof m.content === 'string' ? m.content.substring(0, 50) + '...' : '[Complex Content]'
-              })));
+                content: typeof m.content === 'string' ? m.content.substring(0, 50) + '...' : '[Complex Content]',
+              })),
+            );
 
             // 强制创建新的数组引用以确保React状态更新
             const forceNewArray = [...displayMessages];
@@ -506,25 +489,24 @@ export class PageChatService implements PageChatInterface {
       if (currentTextBuffer.trim()) {
         messageSegments.push({
           type: 'text',
-          content: currentTextBuffer
+          content: currentTextBuffer,
         });
         console.log('[PageChatService] 📝 Pushed final text segment, length:', currentTextBuffer.length);
       }
 
       // 基于 segments 添加最终消息到历史记录
       for (const segment of messageSegments) {
-        if (segment.type === 'text' && segment.content.trim()) {
+        if (segment.type === 'text' && typeof segment.content === 'string' && segment.content.trim()) {
           this.history.push(new AIMessage(segment.content));
-        } else if (segment.type === 'tool') {
+        } else if (segment.type === 'tool' && segment.content instanceof BaseMessage) {
           this.history.push(segment.content);
         }
       }
 
       // 最终更新，确保显示完整的对话历史
       this._onDataListener?.(this.history);
-
     } catch (error) {
-      console.error('[PageChatService] Error in streamResponseWithTools:', error);
+      console.error('Error in streamResponseWithTools:', error);
       this.history.push(new AIMessage(`Error: ${error.message}`));
       this._onDataListener?.(this.history);
     }

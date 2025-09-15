@@ -176,7 +176,7 @@ export default function App() {
         const selection = document.getSelection()?.toString().trim() || '';
         showChat(selection);
       }
-    } 
+    }
     // Handle agent tool commands
     else if (message.cmd === CommandType.GetPageText) {
       console.log('[Content Script] GetPageText command received:', message);
@@ -194,29 +194,29 @@ export default function App() {
         sendResponse(errorResponse);
       }
       return true; // Keep message channel open for async response
-    }
-    else if (message.cmd === CommandType.GetPageLinks) {
+    } else if (message.cmd === CommandType.GetPageLinks) {
       try {
         // Get all links from the page
-        const links = Array.from(document.querySelectorAll('a[href]')).map(link => {
-          const anchor = link as HTMLAnchorElement;
-          return {
-            text: anchor.textContent?.trim() || '',
-            href: anchor.href,
-            title: anchor.title || ''
-          };
-        }).filter(link => link.text || link.title); // Only include links with text or title
-        
+        const links = Array.from(document.querySelectorAll('a[href]'))
+          .map(link => {
+            const anchor = link as HTMLAnchorElement;
+            return {
+              text: anchor.textContent?.trim() || '',
+              href: anchor.href,
+              title: anchor.title || '',
+            };
+          })
+          .filter(link => link.text || link.title); // Only include links with text or title
+
         sendResponse({ success: true, data: { links } });
       } catch (error) {
         console.error('Error getting page links:', error);
         sendResponse({ success: false, error: error.message });
       }
       return true; // Keep message channel open for async response
-    }
-    else if (message.cmd === CommandType.ScrollPage) {
+    } else if (message.cmd === CommandType.ScrollPage) {
       try {
-        const { x = 0, y = 0 } = message.data || {};
+        const { x = 0, y = 0 } = (message.data as { x?: number; y?: number }) || {};
         // Scroll the page by the specified offset
         window.scrollBy(x, y);
         sendResponse({ success: true, data: { scrolled: { x, y } } });
