@@ -29,8 +29,8 @@ export interface MessageItemProps {
   hasContent?: boolean;
   // Tool progress properties
   toolName?: string;
-  toolArgs?: any;
-  result?: any;
+  toolArgs?: unknown;
+  result?: unknown;
 }
 
 function decodeEntities(text: string): string {
@@ -40,7 +40,7 @@ function decodeEntities(text: string): string {
 }
 
 export function MessageItem(props: MessageItemProps) {
-  const { type, text, role, reasoning, content, hasReasoning, hasContent, toolName, toolArgs, result } = props;
+  const { type, text, role, reasoning, content, hasReasoning, hasContent, toolName, toolArgs: _toolArgs, result } = props;
   const [codeHover, setCodeHover] = useState<number | null>(null);
   const { isVisible, handlers } = useCopyButton(type !== MessageType.CODE);
   let messageItem = <div>{text}</div>;

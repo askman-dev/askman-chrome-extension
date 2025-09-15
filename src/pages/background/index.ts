@@ -1,7 +1,6 @@
 import { CommandType, TabMessage } from '@root/src/types';
 import reloadOnUpdate from 'virtual:reload-on-update-in-background-script';
 import 'webextension-polyfill';
-import './agent-service';
 
 reloadOnUpdate('pages/background');
 

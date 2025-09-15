@@ -1,10 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import 'highlight.js/styles/default.min.css';
-import { QuoteAgent, QuoteContext } from '@src/agents/quote';
+import { QuoteContext } from '@src/agents/quote';
 import React, { useState, useContext, useEffect, useRef, useCallback, useMemo } from 'react';
 import { PageChatContext } from './PageChatService';
 import { ToolDropdown, QuoteDropdown, SystemPromptDropdown, ModelSelector } from '@src/components/controls';
-import { tools } from '@src/components/controls/ToolDropdown';
+// import { tools } from '@src/components/controls/ToolDropdown';
 import TextareaAutosize from 'react-textarea-autosize';
 import {
   ArrowsPointingInIcon,
@@ -29,12 +29,11 @@ import {
   AIToolExecutingMessage,
   AIToolResultMessage,
   CommandType,
-  TabMessage,
 } from '@src/types';
-import { StorageManager } from '@src/utils/StorageManager';
+// import { StorageManager } from '@src/utils/StorageManager';
 import configStorage from '@src/shared/storages/configStorage';
 import { createStorage, StorageType } from '@src/shared/storages/base';
-import { Handlebars } from '@src/../third-party/kbn-handlebars/src/handlebars';
+// import { Handlebars } from '@src/../third-party/kbn-handlebars/src/handlebars';
 import { SCROLLBAR_STYLES_THIN_X } from '@src/styles/common';
 import { HumanMessage } from '@langchain/core/messages';
 import { BlockConfig } from '@src/utils/BlockConfig';
@@ -120,7 +119,7 @@ export function PagePanel(props: PagePanelProps) {
   //TODO 需要定义一个可渲染、可序列号的类型，疑似是 StoredMessage
   const [history, setHistory] = useState<{ id: string; role: string; type: string; text: string }[]>([]);
   const [initQuotes, setInitQuotes] = useState<Array<QuoteContext>>([]);
-  const [pageContext, setPageContext] = useState<QuoteContext>(new QuoteContext());
+  const [pageContext] = useState<QuoteContext>(new QuoteContext());
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null); // Add this line
 
@@ -133,6 +132,22 @@ export function PagePanel(props: PagePanelProps) {
   const [isSystemPromptDropdownOpen, setIsSystemPromptDropdownOpen] = useState(false);
   const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+
+  // 初始化选中的模型 - 从配置存储中获取当前模型
+  useEffect(() => {
+    const initializeSelectedModel = async () => {
+      try {
+        const currentModel = await configStorage.getCurrentModel();
+        if (currentModel) {
+          console.log('[PagePanel] 🎯 初始化选中模型:', currentModel);
+          setSelectedModel(currentModel);
+        }
+      } catch (error) {
+        console.warn('[PagePanel] 获取当前模型失败:', error);
+      }
+    };
+    initializeSelectedModel();
+  }, []);
   const [selectorExpanded, setSelectorExpanded] = useState(false);
   const [pendingDropdown, setPendingDropdown] = useState<'system' | 'model' | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -319,13 +334,6 @@ export function PagePanel(props: PagePanelProps) {
     };
   }, [quotes]);
 
-  const updatePageContext = (quoteContext: QuoteContext) => {
-    setPageContext({
-      ...pageContext,
-      ...quoteContext,
-      type: 'page',
-    });
-  };
 
   const updateToolDropdownStatus = (status: boolean) => {
     setIsToolDropdownOpen(status);
@@ -341,13 +349,96 @@ export function PagePanel(props: PagePanelProps) {
   };
 
   useEffect(() => {
-    const messageListener = (message: TabMessage) => {
-      if (message.cmd === CommandType.AGENT_STREAM) {
-        setHistory(message.data);
-      }
-    };
+    // 恢复本地 chatContext 监听
+    function rerenderHistory(messages?) {
+      const messagesToRender = messages || chatContext.history;
+      setHistory(
+        messagesToRender
+          .filter(
+            message =>
+              !(
+                message instanceof HumanInvisibleMessage ||
+                message instanceof AIInvisibleMessage ||
+                message instanceof SystemInvisibleMessage
+              ),
+          )
+          .map((message, idx) => {
+            let role = 'assistant';
+            if (message instanceof HumanMessage) {
+              role = 'user';
+            }
+            if (message instanceof HumanAskMessage) {
+              return {
+                type: 'text',
+                id: `history-${idx}`,
+                text: message.rendered || String(message.content),
+                role: role,
+                name: 'HumanAskMessage',
+              };
+            } else if (message instanceof AIThinkingMessage) {
+              return {
+                type: 'thinking',
+                id: `history-${idx}`,
+                text: '',
+                role: role,
+                name: 'AIThinkingMessage',
+              };
+            } else if (message instanceof AIReasoningMessage) {
+              return {
+                type: 'reasoning',
+                id: `history-${idx}`,
+                text: message.content as string,
+                role: role,
+                name: 'AIReasoningMessage',
+                hasReasoning: !!message.reasoning,
+                reasoning: message.reasoning,
+                hasContent: !!message.content,
+                content: message.content,
+              };
+            } else if (message instanceof AIToolPendingMessage) {
+              return {
+                type: 'tool_pending',
+                id: `history-${idx}`,
+                text: `准备执行工具: ${message.toolName}`,
+                role: role,
+                name: 'AIToolPendingMessage',
+                toolName: message.toolName,
+                toolArgs: message.toolInput,
+              };
+            } else if (message instanceof AIToolExecutingMessage) {
+              return {
+                type: 'tool_executing',
+                id: `history-${idx}`,
+                text: `执行中: ${message.toolName}`,
+                role: role,
+                name: 'AIToolExecutingMessage',
+                toolName: message.toolName,
+              };
+            } else if (message instanceof AIToolResultMessage) {
+              return {
+                type: 'tool_result',
+                id: `history-${idx}`,
+                text: `${message.toolName} 执行完成`,
+                role: role,
+                name: 'AIToolResultMessage',
+                toolName: message.toolName,
+                result: message.result,
+              };
+            } else {
+              return {
+                type: 'text',
+                id: `history-${idx}`,
+                text: String(message.content),
+                role: role,
+                name: message.constructor.name,
+              };
+            }
+          }),
+      );
+    }
 
-    chrome.runtime.onMessage.addListener(messageListener);
+    chatContext.setOnDataListener(rerenderHistory);
+    rerenderHistory(); // Initial render
 
     askPanelVisible &&
       setTimeout(() => {
@@ -355,7 +446,7 @@ export function PagePanel(props: PagePanelProps) {
       }, 200);
 
     return () => {
-      chrome.runtime.onMessage.removeListener(messageListener);
+      chatContext.removeOnDataListener();
     };
   }, [askPanelVisible]);
   // 使用 ref 保持最新状态，避免闭包问题
@@ -543,22 +634,17 @@ export function PagePanel(props: PagePanelProps) {
     } : null);
     console.log('[PagePanel] initQuotes count:', initQuotes?.length || 0);
     console.log('[PagePanel] overrideSystem:', overrideSystem ? 'YES' : 'NO');
-    console.log('[PagePanel] overrideModel:', overrideModel || 'default');
+    console.log('[PagePanel] overrideModel (传递的):', overrideModel || 'default');
+    console.log('[PagePanel] selectedModel (状态的):', selectedModel);
+    console.log('[PagePanel] selectedSystemPrompt (状态的):', selectedSystemPrompt);
+    console.log('[PagePanel] 🎯 最终使用的模型:', overrideModel || selectedModel || 'default');
     
     try {
       if (isAgentMode) {
         console.log('[PagePanel] 🤖 ROUTING TO: askWithAgent (tool calling mode)');
-        chrome.runtime.sendMessage({
-          cmd: CommandType.ASK_AGENT,
-          data: {
-            userPrompt: currentInput,
-            pageContext,
-            quotes: initQuotes,
-            options: {
-              overrideSystem,
-              overrideModel,
-            },
-          },
+        await chatContext.askWithAgent(currentInput, pageContext, initQuotes, {
+          overrideSystem,
+          overrideModel: overrideModel || selectedModel,
         });
       } else if (toolToUse) {
         console.log('[PagePanel] 💬 ROUTING TO: askWithTool (template mode with tool)');
@@ -566,14 +652,14 @@ export function PagePanel(props: PagePanelProps) {
         // Ask mode with tool template: Use askWithTool
         await chatContext.askWithTool(toolToUse, pageContext, initQuotes, currentInput, {
           overrideSystem,
-          overrideModel,
+          overrideModel: overrideModel || selectedModel,
         });
       } else {
         console.log('[PagePanel] 📝 ROUTING TO: askWithQuotes (simple ask mode)');
         // Ask mode without tool: Use askWithQuotes
         await chatContext.askWithQuotes(initQuotes!, currentInput, {
           overrideSystem,
-          overrideModel,
+          overrideModel: overrideModel || selectedModel,
         });
       }
     } catch (error) {
@@ -691,9 +777,12 @@ export function PagePanel(props: PagePanelProps) {
               initOpen={isModelDropdownOpen}
               className="flex items-center"
               onItemClick={(model, withCommand) => {
+                console.log('[PagePanel] 🎯 模型选择器点击:', { model, withCommand, selectedModel });
                 if (withCommand) {
+                  console.log('[PagePanel] 🚀 直接发送，使用模型:', model);
                   onSend(undefined, undefined, model);
                 } else {
+                  console.log('[PagePanel] 📝 更新选中模型状态:', model);
                   setSelectedModel(model);
                 }
                 setIsModelDropdownOpen(false);
@@ -742,10 +831,12 @@ export function PagePanel(props: PagePanelProps) {
               if (itemId === 'toggle-size') {
                 setIsMaximized(!isMaximized);
               } else if (itemId === 'new-chat') {
+                console.log('[PagePanel] 🆕 New Chat - 保留用户选择的模型和系统提示:', { selectedModel, selectedSystemPrompt });
                 clearHistory();
                 setUserTools(null);
-                setSelectedSystemPrompt(null);
-                setSelectedModel(null);
+                // 🎯 保留用户选择的模型和系统提示，不重置为null
+                // setSelectedSystemPrompt(null);  // 注释掉：保留用户选择
+                // setSelectedModel(null);          // 注释掉：保留用户选择
                 setTimeout(() => {
                   inputRef.current?.focus();
                 }, 100);
