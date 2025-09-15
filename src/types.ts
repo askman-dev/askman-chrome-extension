@@ -112,10 +112,10 @@ export class AIReasoningMessage extends AIMessage {
 // Tool execution progress message types
 export class AIToolPendingMessage extends AIMessage {
   toolName: string;
-  toolInput?: any;
+  toolInput?: unknown;
   isToolPending = true;
 
-  constructor(toolName: string, input?: any) {
+  constructor(toolName: string, input?: unknown) {
     super(`准备执行工具: ${toolName}`);
     this.toolName = toolName;
     this.toolInput = input;
@@ -134,10 +134,10 @@ export class AIToolExecutingMessage extends AIMessage {
 
 export class AIToolResultMessage extends AIMessage {
   toolName: string;
-  result: any;
+  result: unknown;
   isToolResult = true;
 
-  constructor(toolName: string, result: any) {
+  constructor(toolName: string, result: unknown) {
     super(`工具 ${toolName} 执行完成`);
     this.toolName = toolName;
     this.result = result;
@@ -169,8 +169,6 @@ export enum CommandType {
   GetPageText,
   GetPageLinks,
   ScrollPage,
-  ASK_AGENT,
-  AGENT_STREAM,
 }
 export interface TabMessage {
   cmd: CommandType;
@@ -179,7 +177,7 @@ export interface TabMessage {
   fromShortcut?: boolean; // 是否由快捷键触发
   linkText?: string; // 被点击的链接文本
   linkUrl?: string; // 被点击的链接URL
-  data?: any; // 用于传递工具调用的数据，如滚动偏移量
+  data?: unknown; // 用于传递工具调用的数据，如滚动偏移量
   timestamp?: number; // 用于工具调用的时间戳
 }
 

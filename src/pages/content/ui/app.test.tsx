@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { render } from '@testing-library/react';
 // import { Chrome } from '@types/chrome';
