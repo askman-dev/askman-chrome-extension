@@ -116,7 +116,7 @@ export class AIToolPendingMessage extends AIMessage {
   isToolPending = true;
 
   constructor(toolName: string, input?: unknown) {
-    super(`准备执行工具: ${toolName}`);
+    super(`🔄 Preparing ${toolName}`);
     this.toolName = toolName;
     this.toolInput = input;
   }
@@ -127,7 +127,7 @@ export class AIToolExecutingMessage extends AIMessage {
   isToolExecuting = true;
 
   constructor(toolName: string) {
-    super(`正在执行: ${toolName}...`);
+    super(`⚡ Executing ${toolName}...`);
     this.toolName = toolName;
   }
 }
@@ -138,7 +138,7 @@ export class AIToolResultMessage extends AIMessage {
   isToolResult = true;
 
   constructor(toolName: string, result: unknown) {
-    super(`工具 ${toolName} 执行完成`);
+    super(`✓ ${toolName} completed`);
     this.toolName = toolName;
     this.result = result;
   }
