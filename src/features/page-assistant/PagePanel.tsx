@@ -334,7 +334,6 @@ export function PagePanel(props: PagePanelProps) {
     };
   }, [quotes]);
 
-
   const updateToolDropdownStatus = (status: boolean) => {
     setIsToolDropdownOpen(status);
   };
@@ -628,17 +627,22 @@ export function PagePanel(props: PagePanelProps) {
     console.log('[PagePanel] ====== SEND REQUEST ROUTING DEBUG ======');
     console.log('[PagePanel] User input:', currentInput);
     console.log('[PagePanel] isAgentMode:', isAgentMode);
-    console.log('[PagePanel] toolToUse:', toolToUse ? {
-      name: toolToUse.name,
-      template: typeof toolToUse.template === 'string' ? toolToUse.template.substring(0, 50) + '...' : 'N/A'
-    } : null);
+    console.log(
+      '[PagePanel] toolToUse:',
+      toolToUse
+        ? {
+            name: toolToUse.name,
+            template: typeof toolToUse.template === 'string' ? toolToUse.template.substring(0, 50) + '...' : 'N/A',
+          }
+        : null,
+    );
     console.log('[PagePanel] initQuotes count:', initQuotes?.length || 0);
     console.log('[PagePanel] overrideSystem:', overrideSystem ? 'YES' : 'NO');
     console.log('[PagePanel] overrideModel (传递的):', overrideModel || 'default');
     console.log('[PagePanel] selectedModel (状态的):', selectedModel);
     console.log('[PagePanel] selectedSystemPrompt (状态的):', selectedSystemPrompt);
     console.log('[PagePanel] 🎯 最终使用的模型:', overrideModel || selectedModel || 'default');
-    
+
     try {
       if (isAgentMode) {
         console.log('[PagePanel] 🤖 ROUTING TO: askWithAgent (tool calling mode)');
@@ -776,8 +780,13 @@ export function PagePanel(props: PagePanelProps) {
             <ModelSelector
               initOpen={isModelDropdownOpen}
               className="flex items-center"
-              onItemClick={(model, withCommand) => {
-                console.log('[PagePanel] 🎯 模型选择器点击:', { model, withCommand, selectedModel });
+              onItemClick={(model, isAgentModel, withCommand) => {
+                console.log('[PagePanel] 🎯 模型选择器点击:', { model, isAgentModel, withCommand, selectedModel });
+
+                // 自动设置模式
+                setIsAgentMode(isAgentModel);
+                console.log('[PagePanel] 🔄 自动设置模式:', isAgentModel ? 'Agent' : 'Chat');
+
                 if (withCommand) {
                   console.log('[PagePanel] 🚀 直接发送，使用模型:', model);
                   onSend(undefined, undefined, model);
@@ -789,6 +798,14 @@ export function PagePanel(props: PagePanelProps) {
               }}
               statusListener={updateModelDropdownStatus}
             />
+
+            {/* 模式指示标签 */}
+            <span
+              className={`px-2 py-1 rounded text-xs font-medium ${
+                isAgentMode ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'
+              }`}>
+              {isAgentMode ? 'Agent' : 'Chat'}
+            </span>
             <SystemPromptDropdown
               className="relative inline-block text-left"
               statusListener={updateSystemPromptDropdownStatus}
@@ -805,21 +822,6 @@ export function PagePanel(props: PagePanelProps) {
           </div>
         </div>
 
-        {/* Ask/Agent Mode Toggle */}
-        <div className="flex items-center gap-1 px-2">
-          <button
-            onClick={() => setIsAgentMode(!isAgentMode)}
-            className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium transition-colors duration-200 ${
-              isAgentMode
-                ? 'bg-black text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-            title={isAgentMode ? 'Switch to Ask mode (template-based)' : 'Switch to Agent mode (tool calling)'}
-          >
-            {isAgentMode ? '🤖 Agent' : '💬 Ask'}
-          </button>
-        </div>
-
         <div className="grow"></div>
 
         <div className="flex items-center gap-2">
@@ -831,7 +833,10 @@ export function PagePanel(props: PagePanelProps) {
               if (itemId === 'toggle-size') {
                 setIsMaximized(!isMaximized);
               } else if (itemId === 'new-chat') {
-                console.log('[PagePanel] 🆕 New Chat - 保留用户选择的模型和系统提示:', { selectedModel, selectedSystemPrompt });
+                console.log('[PagePanel] 🆕 New Chat - 保留用户选择的模型和系统提示:', {
+                  selectedModel,
+                  selectedSystemPrompt,
+                });
                 clearHistory();
                 setUserTools(null);
                 // 🎯 保留用户选择的模型和系统提示，不重置为null
@@ -1136,8 +1141,7 @@ export function PagePanel(props: PagePanelProps) {
               ) : (
                 <div
                   className="inline-flex items-center justify-center w-8 h-8 text-gray-400 rounded transition-colors duration-200"
-                  title="Agent mode: AI will automatically select tools"
-                >
+                  title="Agent mode: AI will automatically select tools">
                   <span className="text-sm">🤖</span>
                 </div>
               )}
