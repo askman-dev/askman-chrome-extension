@@ -798,14 +798,6 @@ export function PagePanel(props: PagePanelProps) {
               }}
               statusListener={updateModelDropdownStatus}
             />
-
-            {/* 模式指示标签 */}
-            <span
-              className={`px-2 py-1 rounded text-xs font-medium ${
-                isAgentMode ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'
-              }`}>
-              {isAgentMode ? 'Agent' : 'Chat'}
-            </span>
             <SystemPromptDropdown
               className="relative inline-block text-left"
               statusListener={updateSystemPromptDropdownStatus}

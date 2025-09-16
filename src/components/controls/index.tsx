@@ -5,6 +5,7 @@ import { QuoteDropdown } from './QuoteDropdown';
 import { SystemPromptDropdown } from './SystemPromptDropdown';
 import { ToolDropdown } from './ToolDropdown';
 import { ToolPreview } from './ToolPreview';
+import { ChatBubbleOvalLeftIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/20/solid';
 
 interface ModelSelectorProps {
   className?: string;
@@ -25,6 +26,7 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
   const [models, setModels] = useState<ModelItem[]>([]);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [selectedModelName, setSelectedModelName] = useState<string>('free'); // 默认显示 free
+  const [isAgentMode, setIsAgentMode] = useState<boolean>(false); // 记录当前模式
   const baseDropdownRef = useRef<HTMLDivElement>(null);
 
   // 辅助函数：简化模型名称显示
@@ -56,7 +58,7 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
               // 添加 agent 版本
               modelArray.push({
                 id: baseModelItem.id + ':agent',
-                name: baseModelItem.name + ' (Agent)',
+                name: baseModelItem.name,
                 shortName: baseModelItem.shortName,
                 provider: baseModelItem.provider,
                 group: 'agent',
@@ -79,9 +81,11 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
       const currentModel = await configStorage.getCurrentModel();
       if (currentModel) {
         setSelectedModel(currentModel);
-        const model = modelArray.find(m => m.id === currentModel);
+        const model = sortedModels.find(m => m.id === currentModel);
         if (model) {
           setSelectedModelName(model.name);
+          // 初始化时设置模式状态
+          setIsAgentMode(model.group === 'agent');
         }
       }
     };
@@ -105,6 +109,9 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
           setSelectedModelName(name);
         });
       }
+      // 更新内部模式状态
+      setIsAgentMode(group === 'agent');
+
       onItemClick(name, group === 'agent', isCommandPressed);
       statusListener(false);
     }
@@ -131,8 +138,8 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
       groupIndex = chatModels.findIndex(m => m.id === item.id);
     }
 
-    // 为 agent 模型使用不同的编号前缀
-    const displayIndex = group === 'agent' ? `A${groupIndex}` : groupIndex;
+    // 为 agent 模型使用字母编号，chat 模型使用数字编号
+    const displayIndex = group === 'agent' ? String.fromCharCode(97 + groupIndex) : groupIndex;
 
     return (
       <div>
@@ -192,7 +199,17 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
   return (
     <div ref={baseDropdownRef} className="relative">
       <BaseDropdown
-        displayName={simplifyModelName(selectedModelName)}
+        displayName=""
+        buttonDisplay={
+          <div className="flex items-center gap-1.5">
+            {isAgentMode ? (
+              <ChatBubbleLeftRightIcon className="h-3.5 w-3.5 text-gray-500" />
+            ) : (
+              <ChatBubbleOvalLeftIcon className="h-3.5 w-3.5 text-gray-500" />
+            )}
+            <span>{simplifyModelName(selectedModelName)}</span>
+          </div>
+        }
         className={className}
         onItemClick={handleModelClick}
         statusListener={statusListener}
@@ -203,7 +220,7 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
         renderItem={renderGroupedItems}
         align="right"
         hoverMessage={`Model [${simplifyModelName(selectedModelName)}]`}
-        variant="button"
+        variant="icon-text"
       />
     </div>
   );
