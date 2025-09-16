@@ -182,6 +182,24 @@ export function PagePanel(props: PagePanelProps) {
     loadHeightExpandedState();
   }, []);
 
+  // Initialize agent mode state from current model on mount
+  useEffect(() => {
+    const initializeAgentMode = async () => {
+      try {
+        const currentModel = await configStorage.getCurrentModel();
+        if (currentModel) {
+          // 检查当前模型是否为 agent 模型
+          const isAgent = currentModel.includes(':agent');
+          console.log('[PagePanel] 🔄 初始化模式状态:', { currentModel, isAgent });
+          setIsAgentMode(isAgent);
+        }
+      } catch (error) {
+        console.warn('Failed to initialize agent mode:', error);
+      }
+    };
+    initializeAgentMode();
+  }, []);
+
   // Save height expansion state to storage when it changes
   useEffect(() => {
     const saveHeightExpandedState = async () => {
@@ -645,22 +663,32 @@ export function PagePanel(props: PagePanelProps) {
 
     try {
       if (isAgentMode) {
-        console.log('[PagePanel] 🤖 ROUTING TO: askWithAgent (tool calling mode)');
-        await chatContext.askWithAgent(currentInput, pageContext, initQuotes, {
-          overrideSystem,
-          overrideModel: overrideModel || selectedModel,
-        });
+        if (toolToUse) {
+          console.log('[PagePanel] 🤖📋 ROUTING TO: askWithAgent (agent mode with template)');
+          console.log('[PagePanel] Selected tool:', toolToUse.name);
+          await chatContext.askWithAgent(currentInput, pageContext, initQuotes, {
+            overrideSystem,
+            overrideModel: overrideModel || selectedModel,
+            tool: toolToUse, // 传递模板给 agent 模式
+          });
+        } else {
+          console.log('[PagePanel] 🤖 ROUTING TO: askWithAgent (agent mode without template)');
+          await chatContext.askWithAgent(currentInput, pageContext, initQuotes, {
+            overrideSystem,
+            overrideModel: overrideModel || selectedModel,
+          });
+        }
       } else if (toolToUse) {
-        console.log('[PagePanel] 💬 ROUTING TO: askWithTool (template mode with tool)');
+        console.log('[PagePanel] 💬 ROUTING TO: askWithTool (chat mode with template)');
         console.log('[PagePanel] Selected tool:', toolToUse.name);
-        // Ask mode with tool template: Use askWithTool
+        // Chat mode with tool template: Use askWithTool
         await chatContext.askWithTool(toolToUse, pageContext, initQuotes, currentInput, {
           overrideSystem,
           overrideModel: overrideModel || selectedModel,
         });
       } else {
-        console.log('[PagePanel] 📝 ROUTING TO: askWithQuotes (simple ask mode)');
-        // Ask mode without tool: Use askWithQuotes
+        console.log('[PagePanel] 📝 ROUTING TO: askWithQuotes (chat mode without template)');
+        // Chat mode without tool: Use askWithQuotes
         await chatContext.askWithQuotes(initQuotes!, currentInput, {
           overrideSystem,
           overrideModel: overrideModel || selectedModel,
@@ -780,19 +808,19 @@ export function PagePanel(props: PagePanelProps) {
             <ModelSelector
               initOpen={isModelDropdownOpen}
               className="flex items-center"
-              onItemClick={(model, isAgentModel, withCommand) => {
-                console.log('[PagePanel] 🎯 模型选择器点击:', { model, isAgentModel, withCommand, selectedModel });
+              onItemClick={(modelId, isAgentModel, withCommand) => {
+                console.log('[PagePanel] 🎯 模型选择器点击:', { modelId, isAgentModel, withCommand, selectedModel });
 
                 // 自动设置模式
                 setIsAgentMode(isAgentModel);
                 console.log('[PagePanel] 🔄 自动设置模式:', isAgentModel ? 'Agent' : 'Chat');
 
                 if (withCommand) {
-                  console.log('[PagePanel] 🚀 直接发送，使用模型:', model);
-                  onSend(undefined, undefined, model);
+                  console.log('[PagePanel] 🚀 直接发送，使用模型ID:', modelId);
+                  onSend(undefined, undefined, modelId);
                 } else {
-                  console.log('[PagePanel] 📝 更新选中模型状态:', model);
-                  setSelectedModel(model);
+                  console.log('[PagePanel] 📝 更新选中模型状态:', modelId);
+                  setSelectedModel(modelId);
                 }
                 setIsModelDropdownOpen(false);
               }}
@@ -1116,7 +1144,7 @@ export function PagePanel(props: PagePanelProps) {
                   title="Stop streaming">
                   <StopIcon className="w-4 h-4" />
                 </button>
-              ) : !isAgentMode ? (
+              ) : (
                 <ToolDropdown
                   initOpen={isToolDropdownOpen}
                   statusListener={updateToolDropdownStatus}
@@ -1130,12 +1158,6 @@ export function PagePanel(props: PagePanelProps) {
                   }}
                   buttonDisplay="➤"
                 />
-              ) : (
-                <div
-                  className="inline-flex items-center justify-center w-8 h-8 text-gray-400 rounded transition-colors duration-200"
-                  title="Agent mode: AI will automatically select tools">
-                  <span className="text-sm">🤖</span>
-                </div>
               )}
             </div>
           </div>
