@@ -8,7 +8,7 @@ import { ToolPreview } from './ToolPreview';
 
 interface ModelSelectorProps {
   className?: string;
-  onItemClick: (_model: string, _withCommand?: boolean) => void;
+  onItemClick: (_model: string, _isAgentModel: boolean, _withCommand?: boolean) => void;
   statusListener: (_status: boolean) => void;
   initOpen: boolean;
 }
@@ -18,6 +18,7 @@ interface ModelItem {
   name: string;
   shortName: string;
   provider: string;
+  group: 'agent' | 'chat';
 }
 
 export function ModelSelector({ className, onItemClick, statusListener, initOpen }: ModelSelectorProps) {
@@ -38,19 +39,42 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
     const fetchModels = async () => {
       const userModels = (await configStorage.getModelConfig()) || [];
       const modelArray: ModelItem[] = [];
+
       userModels.forEach(({ provider, config }) => {
         if (config.models) {
           config.models.forEach(m => {
-            modelArray.push({
+            const baseModelItem: ModelItem = {
               id: provider + '/' + (m.name || m.id),
               name: provider + '/' + (m.name || m.id),
               shortName: m.name || m.id,
               provider,
-            });
+              group: 'chat',
+            };
+
+            // Sonnet 检测 - 自动生成 agent 版本
+            if (baseModelItem.name.toLowerCase().includes('sonnet')) {
+              // 添加 agent 版本
+              modelArray.push({
+                id: baseModelItem.id + ':agent',
+                name: baseModelItem.name + ' (Agent)',
+                shortName: baseModelItem.shortName,
+                provider: baseModelItem.provider,
+                group: 'agent',
+              });
+            }
+
+            // 添加原始 chat 版本
+            modelArray.push(baseModelItem);
           });
         }
       });
-      setModels(modelArray);
+
+      // 按组排序：agent 模型在前，chat 模型在后
+      const agentModels = modelArray.filter(m => m.group === 'agent');
+      const chatModels = modelArray.filter(m => m.group === 'chat');
+      const sortedModels = [...agentModels, ...chatModels];
+
+      setModels(sortedModels);
 
       const currentModel = await configStorage.getCurrentModel();
       if (currentModel) {
@@ -72,6 +96,7 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
     // 安全地访问属性
     const id = item.id as string;
     const name = item.name as string;
+    const group = item.group as string;
 
     if (id && name) {
       if (!isCommandPressed) {
@@ -80,35 +105,86 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
           setSelectedModelName(name);
         });
       }
-      onItemClick(name, isCommandPressed);
+      onItemClick(name, group === 'agent', isCommandPressed);
       statusListener(false);
     }
   };
 
-  // 修改以符合BaseDropdown期望的类型
-  const renderModelItem = (item: Record<string, unknown>, index: number, active: boolean) => {
+  // 支持分组渲染的函数
+  const renderGroupedItems = (item: Record<string, unknown>, index: number, active: boolean, isSelected?: boolean) => {
     const shortName = item.shortName as string;
     const provider = item.provider as string;
+    const group = item.group as string;
 
     if (!shortName) return <div>Invalid model</div>;
 
+    // 检查是否需要显示组标题
+    const isFirstInGroup = index === 0 || (models[index - 1] && models[index - 1].group !== group);
+    const agentModels = models.filter(m => m.group === 'agent');
+    const chatModels = models.filter(m => m.group === 'chat');
+
+    // 计算在组内的索引
+    let groupIndex;
+    if (group === 'agent') {
+      groupIndex = agentModels.findIndex(m => m.id === item.id);
+    } else {
+      groupIndex = chatModels.findIndex(m => m.id === item.id);
+    }
+
+    // 为 agent 模型使用不同的编号前缀
+    const displayIndex = group === 'agent' ? `A${groupIndex}` : groupIndex;
+
     return (
-      <div
-        className={`${
-          active ? 'bg-black text-white' : 'text-gray-900'
-        } group flex w-full items-center rounded-md px-2 py-2 text-sm cursor-pointer`}>
-        <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
-          {index}
-        </span>
-        <span className="whitespace-nowrap flex-1 flex justify-between items-center">
-          <span>{shortName}</span>
-          <span
-            className={`ml-2 opacity-0 transition-all duration-100 ${active || 'group-hover:opacity-100'} ${
-              active && 'opacity-100'
-            }`}>
-            [{provider}]
+      <div>
+        {/* 组标题 */}
+        {isFirstInGroup && (
+          <>
+            {group === 'agent' && agentModels.length > 0 && (
+              <div className="px-2 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider text-left">
+                AGENT MODELS
+              </div>
+            )}
+            {group === 'chat' && chatModels.length > 0 && (
+              <>
+                {agentModels.length > 0 && <div className="my-1 border-t border-gray-200" />}
+                <div className="px-2 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider text-left">
+                  CHAT MODELS
+                </div>
+              </>
+            )}
+          </>
+        )}
+
+        {/* 模型项 */}
+        <div
+          className={`${
+            active ? 'bg-black text-white' : 'text-gray-900'
+          } group flex w-full items-center rounded-md px-2 py-2 text-sm cursor-pointer`}>
+          <span className="mr-2 inline-flex items-center justify-center w-5 h-5 text-xs font-semibold border border-gray-300 rounded">
+            {displayIndex}
           </span>
-        </span>
+          <span className="whitespace-nowrap flex-1 flex justify-between items-center">
+            <span>{shortName}</span>
+            <div className="flex items-center gap-2">
+              {group === 'chat' && (
+                <span
+                  className={`ml-2 text-xs opacity-0 transition-all duration-100 ${
+                    active || 'group-hover:opacity-100'
+                  } ${active && 'opacity-100'}`}>
+                  [{provider}]
+                </span>
+              )}
+              {isSelected && (
+                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  />
+                </svg>
+              )}
+            </div>
+          </span>
+        </div>
       </div>
     );
   };
@@ -124,7 +200,7 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
         items={models}
         selectedId={selectedModel}
         showShortcut={false}
-        renderItem={renderModelItem}
+        renderItem={renderGroupedItems}
         align="right"
         hoverMessage={`Model [${simplifyModelName(selectedModelName)}]`}
         variant="button"
