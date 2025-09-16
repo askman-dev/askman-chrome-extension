@@ -18,6 +18,7 @@ import { stepCountIs } from 'ai';
 export interface SendOptions {
   overrideSystem?: string;
   overrideModel?: string;
+  tool?: ToolsPromptInterface;
 }
 
 export interface PageChatInterface {
@@ -112,17 +113,30 @@ export class PageChatService implements PageChatInterface {
     }
   }
 
-  async askWithAgent(userPrompt: string, _pageContext: QuoteContext, _quotes: QuoteContext[], options?: SendOptions) {
+  async askWithAgent(userPrompt: string, pageContext: QuoteContext, quotes: QuoteContext[], options?: SendOptions) {
     if (!userPrompt?.trim()) return;
 
-    console.log('[PageChatService] 🤖 askWithAgent called with:', { userPrompt, _pageContext, _quotes, options });
+    console.log('[PageChatService] 🤖 askWithAgent called with:', { userPrompt, pageContext, quotes, options });
 
     try {
-      const humanAskMessage = new HumanAskMessage({ content: userPrompt, name: 'user', rendered: userPrompt });
+      // 如果提供了模板，先渲染模板
+      let renderedContent = userPrompt;
+      if (options?.tool) {
+        console.log('[PageChatService] 📋 Rendering template for agent mode:', options.tool.name);
+        const context = { chat: { input: userPrompt }, page: { ...pageContext }, quotes };
+        renderedContent = (options.tool.template as (..._args: unknown[]) => string)?.(context) || userPrompt;
+        console.log('[PageChatService] 📋 Template rendered length:', renderedContent.length);
+      }
+
+      const humanAskMessage = new HumanAskMessage({ content: userPrompt, name: 'user', rendered: renderedContent });
       this.history.push(humanAskMessage);
       this._onDataListener?.(this.history);
 
       const messages = this.convertToCoreMessages(options?.overrideSystem);
+      // 更新最后一条用户消息为渲染后的内容
+      if (messages.length > 0 && messages[messages.length - 1].role === 'user') {
+        messages[messages.length - 1].content = renderedContent;
+      }
 
       // 显示思考状态
       const thinkingMessage = new AIThinkingMessage();
@@ -177,15 +191,25 @@ export class PageChatService implements PageChatInterface {
     let selectedModel = null;
 
     if (overrideModel) {
+      // 移除 :agent 后缀以匹配配置中的模型
+      const modelIdWithoutSuffix = overrideModel.replace(':agent', '');
+      console.log('[PageChatService] Looking for model:', overrideModel);
+      console.log('[PageChatService] Clean model ID:', modelIdWithoutSuffix);
+
       for (const providerConfig of modelConfigs) {
         const model = providerConfig.config.models.find(
-          m => `${providerConfig.provider}/${m.name}` === overrideModel || m.name === overrideModel,
+          m => `${providerConfig.provider}/${m.name}` === modelIdWithoutSuffix || m.name === modelIdWithoutSuffix,
         );
         if (model) {
           selectedProvider = providerConfig;
           selectedModel = model;
+          console.log('[PageChatService] Found model:', selectedModel.name, 'from provider:', providerConfig.provider);
           break;
         }
+      }
+
+      if (!selectedModel) {
+        console.warn('[PageChatService] Model not found:', modelIdWithoutSuffix);
       }
     }
 

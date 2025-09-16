@@ -112,7 +112,7 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
       // 更新内部模式状态
       setIsAgentMode(group === 'agent');
 
-      onItemClick(name, group === 'agent', isCommandPressed);
+      onItemClick(id, group === 'agent', isCommandPressed);
       statusListener(false);
     }
   };
