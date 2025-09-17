@@ -1,13 +1,14 @@
 /**
  * 调用方：thought-prism页面、Prism聊天界面
- * 依赖：TextareaAutosize、ToolDropdown、SystemPromptDropdown、ModelSelector
+ * 依赖：TextareaAutosize、ShortcutSender、SystemPromptDropdown、ModelSelector
  */
 
 /* eslint-disable react/prop-types */
 import React, { useRef, useCallback, useImperativeHandle } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
-import { ToolDropdown, SystemPromptDropdown, ModelSelector } from '@src/components/controls';
-import type { ToolsPromptInterface, SystemPresetInterface } from '@src/components/input';
+import { ShortcutSender, SystemPromptDropdown, ModelSelector } from '@src/components/controls';
+import type { ShortcutInterface } from '@src/types';
+import type { SystemPresetInterface } from '@src/utils/StorageManager';
 
 export interface PrismInputProps {
   className?: string;
@@ -18,24 +19,24 @@ export interface PrismInputProps {
   onValueChange?: (_value: string) => void;
   onSend?: (
     _message: string,
-    _options?: { tool?: ToolsPromptInterface; systemPrompt?: string; model?: string },
+    _options?: { shortcut?: ShortcutInterface; systemPrompt?: string; model?: string },
   ) => void;
   onKeyDown?: (_e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 
   // 控制组件显示
-  showToolDropdown?: boolean;
+  showShortcutDropdown?: boolean;
   showSystemPromptDropdown?: boolean;
   showModelSelector?: boolean;
 
   // 移除控制组件状态 - dropdown 内部管理
 
   // 控制组件回调
-  onToolDropdownStatusChange?: (_open: boolean) => void;
+  onShortcutDropdownStatusChange?: (_open: boolean) => void;
   onSystemPromptDropdownStatusChange?: (_open: boolean) => void;
   onModelDropdownStatusChange?: (_open: boolean) => void;
 
-  // 工具选择回调
-  onToolSelect?: (_tool: ToolsPromptInterface, _withCommand?: boolean) => void;
+  // 快捷键选择回调
+  onShortcutSelect?: (_shortcut: ShortcutInterface, _withCommand?: boolean) => void;
   onSystemPromptSelect?: (_preset: SystemPresetInterface, _withCommand?: boolean) => void;
   onModelSelect?: (_model: string, _withCommand?: boolean) => void;
 
@@ -66,17 +67,17 @@ export const PrismInput = React.memo(
         onKeyDown = () => {},
 
         // 控制组件显示 - 默认全部显示
-        showToolDropdown = true,
+        showShortcutDropdown = true,
         showSystemPromptDropdown = true,
         showModelSelector = true,
 
         // 控制组件回调
-        onToolDropdownStatusChange = () => {},
+        onShortcutDropdownStatusChange = () => {},
         onSystemPromptDropdownStatusChange = () => {},
         onModelDropdownStatusChange = () => {},
 
-        // 工具选择回调
-        onToolSelect = () => {},
+        // 快捷键选择回调
+        onShortcutSelect = () => {},
         onSystemPromptSelect = () => {},
         onModelSelect = () => {},
 
@@ -182,7 +183,7 @@ export const PrismInput = React.memo(
             />
 
             {/* 内置控制按钮区域 - 位于输入框底部 */}
-            {(showToolDropdown || showSystemPromptDropdown || showModelSelector) && (
+            {(showShortcutDropdown || showSystemPromptDropdown || showModelSelector) && (
               <div className={`controls-container px-3 pb-2 ${getButtonLayoutClasses()}`}>
                 {/* 左侧组：System Prompt 和 Model - 优先显示 */}
                 <div className="flex gap-2 flex-shrink-0 min-w-0">
@@ -205,20 +206,20 @@ export const PrismInput = React.memo(
                 </div>
 
                 {/* 右侧组：Tool Dropdown (发送按钮) - 小屏幕时隐藏避免重叠 */}
-                {showToolDropdown && (
+                {showShortcutDropdown && (
                   <div className="hidden lg:block">
-                    <ToolDropdown
+                    <ShortcutSender
                       className="flex-shrink-0"
-                      statusListener={onToolDropdownStatusChange}
-                      onItemClick={(tool: Record<string, unknown>, withCommand?: boolean) => {
-                        // Convert Record<string, unknown> to ToolsPromptInterface
-                        const toolInterface: ToolsPromptInterface = {
-                          id: tool.id as string,
-                          name: tool.name as string,
-                          hbs: tool.hbs as string,
-                          template: tool.template as unknown,
+                      statusListener={onShortcutDropdownStatusChange}
+                      onItemClick={(shortcut: Record<string, unknown>, withCommand?: boolean) => {
+                        // Convert Record<string, unknown> to ShortcutInterface
+                        const shortcutInterface: ShortcutInterface = {
+                          id: shortcut.id as string,
+                          name: shortcut.name as string,
+                          hbs: shortcut.hbs as string,
+                          template: shortcut.template as unknown,
                         };
-                        onToolSelect(toolInterface, withCommand);
+                        onShortcutSelect(shortcutInterface, withCommand);
                       }}
                       buttonDisplay="➔"
                       initOpen={false}
@@ -241,8 +242,8 @@ export const PrismInput = React.memo(
       changes.push('onSystemPromptDropdownStatusChange');
     if (prevProps.onModelDropdownStatusChange !== nextProps.onModelDropdownStatusChange)
       changes.push('onModelDropdownStatusChange');
-    if (prevProps.onToolDropdownStatusChange !== nextProps.onToolDropdownStatusChange)
-      changes.push('onToolDropdownStatusChange');
+    if (prevProps.onShortcutDropdownStatusChange !== nextProps.onShortcutDropdownStatusChange)
+      changes.push('onShortcutDropdownStatusChange');
 
     if (changes.length > 0) {
       return false; // 重新渲染

@@ -4,31 +4,28 @@
  */
 
 import React, { useCallback, forwardRef, useState, useEffect, useRef, useMemo } from 'react';
-import {
-  PrismInput,
-  type PrismInputRef,
-  type ToolsPromptInterface,
-  type SystemPresetInterface,
-} from '@src/features/prism';
+import { PrismInput, type PrismInputRef } from '@src/features/prism';
+import type { ShortcutInterface } from '@src/types';
+import type { SystemPresetInterface } from '@src/utils/StorageManager';
 import type { ChatColumnProps, CanvasMessage } from '@src/features/prism/canvas/types';
 import { StorageManager } from '@src/utils/StorageManager';
 import configStorage from '@src/shared/storages/configStorage';
 import { Handlebars } from '@src/../third-party/kbn-handlebars/src/handlebars';
 import { ThinkingAnimation } from '@src/components/ui/ThinkingAnimation';
-import defaultTools from '@assets/conf/tools.toml';
+import defaultShortcuts from '@assets/conf/shortcuts.toml';
 
-// 初始化默认工具列表
-const tools: ToolsPromptInterface[] = [];
-for (const k in defaultTools) {
+// 初始化默认快捷键列表
+const shortcuts: ShortcutInterface[] = [];
+for (const k in defaultShortcuts) {
   try {
-    tools.push({
-      id: defaultTools[k].name,
-      name: defaultTools[k].name,
-      hbs: defaultTools[k].hbs,
-      template: Handlebars.compileAST(defaultTools[k].hbs),
+    shortcuts.push({
+      id: defaultShortcuts[k].name,
+      name: defaultShortcuts[k].name,
+      hbs: defaultShortcuts[k].hbs,
+      template: Handlebars.compileAST(defaultShortcuts[k].hbs),
     });
   } catch (e) {
-    console.error('Cannot parse default tools', e);
+    console.error('Cannot parse default shortcuts', e);
   }
 }
 
@@ -67,12 +64,12 @@ const ChatColumn = forwardRef<HTMLDivElement, ChatColumnProps>(
     // PrismInput 相关状态
     const prismInputRef = useRef<PrismInputRef>(null);
     const [inputValue, setInputValue] = useState('');
-    const [isToolDropdownOpen, setIsToolDropdownOpen] = useState(false);
+    const [isShortcutDropdownOpen, setIsShortcutDropdownOpen] = useState(false);
     const [isSystemPromptDropdownOpen, setIsSystemPromptDropdownOpen] = useState(false);
     const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
 
     // 选择状态管理
-    const [selectedTool, setSelectedTool] = useState<ToolsPromptInterface | null>(null);
+    const [selectedShortcut, setSelectedShortcut] = useState<ShortcutInterface | null>(null);
     const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<string | null>(null);
     const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
@@ -80,23 +77,23 @@ const ChatColumn = forwardRef<HTMLDivElement, ChatColumnProps>(
     useEffect(() => {
       const initializeDefaults = async () => {
         try {
-          // 初始化工具选择
-          const currentTool = await StorageManager.getCurrentTool();
-          if (currentTool) {
-            // 获取工具列表以找到完整的工具对象
-            const userToolSettings = await StorageManager.getUserTools();
-            const userTools = Object.values(userToolSettings).map(tool => ({
-              id: tool.name,
-              name: tool.name,
-              hbs: tool.hbs,
-              template: Handlebars.compileAST(tool.hbs),
+          // 初始化快捷键选择
+          const currentShortcut = await StorageManager.getCurrentShortcut();
+          if (currentShortcut) {
+            // 获取快捷键列表以找到完整的快捷键对象
+            const userShortcutSettings = await StorageManager.getUserShortcuts();
+            const userShortcuts = Object.values(userShortcutSettings).map(shortcut => ({
+              id: shortcut.name,
+              name: shortcut.name,
+              hbs: shortcut.hbs,
+              template: Handlebars.compileAST(shortcut.hbs),
             }));
 
-            // 合并默认工具和用户工具
-            const allTools = [...tools, ...userTools];
-            const foundTool = allTools.find(t => t.id === currentTool);
-            if (foundTool) {
-              setSelectedTool(foundTool);
+            // 合并默认快捷键和用户快捷键
+            const allShortcuts = [...shortcuts, ...userShortcuts];
+            const foundShortcut = allShortcuts.find(s => s.id === currentShortcut);
+            if (foundShortcut) {
+              setSelectedShortcut(foundShortcut);
             }
           }
 
@@ -333,10 +330,10 @@ const ChatColumn = forwardRef<HTMLDivElement, ChatColumnProps>(
 
     // PrismInput 消息发送处理
     const handlePrismInputSend = useCallback(
-      (message: string, options?: { tool?: ToolsPromptInterface; systemPrompt?: string; model?: string }) => {
+      (message: string, options?: { tool?: ShortcutInterface; systemPrompt?: string; model?: string }) => {
         // 合并传入的 options 和当前选择的状态
         const finalOptions = {
-          tool: options?.tool || selectedTool,
+          tool: options?.tool || selectedShortcut,
           systemPrompt: options?.systemPrompt || selectedSystemPrompt,
           model: options?.model || selectedModel,
         };
@@ -355,7 +352,7 @@ const ChatColumn = forwardRef<HTMLDivElement, ChatColumnProps>(
           onMessageCreate(message, parentId, finalOptions);
         }
       },
-      [column.id, onMessageCreate, messagePairs, selectedTool, selectedSystemPrompt, selectedModel],
+      [column.id, onMessageCreate, messagePairs, selectedShortcut, selectedSystemPrompt, selectedModel],
     );
 
     // 键盘事件处理
@@ -366,16 +363,16 @@ const ChatColumn = forwardRef<HTMLDivElement, ChatColumnProps>(
           e.preventDefault();
           e.stopPropagation();
 
-          if (!isToolDropdownOpen && !isModelDropdownOpen && !isSystemPromptDropdownOpen) {
-            setIsToolDropdownOpen(true);
-          } else if (isToolDropdownOpen) {
+          if (!isShortcutDropdownOpen && !isModelDropdownOpen && !isSystemPromptDropdownOpen) {
+            setIsShortcutDropdownOpen(true);
+          } else if (isShortcutDropdownOpen) {
             setIsSystemPromptDropdownOpen(true);
-            setIsToolDropdownOpen(false);
+            setIsShortcutDropdownOpen(false);
           } else if (isSystemPromptDropdownOpen) {
             setIsModelDropdownOpen(true);
             setIsSystemPromptDropdownOpen(false);
           } else if (isModelDropdownOpen) {
-            setIsToolDropdownOpen(true);
+            setIsShortcutDropdownOpen(true);
             setIsModelDropdownOpen(false);
           }
           return;
@@ -383,7 +380,7 @@ const ChatColumn = forwardRef<HTMLDivElement, ChatColumnProps>(
 
         // 处理方向键菜单导航
         if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-          if (isToolDropdownOpen || isModelDropdownOpen || isSystemPromptDropdownOpen) {
+          if (isShortcutDropdownOpen || isModelDropdownOpen || isSystemPromptDropdownOpen) {
             e.preventDefault();
             e.stopPropagation();
 
@@ -392,22 +389,22 @@ const ChatColumn = forwardRef<HTMLDivElement, ChatColumnProps>(
                 setIsModelDropdownOpen(true);
                 setIsSystemPromptDropdownOpen(false);
               } else if (isModelDropdownOpen) {
-                setIsToolDropdownOpen(true);
+                setIsShortcutDropdownOpen(true);
                 setIsModelDropdownOpen(false);
-              } else if (isToolDropdownOpen) {
+              } else if (isShortcutDropdownOpen) {
                 setIsSystemPromptDropdownOpen(true);
-                setIsToolDropdownOpen(false);
+                setIsShortcutDropdownOpen(false);
               }
             } else if (e.key === 'ArrowLeft') {
               if (isSystemPromptDropdownOpen) {
-                setIsToolDropdownOpen(true);
+                setIsShortcutDropdownOpen(true);
                 setIsSystemPromptDropdownOpen(false);
               } else if (isModelDropdownOpen) {
                 setIsSystemPromptDropdownOpen(true);
                 setIsModelDropdownOpen(false);
-              } else if (isToolDropdownOpen) {
+              } else if (isShortcutDropdownOpen) {
                 setIsModelDropdownOpen(true);
-                setIsToolDropdownOpen(false);
+                setIsShortcutDropdownOpen(false);
               }
             }
             return;
@@ -416,8 +413,8 @@ const ChatColumn = forwardRef<HTMLDivElement, ChatColumnProps>(
 
         // 处理ESC键层级控制
         if (e.key === 'Escape') {
-          if (isToolDropdownOpen || isSystemPromptDropdownOpen || isModelDropdownOpen) {
-            setIsToolDropdownOpen(false);
+          if (isShortcutDropdownOpen || isSystemPromptDropdownOpen || isModelDropdownOpen) {
+            setIsShortcutDropdownOpen(false);
             setIsSystemPromptDropdownOpen(false);
             setIsModelDropdownOpen(false);
             e.stopPropagation();
@@ -437,7 +434,7 @@ const ChatColumn = forwardRef<HTMLDivElement, ChatColumnProps>(
           }
         }
       },
-      [isToolDropdownOpen, isSystemPromptDropdownOpen, isModelDropdownOpen, isFocused, onExitFocus],
+      [isShortcutDropdownOpen, isSystemPromptDropdownOpen, isModelDropdownOpen, isFocused, onExitFocus],
     );
 
     // 全局键盘事件监听（用于ESC键退出聚焦模式）
@@ -456,22 +453,22 @@ const ChatColumn = forwardRef<HTMLDivElement, ChatColumnProps>(
       }
     }, [isFocused, onExitFocus]);
 
-    // 工具选择处理
-    const handleToolSelect = useCallback(
-      (tool: ToolsPromptInterface, withCommand?: boolean) => {
-        console.log('Tool selected:', { tool: tool.name, withCommand });
+    // 快捷键选择处理
+    const handleShortcutSelect = useCallback(
+      (shortcut: ShortcutInterface, withCommand?: boolean) => {
+        console.log('Shortcut selected:', { shortcut: shortcut.name, withCommand });
         if (withCommand) {
-          // Command+click: 保存为默认工具但不发送
-          setSelectedTool(tool);
+          // Command+click: 保存为默认快捷键但不发送
+          setSelectedShortcut(shortcut);
         } else if (inputValue.trim()) {
           // 常规点击且有输入内容：自动发送消息
-          handlePrismInputSend(inputValue.trim(), { tool });
+          handlePrismInputSend(inputValue.trim(), { tool: shortcut });
           setInputValue('');
         } else {
           // 常规点击但无输入内容：仅保存到状态
-          setSelectedTool(tool);
+          setSelectedShortcut(shortcut);
         }
-        setIsToolDropdownOpen(false);
+        setIsShortcutDropdownOpen(false);
       },
       [inputValue, handlePrismInputSend],
     );
@@ -515,8 +512,8 @@ const ChatColumn = forwardRef<HTMLDivElement, ChatColumnProps>(
     );
 
     // 使用 useCallback 包装状态更新函数，避免每次渲染都创建新的引用
-    const handleToolDropdownStatusChange = useCallback((open: boolean) => {
-      setIsToolDropdownOpen(open);
+    const handleShortcutDropdownStatusChange = useCallback((open: boolean) => {
+      setIsShortcutDropdownOpen(open);
     }, []);
 
     const handleSystemPromptDropdownStatusChange = useCallback((open: boolean) => {
@@ -796,15 +793,15 @@ const ChatColumn = forwardRef<HTMLDivElement, ChatColumnProps>(
             onSend={handlePrismInputSend}
             onKeyDown={handlePrismInputKeyDown}
             // 显示控制工具区域
-            showToolDropdown={true}
+            showShortcutDropdown={true}
             showSystemPromptDropdown={true}
             showModelSelector={true}
             // 控制组件回调
-            onToolDropdownStatusChange={handleToolDropdownStatusChange}
+            onShortcutDropdownStatusChange={handleShortcutDropdownStatusChange}
             onSystemPromptDropdownStatusChange={handleSystemPromptDropdownStatusChange}
             onModelDropdownStatusChange={handleModelDropdownStatusChange}
-            // 工具选择回调
-            onToolSelect={handleToolSelect}
+            // 快捷键选择回调
+            onShortcutSelect={handleShortcutSelect}
             onSystemPromptSelect={handleSystemPromptSelect}
             onModelSelect={handleModelSelect}
             // 按钮布局配置

@@ -2,7 +2,7 @@ import { QuoteContext } from '@src/agents/quote';
 import { HumanMessage, AIMessage, BaseMessage, ToolMessage } from '@langchain/core/messages';
 import { createContext } from 'react';
 import {
-  ToolsPromptInterface,
+  ShortcutInterface,
   SystemInvisibleMessage,
   HumanAskMessage,
   AIThinkingMessage,
@@ -10,7 +10,7 @@ import {
   AIToolResultMessage,
 } from '@src/types';
 import { StorageManager } from '@src/utils/StorageManager';
-import { tools } from '@src/components/controls/ToolDropdown';
+import { shortcuts } from '@src/components/controls/ShortcutSender';
 import { CoreMessage, streamText, Tool } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { stepCountIs } from 'ai';
@@ -18,7 +18,7 @@ import { stepCountIs } from 'ai';
 export interface SendOptions {
   overrideSystem?: string;
   overrideModel?: string;
-  tool?: ToolsPromptInterface;
+  tool?: ShortcutInterface;
 }
 
 export interface PageChatInterface {
@@ -26,7 +26,7 @@ export interface PageChatInterface {
   init(): void;
   askWithQuotes(_quotes: QuoteContext[], _userPrompt: null | string, _options?: SendOptions): Promise<void>;
   askWithTool(
-    _tool: ToolsPromptInterface,
+    _tool: ShortcutInterface,
     _pageContext: QuoteContext,
     _quotes: QuoteContext[],
     _userPrompt: null | string,
@@ -71,7 +71,7 @@ export class PageChatService implements PageChatInterface {
   async askWithQuotes(quotes: QuoteContext[], userPrompt: string | null, options?: SendOptions) {
     if (!userPrompt?.trim()) return;
 
-    const noContextTool = tools.find(t => t.name === 'No Context');
+    const noContextTool = shortcuts.find(t => t.name === 'No Context');
     if (!noContextTool) {
       console.error('[PageChatService] No Context tool not found');
       return;
@@ -81,7 +81,7 @@ export class PageChatService implements PageChatInterface {
   }
 
   async askWithTool(
-    tool: ToolsPromptInterface,
+    tool: ShortcutInterface,
     pageContext: QuoteContext,
     quotes: QuoteContext[],
     userPrompt: string | null,

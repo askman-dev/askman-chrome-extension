@@ -186,12 +186,15 @@ export interface PromptTool {
   hbs: string;
 }
 
-export interface ToolsPromptInterface {
+export interface ShortcutInterface {
   id: string;
   name: string;
   hbs: string;
   template: unknown;
 }
+
+// @deprecated Use ShortcutInterface instead
+export interface ToolsPromptInterface extends ShortcutInterface {}
 
 /* eslint-disable no-unused-vars */
 export enum MentionType {
