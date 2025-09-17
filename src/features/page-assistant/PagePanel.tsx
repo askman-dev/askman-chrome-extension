@@ -3,7 +3,7 @@ import 'highlight.js/styles/default.min.css';
 import { QuoteContext } from '@src/agents/quote';
 import React, { useState, useContext, useEffect, useRef, useCallback, useMemo } from 'react';
 import { PageChatContext } from './PageChatService';
-import { ToolDropdown, QuoteDropdown, SystemPromptDropdown, ModelSelector } from '@src/components/controls';
+import { ToolDropdown, QuoteDropdown, SystemPromptDropdown, ModelSelector, ModeToggle } from '@src/components/controls';
 // import { tools } from '@src/components/controls/ToolDropdown';
 import TextareaAutosize from 'react-textarea-autosize';
 import {
@@ -182,17 +182,14 @@ export function PagePanel(props: PagePanelProps) {
     loadHeightExpandedState();
   }, []);
 
-  // Initialize agent mode state from current model on mount
+  // Initialize agent mode state - defaults to false (Chat mode)
+  // Agent mode is now controlled by ModeToggle independently
   useEffect(() => {
     const initializeAgentMode = async () => {
       try {
-        const currentModel = await configStorage.getCurrentModel();
-        if (currentModel) {
-          // 检查当前模型是否为 agent 模型
-          const isAgent = currentModel.includes(':agent');
-          console.log('[PagePanel] 🔄 初始化模式状态:', { currentModel, isAgent });
-          setIsAgentMode(isAgent);
-        }
+        // 默认 Chat 模式，由用户通过 ModeToggle 手动选择
+        setIsAgentMode(false);
+        console.log('[PagePanel] 🔄 初始化为 Chat 模式');
       } catch (error) {
         console.warn('Failed to initialize agent mode:', error);
       }
@@ -808,12 +805,10 @@ export function PagePanel(props: PagePanelProps) {
             <ModelSelector
               initOpen={isModelDropdownOpen}
               className="flex items-center"
-              onItemClick={(modelId, isAgentModel, withCommand) => {
-                console.log('[PagePanel] 🎯 模型选择器点击:', { modelId, isAgentModel, withCommand, selectedModel });
+              onItemClick={(modelId, isSonnet, withCommand) => {
+                console.log('[PagePanel] 🎯 模型选择器点击:', { modelId, isSonnet, withCommand, selectedModel });
 
-                // 自动设置模式
-                setIsAgentMode(isAgentModel);
-                console.log('[PagePanel] 🔄 自动设置模式:', isAgentModel ? 'Agent' : 'Chat');
+                // 不再自动设置模式，由 ModeToggle 独立控制
 
                 if (withCommand) {
                   console.log('[PagePanel] 🚀 直接发送，使用模型ID:', modelId);
@@ -1128,7 +1123,12 @@ export function PagePanel(props: PagePanelProps) {
                 }}
               />
             </div>
-            <div className="flex">
+            <div className="flex items-center gap-2">
+              {/* Mode Toggle - 仅在 Sonnet 模型时显示 */}
+              {selectedModel && selectedModel.toLowerCase().includes('sonnet') && (
+                <ModeToggle value={isAgentMode} onChange={setIsAgentMode} className="flex-shrink-0" />
+              )}
+
               <div
                 className="grow cursor-text"
                 onClick={() => {
@@ -1137,6 +1137,7 @@ export function PagePanel(props: PagePanelProps) {
                     inputRef.current.focus();
                   }
                 }}></div>
+
               {isStreaming ? (
                 <button
                   onClick={stopStreaming}
@@ -1148,7 +1149,7 @@ export function PagePanel(props: PagePanelProps) {
                 <ToolDropdown
                   initOpen={isToolDropdownOpen}
                   statusListener={updateToolDropdownStatus}
-                  className="inline-block relative"
+                  className="inline-block relative flex-shrink-0"
                   onItemClick={(_item, _withCommand) => {
                     if (_withCommand) {
                       setUserTools(_item as unknown as ToolsPromptInterface);
