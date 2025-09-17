@@ -64,6 +64,18 @@ We welcome contributions! Feel free to:
 
 To get started, please read our Contribution Guide.
 
+## MCP Server Integration
+
+Askman supports integration with MCP (Model Context Protocol) servers that use HTTP transport. These servers can provide additional capabilities like database access, file system operations, and third-party service integrations.
+
+📚 **[View MCP Servers Documentation](./docs/mcp-servers.md)** - Complete catalog of HTTP-compatible MCP servers
+
+Key features:
+- **HTTP Protocol Support**: Compatible with web-based Chrome extension environment
+- **Secure Authentication**: Token-based authentication for secure server access
+- **Extensive Server Catalog**: 10+ documented servers including GitHub, SQLite, Google Drive, and more
+- **Easy Configuration**: TOML-based configuration system for quick setup
+
 ## Contributors
 > Made with [contributors-img](https://contrib.rocks)
 

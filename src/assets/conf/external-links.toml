@@ -10,4 +10,11 @@ discussions = "https://github.com/askman-dev/askman-chrome-extension/discussions
 [social]
 # Social media links
 wechat_id = "nob301"
-wechat_qr = "https://github.com/askman-dev/askman-chrome-extension/raw/refs/heads/main/src/assets/img/askman-group.png" 
+wechat_qr = "https://github.com/askman-dev/askman-chrome-extension/raw/refs/heads/main/src/assets/img/askman-group.png"
+
+[mcp]
+# MCP (Model Context Protocol) related links
+specification = "https://spec.modelcontextprotocol.io/"
+servers_repo = "https://github.com/modelcontextprotocol/servers"
+typescript_sdk = "https://github.com/modelcontextprotocol/typescript-sdk"
+discussions = "https://github.com/modelcontextprotocol/servers/discussions" 
