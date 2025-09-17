@@ -154,7 +154,7 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
         renderItem={renderModelItem}
         align="right"
         hoverMessage={`Model [${simplifyModelName(selectedModelName)}]`}
-        variant="button"
+        variant="button-text"
       />
     </div>
   );

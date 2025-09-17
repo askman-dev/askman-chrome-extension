@@ -159,6 +159,7 @@ export function ToolDropdown({ className, onItemClick, initOpen, statusListener,
         buttonDisplay={buttonDisplay}
         onMainButtonClick={handleMainButtonClick}
         hoverMessage={`Send with Context [${selectedTool ? selectedToolName : '工具'}]`}
+        hasBackground={false}
       />
       {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
     </div>

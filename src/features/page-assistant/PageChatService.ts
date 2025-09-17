@@ -206,7 +206,7 @@ export class PageChatService implements PageChatInterface {
       }
 
       if (!selectedModel) {
-        console.warn('[PageChatService] Model not found:', modelIdWithoutSuffix);
+        console.warn('[PageChatService] Model not found:', overrideModel);
       }
     }
 

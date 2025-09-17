@@ -28,7 +28,8 @@ export interface DropdownProps {
   buttonDisplay?: React.ReactNode;
   onMainButtonClick?: (_e: React.MouseEvent) => void;
   hoverMessage?: string;
-  variant?: 'default' | 'button' | 'button-icon';
+  variant?: 'button-text' | 'button-icon';
+  hasBackground?: boolean;
 }
 
 export function Dropdown({
@@ -46,7 +47,8 @@ export function Dropdown({
   buttonDisplay,
   onMainButtonClick,
   hoverMessage,
-  variant = 'default',
+  variant = 'button-text',
+  hasBackground = true,
 }: DropdownProps) {
   const [isCommandPressed, setIsCommandPressed] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -199,7 +201,7 @@ export function Dropdown({
                 'group inline-flex justify-center items-center rounded-md focus:outline-none',
                 variant === 'button-icon'
                   ? 'bg-gray-100 text-gray-600 p-1 h-6 w-6 hover:bg-black hover:text-white transition-colors duration-200'
-                  : variant === 'button'
+                  : variant === 'button-text' && hasBackground
                     ? 'max-w-[16rem] text-sm text-sm font-normal bg-gray-100 text-gray-600 px-2 h-6 hover:bg-black hover:text-white transition-colors duration-200'
                     : 'max-w-[16rem] text-sm text-sm font-normal text-gray-500',
               )}
@@ -265,7 +267,7 @@ export function Dropdown({
                   </div>
                   {buttonDisplay ? (
                     <span className="-mr-1 h-5 w-5 ml-1 flex-shrink-0">{buttonDisplay}</span>
-                  ) : variant === 'button' ? null : (
+                  ) : variant === 'button-text' && hasBackground ? null : (
                     <ChevronDownIcon className="-mr-1 h-5 w-5 flex-shrink-0" />
                   )}
                   {showShortcut && (
