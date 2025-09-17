@@ -861,9 +861,10 @@ export function PagePanel(props: PagePanelProps) {
                 });
                 clearHistory();
                 setUserShortcuts(null);
-                // 🎯 保留用户选择的模型和系统提示，不重置为null
-                // setSelectedSystemPrompt(null);  // 注释掉：保留用户选择
-                // setSelectedModel(null);          // 注释掉：保留用户选择
+                // Intentionally preserve the user's selected model and system prompt when starting a new chat.
+                // If you want to reset these selections, uncomment the lines below:
+                // setSelectedSystemPrompt(null);
+                // setSelectedModel(null);
                 setTimeout(() => {
                   inputRef.current?.focus();
                 }, 100);
