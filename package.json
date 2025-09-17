@@ -1,6 +1,6 @@
 {
   "name": "askman-chrome-extension",
-  "version": "0.0.18",
+  "version": "0.0.20",
   "description": "Ask anything about the web page you are on",
   "license": "GPL-3.0-only",
   "repository": {

@@ -10,12 +10,25 @@ https://chromewebstore.google.com/detail/askman-connect-ai-to-page/gpopfjaknekkf
 
 # Features
 
-- In-Page Chat Popup: Quickly access AskMan’s chat interface with the Command + I shortcut or by right-clicking to open the dialog on any page.
-- Contextual Awareness: Automatically reads page titles and content to add context to your questions, allowing for more relevant AI responses.
-- Data Privacy: Askman only shares data with your chosen AI service provider, without storing or tracking any information on external servers.
-- Side Panel for Persistent Conversations: Keep your chat session fixed, even when switching pages, ensuring data is retained and your flow remains uninterrupted.
-- Custom Prompts: Easily set up common prompts that use page-specific elements, like titles and selected text, for a personalized experience.
+## Page Assistant
+- **In-Page Chat Interface**: Quickly access AskMan's chat interface with Command + I shortcut or right-click context menu on any webpage
+- **Contextual Awareness**: Automatically extracts page content, titles, and selected text for AI-powered assistance
+- **Advanced Model Support**: Multi-provider AI integration (OpenRouter, SiliconFlow, etc.) with custom streaming for reasoning models
+- **Tool Integration**: Handlebars-based prompt templates with dynamic page context injection
+- **Agent & Chat Modes**: Unified interface supporting both conversational and specialized agent interactions
 
+## ThoughtPrism Multi-Column Interface
+- **Advanced Conversation Management**: Multi-column canvas for complex dialog exploration and thought organization
+- **Conversation Branching**: Create alternate conversation paths from any message for exploring different ideas
+- **Focus Mode**: Double-click columns for distraction-free reading with optimal text layout
+- **Canvas Navigation**: Zoom, pan, and organize conversation landscapes with intelligent grid positioning
+- **Cross-Column Context**: Messages can reference and build upon conversations in other columns
+
+## Configuration & Privacy
+- **TOML-Based Configuration**: Modern configuration system for models, tools, and user preferences
+- **Data Privacy**: All interactions remain local or go directly to your chosen AI provider - no external data collection
+- **Dual LLM Architecture**: Supports both Vercel AI SDK and LangChain implementations for maximum flexibility
+- **Custom Prompt Templates**: Create reusable prompts with page-specific variables (title, content, selected text)
 | ![screenshot](.github/public/0.0.12.png) | ![screenshot](.github/public/114shots_so.png) | ![screenshot](.github/public/715shots_so.png) |
 |:---:|:---:|:---:|
 
@@ -33,11 +46,15 @@ cd askman-chrome-extension
 2. Install dependencies and build:
 
 ```sh
-# Install necessary packages
-npm install
+# Install necessary packages (using pnpm - configured in packageManager)
+corepack enable && corepack install
+pnpm install
 
-# Build the extension
-npm run dev
+# For development with Hot Module Reload
+pnpm dev
+
+# For production build
+pnpm build
 ```
 
 3. Load the extension:
@@ -47,11 +64,22 @@ npm run dev
 
 # Usage
 
-1. Open a page (e.g., GitHub) and activate Askman:
-    - Press Command + I.
-    - Or, right-click and choose Askman from the menu.
-2. Use the chat popup to ask questions based on page content or context.
-3. Customize prompts by referencing page-specific variables like the title, content, and selected text.
+## Page Assistant
+1. Open any webpage and activate Askman:
+    - Press **Command + I** (Mac) or **Ctrl + I** (Windows/Linux)
+    - Or right-click and choose "Askman" from the context menu
+2. Use the chat interface to ask questions about page content or context
+3. Switch between Chat and Agent modes using the toggle
+4. Select from available prompt templates using the tool dropdown
+5. Customize system prompts and choose different AI models
+
+## ThoughtPrism Multi-Column Interface
+1. Open the extension options or navigate to the ThoughtPrism page
+2. Create multiple conversation columns for complex thought exploration
+3. Use **right-click on any message** to branch into new conversation paths
+4. **Double-click on columns** to enter focus mode for distraction-free reading
+5. **Drag and zoom** the canvas to organize your conversation landscape
+6. Reference content between columns for cross-conversation insights
 
 
 # Contributing
