@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * Props for the ToolPreview component
+ * Props for the ShortcutPreview component
  */
-interface ToolPreviewProps {
+interface ShortcutPreviewProps {
   /** Content to display in the preview */
   content: string;
   /** X coordinate for positioning */
@@ -13,10 +13,10 @@ interface ToolPreviewProps {
 }
 
 /**
- * ToolPreview component displays a tooltip-like preview with provided content at specified coordinates.
- * Used primarily by dropdown components to show previews of tools and system prompts.
+ * ShortcutPreview component displays a tooltip-like preview with provided content at specified coordinates.
+ * Used primarily by dropdown components to show previews of shortcuts and system prompts.
  */
-export function ToolPreview({ content, x, y }: ToolPreviewProps) {
+export function ShortcutPreview({ content, x, y }: ShortcutPreviewProps) {
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -41,4 +41,4 @@ export function ToolPreview({ content, x, y }: ToolPreviewProps) {
 }
 
 // Export for backwards compatibility
-export default ToolPreview;
+export default ShortcutPreview;

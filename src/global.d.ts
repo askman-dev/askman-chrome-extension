@@ -29,7 +29,7 @@ declare module '*.json' {
   const content: string;
   export default content;
 }
-declare module '*/tools.toml' {
+declare module '*/shortcuts.toml' {
   const content: { name: string; hbs: string }[];
   export default content;
 }

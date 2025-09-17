@@ -3,7 +3,13 @@ import 'highlight.js/styles/default.min.css';
 import { QuoteContext } from '@src/agents/quote';
 import React, { useState, useContext, useEffect, useRef, useCallback, useMemo } from 'react';
 import { PageChatContext } from './PageChatService';
-import { ToolDropdown, QuoteDropdown, SystemPromptDropdown, ModelSelector, ModeToggle } from '@src/components/controls';
+import {
+  ShortcutSender,
+  QuoteDropdown,
+  SystemPromptDropdown,
+  ModelSelector,
+  ModeToggle,
+} from '@src/components/controls';
 // import { tools } from '@src/components/controls/ToolDropdown';
 import TextareaAutosize from 'react-textarea-autosize';
 import {
@@ -18,7 +24,7 @@ import {
 import { BaseDropdown } from '@src/components/common/Dropdown';
 import { MessageItem } from '@src/components/message';
 import {
-  ToolsPromptInterface,
+  ShortcutInterface,
   AIInvisibleMessage,
   HumanInvisibleMessage,
   HumanAskMessage,
@@ -78,7 +84,7 @@ export function PagePanel(props: PagePanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const handleClickOutside = useCallback((event: MouseEvent) => {
     if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
-      setIsToolDropdownOpen(false);
+      setIsShortcutDropdownOpen(false);
       setIsQuoteDropdownOpen(false);
       setIsModelDropdownOpen(false);
       setIsSystemPromptDropdownOpen(false);
@@ -123,8 +129,8 @@ export function PagePanel(props: PagePanelProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null); // Add this line
 
-  const [userTools, setUserTools] = useState<ToolsPromptInterface>();
-  const [isToolDropdownOpen, setIsToolDropdownOpen] = useState(false);
+  const [userShortcuts, setUserShortcuts] = useState<ShortcutInterface>();
+  const [isShortcutDropdownOpen, setIsShortcutDropdownOpen] = useState(false);
   const [isQuoteDropdownOpen, setIsQuoteDropdownOpen] = useState(false);
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ left: 0, top: 0 });
@@ -297,27 +303,27 @@ export function PagePanel(props: PagePanelProps) {
     [isMaximized],
   );
 
-  const showToolDropdown = () => {
-    setIsToolDropdownOpen(true);
+  const showShortcutDropdown = () => {
+    setIsShortcutDropdownOpen(true);
     setIsQuoteDropdownOpen(false);
     setIsModelDropdownOpen(false);
     setIsSystemPromptDropdownOpen(false);
   };
   const showQuoteDropdown = () => {
     setIsQuoteDropdownOpen(true);
-    setIsToolDropdownOpen(false);
+    setIsShortcutDropdownOpen(false);
     setIsModelDropdownOpen(false);
     setIsSystemPromptDropdownOpen(false);
   };
   const showModelDropdown = () => {
     setIsModelDropdownOpen(true);
-    setIsToolDropdownOpen(false);
+    setIsShortcutDropdownOpen(false);
     setIsQuoteDropdownOpen(false);
     setIsSystemPromptDropdownOpen(false);
   };
   const showSystemPromptDropdown = () => {
     setIsSystemPromptDropdownOpen(true);
-    setIsToolDropdownOpen(false);
+    setIsShortcutDropdownOpen(false);
     setIsQuoteDropdownOpen(false);
     setIsModelDropdownOpen(false);
   };
@@ -349,8 +355,8 @@ export function PagePanel(props: PagePanelProps) {
     };
   }, [quotes]);
 
-  const updateToolDropdownStatus = (status: boolean) => {
-    setIsToolDropdownOpen(status);
+  const updateShortcutDropdownStatus = (status: boolean) => {
+    setIsShortcutDropdownOpen(status);
   };
   const updateModelDropdownStatus = (status: boolean) => {
     setIsModelDropdownOpen(status);
@@ -465,7 +471,7 @@ export function PagePanel(props: PagePanelProps) {
   }, [askPanelVisible]);
   // 使用 ref 保持最新状态，避免闭包问题
   const dropdownStatesRef = useRef({
-    isToolDropdownOpen,
+    isShortcutDropdownOpen,
     isModelDropdownOpen,
     isSystemPromptDropdownOpen,
     isQuoteDropdownOpen,
@@ -474,12 +480,12 @@ export function PagePanel(props: PagePanelProps) {
   // 更新 ref 中的状态
   useEffect(() => {
     dropdownStatesRef.current = {
-      isToolDropdownOpen,
+      isShortcutDropdownOpen,
       isModelDropdownOpen,
       isSystemPromptDropdownOpen,
       isQuoteDropdownOpen,
     };
-  }, [isToolDropdownOpen, isModelDropdownOpen, isSystemPromptDropdownOpen, isQuoteDropdownOpen]);
+  }, [isShortcutDropdownOpen, isModelDropdownOpen, isSystemPromptDropdownOpen, isQuoteDropdownOpen]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -491,12 +497,12 @@ export function PagePanel(props: PagePanelProps) {
         e.stopPropagation();
 
         if (
-          !currentStates.isToolDropdownOpen &&
+          !currentStates.isShortcutDropdownOpen &&
           !currentStates.isModelDropdownOpen &&
           !currentStates.isSystemPromptDropdownOpen
         ) {
-          showToolDropdown();
-        } else if (currentStates.isToolDropdownOpen) {
+          showShortcutDropdown();
+        } else if (currentStates.isShortcutDropdownOpen) {
           // 从 tool 切换到 model，需要先展开 selector 然后显示菜单
           setSelectorExpanded(true);
           setPendingDropdown('model');
@@ -507,7 +513,7 @@ export function PagePanel(props: PagePanelProps) {
         } else if (currentStates.isSystemPromptDropdownOpen) {
           // 从 system 切换到 tool，可以收起 selector
           setSelectorExpanded(false);
-          showToolDropdown();
+          showShortcutDropdown();
         }
         return;
       }
@@ -515,7 +521,7 @@ export function PagePanel(props: PagePanelProps) {
       // 检测左右方向键
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         if (
-          currentStates.isToolDropdownOpen ||
+          currentStates.isShortcutDropdownOpen ||
           currentStates.isModelDropdownOpen ||
           currentStates.isSystemPromptDropdownOpen
         ) {
@@ -523,7 +529,7 @@ export function PagePanel(props: PagePanelProps) {
           e.stopPropagation();
 
           if (e.key === 'ArrowRight') {
-            if (currentStates.isToolDropdownOpen) {
+            if (currentStates.isShortcutDropdownOpen) {
               setSelectorExpanded(true);
               setPendingDropdown('model');
             } else if (currentStates.isModelDropdownOpen) {
@@ -531,10 +537,10 @@ export function PagePanel(props: PagePanelProps) {
               setPendingDropdown('system');
             } else if (currentStates.isSystemPromptDropdownOpen) {
               setSelectorExpanded(false);
-              showToolDropdown();
+              showShortcutDropdown();
             }
           } else if (e.key === 'ArrowLeft') {
-            if (currentStates.isToolDropdownOpen) {
+            if (currentStates.isShortcutDropdownOpen) {
               setSelectorExpanded(true);
               setPendingDropdown('system');
             } else if (currentStates.isSystemPromptDropdownOpen) {
@@ -542,7 +548,7 @@ export function PagePanel(props: PagePanelProps) {
               setPendingDropdown('model');
             } else if (currentStates.isModelDropdownOpen) {
               setSelectorExpanded(false);
-              showToolDropdown();
+              showShortcutDropdown();
             }
           }
           return;
@@ -559,7 +565,7 @@ export function PagePanel(props: PagePanelProps) {
   // Add this new useEffect to focus on input when menus are closed
   useEffect(() => {
     if (
-      !isToolDropdownOpen &&
+      !isShortcutDropdownOpen &&
       !isQuoteDropdownOpen &&
       !isModelDropdownOpen &&
       !isSystemPromptDropdownOpen &&
@@ -607,7 +613,7 @@ export function PagePanel(props: PagePanelProps) {
         }, 100);
       });
     }
-  }, [isToolDropdownOpen, isQuoteDropdownOpen, isModelDropdownOpen, isSystemPromptDropdownOpen]);
+  }, [isShortcutDropdownOpen, isQuoteDropdownOpen, isModelDropdownOpen, isSystemPromptDropdownOpen]);
 
   const addQuote = (newQuote: QuoteContext) => {
     setInitQuotes(prevQuotes => [...prevQuotes, newQuote]);
@@ -621,9 +627,9 @@ export function PagePanel(props: PagePanelProps) {
     }
   }, [chatContext]);
 
-  async function onSend(overrideTool?: ToolsPromptInterface, overrideSystem?: string, overrideModel?: string) {
-    // Use overrideTool if provided, otherwise fall back to userTools state
-    const toolToUse = overrideTool || userTools;
+  async function onSend(overrideShortcut?: ShortcutInterface, overrideSystem?: string, overrideModel?: string) {
+    // Use overrideShortcut if provided, otherwise fall back to userShortcuts state
+    const shortcutToUse = overrideShortcut || userShortcuts;
 
     // Capture user input before clearing
     const currentInput = userInput.trim();
@@ -643,11 +649,12 @@ export function PagePanel(props: PagePanelProps) {
     console.log('[PagePanel] User input:', currentInput);
     console.log('[PagePanel] isAgentMode:', isAgentMode);
     console.log(
-      '[PagePanel] toolToUse:',
-      toolToUse
+      '[PagePanel] shortcutToUse:',
+      shortcutToUse
         ? {
-            name: toolToUse.name,
-            template: typeof toolToUse.template === 'string' ? toolToUse.template.substring(0, 50) + '...' : 'N/A',
+            name: shortcutToUse.name,
+            template:
+              typeof shortcutToUse.template === 'string' ? shortcutToUse.template.substring(0, 50) + '...' : 'N/A',
           }
         : null,
     );
@@ -660,13 +667,13 @@ export function PagePanel(props: PagePanelProps) {
 
     try {
       if (isAgentMode) {
-        if (toolToUse) {
+        if (shortcutToUse) {
           console.log('[PagePanel] 🤖📋 ROUTING TO: askWithAgent (agent mode with template)');
-          console.log('[PagePanel] Selected tool:', toolToUse.name);
+          console.log('[PagePanel] Selected tool:', shortcutToUse.name);
           await chatContext.askWithAgent(currentInput, pageContext, initQuotes, {
             overrideSystem,
             overrideModel: overrideModel || selectedModel,
-            tool: toolToUse, // 传递模板给 agent 模式
+            tool: shortcutToUse, // 传递模板给 agent 模式
           });
         } else {
           console.log('[PagePanel] 🤖 ROUTING TO: askWithAgent (agent mode without template)');
@@ -675,11 +682,11 @@ export function PagePanel(props: PagePanelProps) {
             overrideModel: overrideModel || selectedModel,
           });
         }
-      } else if (toolToUse) {
+      } else if (shortcutToUse) {
         console.log('[PagePanel] 💬 ROUTING TO: askWithTool (chat mode with template)');
-        console.log('[PagePanel] Selected tool:', toolToUse.name);
+        console.log('[PagePanel] Selected tool:', shortcutToUse.name);
         // Chat mode with tool template: Use askWithTool
-        await chatContext.askWithTool(toolToUse, pageContext, initQuotes, currentInput, {
+        await chatContext.askWithTool(shortcutToUse, pageContext, initQuotes, currentInput, {
           overrideSystem,
           overrideModel: overrideModel || selectedModel,
         });
@@ -784,10 +791,10 @@ export function PagePanel(props: PagePanelProps) {
       onKeyDown={e => {
         if (
           e.key === 'Escape' &&
-          (isQuoteDropdownOpen || isToolDropdownOpen || isModelDropdownOpen || isSystemPromptDropdownOpen)
+          (isQuoteDropdownOpen || isShortcutDropdownOpen || isModelDropdownOpen || isSystemPromptDropdownOpen)
         ) {
           setIsQuoteDropdownOpen(false);
-          setIsToolDropdownOpen(false);
+          setIsShortcutDropdownOpen(false);
           setIsModelDropdownOpen(false);
           setIsSystemPromptDropdownOpen(false);
           setSelectorExpanded(false);
@@ -853,7 +860,7 @@ export function PagePanel(props: PagePanelProps) {
                   selectedSystemPrompt,
                 });
                 clearHistory();
-                setUserTools(null);
+                setUserShortcuts(null);
                 // 🎯 保留用户选择的模型和系统提示，不重置为null
                 // setSelectedSystemPrompt(null);  // 注释掉：保留用户选择
                 // setSelectedModel(null);          // 注释掉：保留用户选择
@@ -1001,12 +1008,12 @@ export function PagePanel(props: PagePanelProps) {
                   if (e.key === 'Escape') {
                     if (
                       isQuoteDropdownOpen ||
-                      isToolDropdownOpen ||
+                      isShortcutDropdownOpen ||
                       isModelDropdownOpen ||
                       isSystemPromptDropdownOpen
                     ) {
                       setIsQuoteDropdownOpen(false);
-                      setIsToolDropdownOpen(false);
+                      setIsShortcutDropdownOpen(false);
                       setIsModelDropdownOpen(false);
                       setIsSystemPromptDropdownOpen(false);
                       setSelectorExpanded(false);
@@ -1044,9 +1051,9 @@ export function PagePanel(props: PagePanelProps) {
                       return;
                     }
 
-                    if (isToolDropdownOpen) {
+                    if (isShortcutDropdownOpen) {
                       // 如果 Tool 下拉菜单打开，确认选择并关闭菜单
-                      setIsToolDropdownOpen(false);
+                      setIsShortcutDropdownOpen(false);
                     } else if (isQuoteDropdownOpen) {
                       // 如果 Quote 下拉菜单打开，确认选择并关闭菜单
                       setIsQuoteDropdownOpen(false);
@@ -1065,12 +1072,12 @@ export function PagePanel(props: PagePanelProps) {
                   }
                   // 检测左右方向键
                   if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                    if (isToolDropdownOpen || isModelDropdownOpen || isSystemPromptDropdownOpen) {
+                    if (isShortcutDropdownOpen || isModelDropdownOpen || isSystemPromptDropdownOpen) {
                       e.preventDefault();
                       e.stopPropagation();
 
                       if (e.key === 'ArrowRight') {
-                        if (isToolDropdownOpen) {
+                        if (isShortcutDropdownOpen) {
                           setSelectorExpanded(true);
                           setPendingDropdown('model');
                         } else if (isModelDropdownOpen) {
@@ -1078,10 +1085,10 @@ export function PagePanel(props: PagePanelProps) {
                           setPendingDropdown('system');
                         } else if (isSystemPromptDropdownOpen) {
                           setSelectorExpanded(false);
-                          showToolDropdown();
+                          showShortcutDropdown();
                         }
                       } else if (e.key === 'ArrowLeft') {
-                        if (isToolDropdownOpen) {
+                        if (isShortcutDropdownOpen) {
                           setSelectorExpanded(true);
                           setPendingDropdown('system');
                         } else if (isSystemPromptDropdownOpen) {
@@ -1089,7 +1096,7 @@ export function PagePanel(props: PagePanelProps) {
                           setPendingDropdown('model');
                         } else if (isModelDropdownOpen) {
                           setSelectorExpanded(false);
-                          showToolDropdown();
+                          showShortcutDropdown();
                         }
                       }
                       return;
@@ -1146,16 +1153,16 @@ export function PagePanel(props: PagePanelProps) {
                   <StopIcon className="w-4 h-4" />
                 </button>
               ) : (
-                <ToolDropdown
-                  initOpen={isToolDropdownOpen}
-                  statusListener={updateToolDropdownStatus}
+                <ShortcutSender
+                  initOpen={isShortcutDropdownOpen}
+                  statusListener={updateShortcutDropdownStatus}
                   className="inline-block relative flex-shrink-0"
                   onItemClick={(_item, _withCommand) => {
                     if (_withCommand) {
-                      setUserTools(_item as unknown as ToolsPromptInterface);
+                      setUserShortcuts(_item as unknown as ShortcutInterface);
                     }
-                    onSend(_item as unknown as ToolsPromptInterface); // 直接发送，不需要修改按钮文字
-                    setIsToolDropdownOpen(false); // Explicitly close the dropdown
+                    onSend(_item as unknown as ShortcutInterface); // 直接发送，不需要修改按钮文字
+                    setIsShortcutDropdownOpen(false); // Explicitly close the dropdown
                   }}
                   buttonDisplay="➤"
                 />
