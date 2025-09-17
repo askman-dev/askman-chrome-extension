@@ -191,14 +191,11 @@ export class PageChatService implements PageChatInterface {
     let selectedModel = null;
 
     if (overrideModel) {
-      // 移除 :agent 后缀以匹配配置中的模型
-      const modelIdWithoutSuffix = overrideModel.replace(':agent', '');
       console.log('[PageChatService] Looking for model:', overrideModel);
-      console.log('[PageChatService] Clean model ID:', modelIdWithoutSuffix);
 
       for (const providerConfig of modelConfigs) {
         const model = providerConfig.config.models.find(
-          m => `${providerConfig.provider}/${m.name}` === modelIdWithoutSuffix || m.name === modelIdWithoutSuffix,
+          m => `${providerConfig.provider}/${m.name}` === overrideModel || m.name === overrideModel,
         );
         if (model) {
           selectedProvider = providerConfig;
