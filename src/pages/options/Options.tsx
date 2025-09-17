@@ -47,7 +47,7 @@ const Options: React.FC = () => {
       case 'Prompts':
         return {
           configType: 'Prompts',
-          systemConfigPath: '/assets/conf/tools.toml',
+          systemConfigPath: '/assets/conf/shortcuts.toml',
           userConfigStorageKey: USER_TOOLS_KEY,
           isEditable: true,
         };

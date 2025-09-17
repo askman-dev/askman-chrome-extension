@@ -3,8 +3,8 @@ import configStorage from '@src/shared/storages/configStorage';
 import { BaseDropdown } from '@src/components/common/Dropdown';
 import { QuoteDropdown } from './QuoteDropdown';
 import { SystemPromptDropdown } from './SystemPromptDropdown';
-import { ToolDropdown } from './ToolDropdown';
-import { ToolPreview } from './ToolPreview';
+import { ShortcutSender } from './ShortcutSender';
+import { ShortcutPreview } from './ShortcutPreview';
 // Icons removed for cleaner interface
 
 interface ModelSelectorProps {
@@ -161,7 +161,9 @@ export function ModelSelector({ className, onItemClick, statusListener, initOpen
 }
 
 // 导出所有控件组件
-export { QuoteDropdown, SystemPromptDropdown, ToolDropdown, ToolPreview };
+export { QuoteDropdown, SystemPromptDropdown, ShortcutSender, ShortcutPreview };
+// 为了向后兼容，保持旧名称的导出
+export { ShortcutSender as ToolDropdown, ShortcutPreview as ToolPreview };
 export { ModeToggle } from './ModeToggle';
 
 // 为了兼容旧的导入方式，提供默认导出

@@ -2,14 +2,17 @@ import * as TOML from '@iarna/toml';
 import { logger } from './logger';
 import { Handlebars } from '../../third-party/kbn-handlebars/src/handlebars';
 import chatPresets from '@assets/conf/chat-presets.toml';
-import { ToolsPromptInterface } from '../types';
+import { ShortcutInterface } from '../types';
 import { TemplateDelegate } from '../../third-party/kbn-handlebars';
 import { TomlModelConfig } from '@src/shared/storages/configStorage';
 
-export interface UserToolSetting {
+export interface UserShortcutSetting {
   name: string;
   hbs: string;
 }
+
+// @deprecated Use UserShortcutSetting instead
+export interface UserToolSetting extends UserShortcutSetting {}
 
 export interface ModelInterface {
   id: string;
@@ -34,18 +37,24 @@ export interface SystemPromptContent {
   name: string;
 }
 
-export interface SystemPresetInterface extends ToolsPromptInterface {
+export interface SystemPresetInterface extends ShortcutInterface {
   name: string;
   hbs: string;
   template: TemplateDelegate;
 }
 
-export const USER_TOOLS_KEY = 'userTools';
+export const USER_SHORTCUTS_KEY = 'userShortcuts';
+export const USER_TOOLS_KEY = 'userTools'; // @deprecated Use USER_SHORTCUTS_KEY
 export const USER_MODELS_KEY = 'userModels';
 export const USER_CHAT_PRESETS_KEY = 'userChatPresets';
 export const USER_PREFERENCES_KEY = 'userPreferences';
 export const CURRENT_SYSTEM_PRESET_KEY = 'currentSystemPreset';
 
+export interface UserShortcutsObject {
+  [key: string]: UserShortcutSetting;
+}
+
+// @deprecated Use UserShortcutsObject instead
 export interface UserToolsObject {
   [key: string]: UserToolSetting;
 }
@@ -67,10 +76,25 @@ export const StorageManager = {
     });
   },
 
+  saveUserShortcuts: (shortcuts: UserShortcutsObject) => {
+    return StorageManager.save(USER_SHORTCUTS_KEY, shortcuts);
+  },
+
+  // @deprecated Use saveUserShortcuts instead
   saveUserTools: (tools: UserToolsObject) => {
     return StorageManager.save(USER_TOOLS_KEY, tools);
   },
 
+  getUserShortcuts: (): Promise<UserShortcutsObject> => {
+    return StorageManager.get(USER_SHORTCUTS_KEY).then(shortcuts => {
+      if (shortcuts) {
+        return shortcuts;
+      }
+      return {};
+    });
+  },
+
+  // @deprecated Use getUserShortcuts instead
   getUserTools: (): Promise<UserToolsObject> => {
     return StorageManager.get(USER_TOOLS_KEY).then(tools => {
       if (tools) {
@@ -238,12 +262,33 @@ export const StorageManager = {
     return StorageManager.save(CURRENT_SYSTEM_PRESET_KEY, presetName);
   },
 
-  // 获取当前工具
+  // 获取当前快捷指令
+  getCurrentShortcut: async () => {
+    // First try new key, then fallback to old key for migration
+    const current = await StorageManager.get('current-shortcut');
+    if (current) {
+      return current;
+    }
+    // Migration: check old key and migrate if exists
+    const oldCurrent = await StorageManager.get('current-tool');
+    if (oldCurrent) {
+      await StorageManager.save('current-shortcut', oldCurrent);
+      return oldCurrent;
+    }
+    return null;
+  },
+
+  // 设置当前快捷指令
+  setCurrentShortcut: async (shortcutName: string) => {
+    await StorageManager.save('current-shortcut', shortcutName);
+  },
+
+  // @deprecated Use getCurrentShortcut instead
   getCurrentTool: async () => {
     return await StorageManager.get('current-tool');
   },
 
-  // 设置当前工具
+  // @deprecated Use setCurrentShortcut instead
   setCurrentTool: async (toolName: string) => {
     await StorageManager.save('current-tool', toolName);
   },

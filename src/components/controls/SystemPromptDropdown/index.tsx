@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { StorageManager, SystemPresetInterface } from '@src/utils/StorageManager';
-import { ToolPreview } from '@src/components/controls/ToolPreview';
+import { ShortcutPreview } from '@src/components/controls/ShortcutPreview';
 import { BaseDropdown } from '@src/components/common/Dropdown';
 import { useToolPreview } from '@src/shared/hooks/useToolPreview';
 
@@ -123,7 +123,7 @@ export function SystemPromptDropdown({
         }]`}
         variant="button-text"
       />
-      {showPreview && <ToolPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
+      {showPreview && <ShortcutPreview content={previewContent} x={previewPos.x} y={previewPos.y} />}
     </div>
   );
 }
