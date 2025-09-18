@@ -1133,7 +1133,7 @@ export function PagePanel(props: PagePanelProps) {
             <div className="flex items-center gap-2">
               {/* Mode Toggle - 仅在 Sonnet 模型时显示 */}
               {selectedModel && selectedModel.toLowerCase().includes('sonnet') && (
-                <ModeToggle value={isAgentMode} onChange={setIsAgentMode} className="flex-shrink-0" />
+                <ModeToggle value={isAgentMode} onChange={setIsAgentMode} className="flex-shrink-0 ml-2" />
               )}
 
               <div
