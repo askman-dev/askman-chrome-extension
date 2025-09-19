@@ -1,0 +1,179 @@
+# MCP Servers Configuration
+# This file contains configuration for MCP (Model Context Protocol) servers that support HTTP transport
+# These servers can be integrated with the Askman Chrome Extension for enhanced capabilities
+
+# SQLite Database Server
+[sqlite]
+name = "SQLite Database Server"
+description = "Provides read-only access to SQLite databases"
+transport = "http"
+endpoint = "https://mcp-sqlite.example.com"
+authentication = "bearer"
+api_key = ""
+capabilities = ["read", "query", "schema"]
+enabled = false
+
+[sqlite.config]
+# SQLite specific configuration
+max_query_timeout = 30
+read_only = true
+allowed_extensions = [".db", ".sqlite", ".sqlite3"]
+
+# GitHub Integration Server
+[github]
+name = "GitHub Integration"
+description = "GitHub API integration for repository access"
+transport = "http"
+endpoint = "https://mcp-github.example.com"
+authentication = "bearer"
+api_key = ""
+capabilities = ["repositories", "issues", "files", "pulls"]
+enabled = false
+
+[github.config]
+# GitHub specific configuration
+max_file_size = 1048576  # 1MB
+api_version = "2022-11-28"
+default_per_page = 30
+
+# Google Drive Server
+[gdrive]
+name = "Google Drive"
+description = "Google Drive file access and search"
+transport = "http"
+endpoint = "https://mcp-gdrive.example.com"
+authentication = "oauth2"
+api_key = ""
+capabilities = ["files", "search", "metadata"]
+enabled = false
+
+[gdrive.config]
+# Google Drive specific configuration
+scopes = ["https://www.googleapis.com/auth/drive.readonly"]
+max_file_size = 10485760  # 10MB
+supported_mime_types = ["text/plain", "application/pdf", "application/vnd.google-apps.document"]
+
+# Slack Integration Server
+[slack]
+name = "Slack Workspace"
+description = "Slack workspace integration for team communication"
+transport = "http"
+endpoint = "https://mcp-slack.example.com"
+authentication = "bearer"
+api_key = ""
+capabilities = ["channels", "messages", "users"]
+enabled = false
+
+[slack.config]
+# Slack specific configuration
+max_message_history = 100
+default_channel_limit = 50
+include_private_channels = false
+
+# Web Search Server
+[websearch]
+name = "Web Search"
+description = "Web search capabilities across multiple search engines"
+transport = "http"
+endpoint = "https://mcp-websearch.example.com"
+authentication = "api_key"
+api_key = ""
+capabilities = ["search", "results", "snippets"]
+enabled = false
+
+[websearch.config]
+# Web search specific configuration
+search_engines = ["google", "bing", "duckduckgo"]
+max_results = 10
+safe_search = true
+result_timeout = 30
+
+# PostgreSQL Database Server
+[postgres]
+name = "PostgreSQL Database"
+description = "PostgreSQL database integration"
+transport = "http"
+endpoint = "https://mcp-postgres.example.com"
+authentication = "bearer"
+api_key = ""
+capabilities = ["read", "query", "schema", "analyze"]
+enabled = false
+
+[postgres.config]
+# PostgreSQL specific configuration
+connection_timeout = 30
+query_timeout = 60
+read_only = true
+max_rows = 1000
+
+# Weather Service Server
+[weather]
+name = "Weather Service"
+description = "Weather data access for current conditions and forecasts"
+transport = "http"
+endpoint = "https://mcp-weather.example.com"
+authentication = "api_key"
+api_key = ""
+capabilities = ["current", "forecast", "historical"]
+enabled = false
+
+[weather.config]
+# Weather service specific configuration
+default_units = "metric"  # metric, imperial, kelvin
+forecast_days = 7
+include_hourly = true
+providers = ["openweathermap", "accuweather"]
+
+# Filesystem Server
+[filesystem]
+name = "Filesystem Access"
+description = "Secure file system access with configurable permissions"
+transport = "http"
+endpoint = "https://mcp-filesystem.example.com"
+authentication = "bearer"
+api_key = ""
+capabilities = ["read", "list", "search"]
+enabled = false
+
+[filesystem.config]
+# Filesystem specific configuration
+allowed_paths = ["/tmp", "/var/log"]
+max_file_size = 5242880  # 5MB
+allowed_extensions = [".txt", ".log", ".json", ".xml", ".csv"]
+recursive_search = true
+
+# Git Repository Server
+[git]
+name = "Git Repository"
+description = "Git repository interaction and analysis"
+transport = "http"
+endpoint = "https://mcp-git.example.com"
+authentication = "bearer"
+api_key = ""
+capabilities = ["status", "history", "diff", "branches"]
+enabled = false
+
+[git.config]
+# Git specific configuration
+max_commit_history = 100
+include_merge_commits = true
+diff_context_lines = 3
+max_diff_size = 1048576  # 1MB
+
+# Generic REST API Server
+[rest_api]
+name = "REST API Gateway"
+description = "Generic REST API access with OpenAPI support"
+transport = "http"
+endpoint = "https://mcp-rest.example.com"
+authentication = "bearer"
+api_key = ""
+capabilities = ["get", "post", "put", "delete", "openapi"]
+enabled = false
+
+[rest_api.config]
+# REST API specific configuration
+timeout = 30
+follow_redirects = true
+max_response_size = 5242880  # 5MB
+supported_content_types = ["application/json", "application/xml", "text/plain"]
