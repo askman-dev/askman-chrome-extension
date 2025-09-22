@@ -40,7 +40,7 @@
     "@shikijs/monaco": "^1.15.1",
     "@types/prop-types": "^15.7.12",
     "ahooks": "^3.7.9",
-    "ai": "^5.0.44",
+    "ai": "^5.0.48",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
